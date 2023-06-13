@@ -1,5 +1,6 @@
 package com.example.naejango.global.auth.application;
 
+import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.entity.Role;
 import com.example.naejango.domain.user.entity.User;
 import com.example.naejango.domain.user.repository.UserRepository;
@@ -25,9 +26,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class OauthService {
-
-
     private final UserRepository userRepository;
+    private final UserService userService;
     private final BCryptPasswordEncoder encoder;
     private final JwtGenerator jwtGenerator;
     private final InMemoryClientRegistrationRepository inMemoryClientRegistrationRepository;
@@ -45,8 +45,8 @@ public class OauthService {
         User user = userRepository.findByUserKey(kakaoUserInfo.getUserkey());
         if(user==null) user = createUser(kakaoUserInfo);
         String accessToken = jwtGenerator.generateAccessToken(user);
-        String refreshToken = jwtGenerator.generateRefreshToken(user);
-
+        String refreshToken = jwtGenerator.generateRefreshToken();
+        userService.setSignature(user, refreshToken);
         return LoginResponse.builder()
                 .id(user.getId())
                 .accessToken(accessToken)

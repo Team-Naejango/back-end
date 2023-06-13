@@ -3,6 +3,7 @@ package com.example.naejango.global.config;
 import com.example.naejango.domain.user.entity.Role;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
+import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
     private final UserRepository userRepository;
     private final JwtValidator jwtValidator;
+    private final JwtGenerator jwtGenerator;
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -47,7 +49,7 @@ public class SecurityConfig {
                 .httpBasic().disable()// Http basic Auth 기반으로 로그인 인증창이 뜸 disable 시에 인증창 뜨지 않음
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지않고 Stateless 하게 만듬
                 .and()
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtValidator, userRepository))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtGenerator, jwtValidator, userRepository))
                 .authorizeRequests()
                 .antMatchers("/api/user/**")
                 .hasAnyRole(Role.USER.toString(), Role.ADMIN.toString())
