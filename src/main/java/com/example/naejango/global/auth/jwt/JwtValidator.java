@@ -18,6 +18,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class JwtValidator {
     private final UserRepository userRepository;
+    private final JwtGenerator jwtGenerator;
     /**
      * access token 의 유효성을 검증
      * access token payload의 "exp"(유효시간)을
@@ -32,7 +33,6 @@ public class JwtValidator {
         if(accessToken!=null) {
             DecodedJWT decodedAccessToken = decodeJwt(accessToken);
             if (isExpiredToken(decodedAccessToken)) {
-                System.out.println("access token이 만료되었습니다.");
                 validateResponse.setValidAccessToken(false);
             } else {
                 validateResponse.setValidAccessToken(true);
@@ -58,6 +58,12 @@ public class JwtValidator {
             }
         } else {
             validateResponse.setValidRefreshToken(false);
+        }
+
+        if(!validateResponse.isValidAccessToken() && validateResponse.isValidRefreshToken()){
+            User user = userRepository.findByUserKey(validateResponse.getUserKey());
+            String reIssuedAccessToken = jwtGenerator.generateAccessToken(user);
+            validateResponse.setReIssuedAccessToken(reIssuedAccessToken);
         }
 
         return validateResponse;

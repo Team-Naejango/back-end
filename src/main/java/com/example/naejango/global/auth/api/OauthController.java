@@ -24,12 +24,9 @@ public class OauthController {
         LoginResponse loginResponse = oauthService.login(provider, code);
         return ResponseEntity.ok().body(loginResponse);
     }
-
     @GetMapping("/loginPage")
     public String test() {
         return "<h1>test</h1>" +
                 "<a href=\"Https://kauth.kakao.com/oauth/authorize?client_id=a5487753d1cfdb999c88c7fb96f0288b&redirect_uri=http://localhost:8080/login/oauth/kakao&response_type=code\"><img height=\"38px\" src=\"https://developers.kakao.com/tool/resource/static/img/button/kakaosync/complete/ko/kakao_login_medium_narrow.png\"></a>";
     }
-
-
 }

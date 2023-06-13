@@ -51,7 +51,7 @@ public class OauthService {
                 .id(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .isNew(!user.isCompleteInfo())
+                .isNew(!user.isCompleteProfile())
                 .build();
     }
 
@@ -65,7 +65,6 @@ public class OauthService {
      */
 
     public KakaoOauthToken getToken(String code, ClientRegistration provider) {
-
         return WebClient.create()
                 .post()
                 .uri(provider.getProviderDetails().getTokenUri())

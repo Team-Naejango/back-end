@@ -2,10 +2,7 @@ package com.example.naejango.global.config;
 
 import com.example.naejango.domain.user.entity.Role;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.PrincipalDetailsService;
-import com.example.naejango.global.auth.PrincipalOauth2UserService;
 import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
-import com.example.naejango.global.auth.filter.LoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +21,6 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
     private final UserRepository userRepository;
     private final JwtValidator jwtValidator;
-    private final PrincipalDetailsService principalDetailsService;
-    private final PrincipalOauth2UserService principalOauth2UserService;
-    private final LoginSuccessHandler loginSuccessHandler;
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -34,12 +28,16 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(){
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(principalDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return new ProviderManager(provider);
+        return new ProviderManager(new DaoAuthenticationProvider());
     }
-
+    /**
+     * Authentication 의 경우
+     * 카카오 로그인 시 회원 키와 서명을 담은 jwt를 발급하고
+     * Authorization 시 해당 jwt를 검증하여
+     * 유효한 token일시 자체적인 로직으로 Authentication 을 주입하는 로직을 구현하고 있음
+     * 때문에 별도의 Authentication 과정이 필요하지 않고
+     * AuthenticationManger도 쓰이지 않음
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -49,21 +47,17 @@ public class SecurityConfig {
                 .httpBasic().disable()// Http basic Auth 기반으로 로그인 인증창이 뜸 disable 시에 인증창 뜨지 않음
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지않고 Stateless 하게 만듬
                 .and()
-//                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtValidator, userRepository))
                 .authorizeRequests()
                 .antMatchers("/api/user/**")
-                .hasAnyAuthority(Role.USER.toString(), Role.ADMIN.toString())
+                .hasAnyRole(Role.USER.toString(), Role.ADMIN.toString())
                 .antMatchers("/api/admin/**")
-                .hasAnyAuthority(Role.ADMIN.toString())
+                .hasRole(Role.ADMIN.toString())
                 .anyRequest().permitAll()
                 .and()
                 .oauth2Login()
-                .loginPage("/loginPage")
-                .userInfoEndpoint()
-                .userService(principalOauth2UserService)
-                .and()
-                .successHandler(loginSuccessHandler);
+                .loginPage("/loginPage");
         return http.build();
     }
 }
+

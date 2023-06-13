@@ -4,6 +4,7 @@ import com.example.naejango.domain.user.entity.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.PrincipalDetails;
 import com.example.naejango.global.auth.dto.TokenValidateResponse;
+import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,12 +27,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         System.out.println("인증 또는 권한이 필요한 요청");
         TokenValidateResponse validateResponse = jwtValidator.validateToken(request);
-        if(validateResponse.getUserKey()==null){
-            System.out.println("사용자 정보가 없습니다");
+        if(validateResponse.getUserKey()==null || (validateResponse.isValidAccessToken()&&validateResponse.isValidRefreshToken())){
             chain.doFilter(request, response);
             return;
         }
-        System.out.println("validateResponse = " + validateResponse.getUserKey());
+        if(validateResponse.getReIssuedAccessToken()!=null){
+            response.setHeader(JwtProperties.ACCESS_TOKEN_HEADER, validateResponse.getReIssuedAccessToken());
+        }
         authenticate(validateResponse.getUserKey());
         chain.doFilter(request, response);
     }
