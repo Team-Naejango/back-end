@@ -12,7 +12,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-    
+  workflow_dispatch:
+  
 # 리전, 버킷 이름, CodeDeploy 앱 이름, CodeDeploy 배포 그룹 이름
 env:
   AWS_REGION: ap-northeast-2
