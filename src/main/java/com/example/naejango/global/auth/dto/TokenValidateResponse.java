@@ -5,6 +5,5 @@ import lombok.Data;
 @Data
 public class TokenValidateResponse {
     private String userKey;
-    private boolean isValidAccessToken;
-    private boolean isValidRefreshToken;
+    private boolean isValidToken;
 }

@@ -1,17 +1,16 @@
 package com.example.naejango.global.auth.application;
 
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.entity.Role;
 import com.example.naejango.domain.user.entity.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.LoginResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.kakao.KakaoOauthToken;
 import com.example.naejango.global.auth.kakao.KakaoUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.stereotype.Service;
@@ -26,9 +25,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class OauthService {
-    private final UserRepository userRepository;
     private final UserService userService;
-    private final BCryptPasswordEncoder encoder;
+    private final UserRepository userRepository;
     private final JwtGenerator jwtGenerator;
     private final InMemoryClientRegistrationRepository inMemoryClientRegistrationRepository;
 
@@ -42,11 +40,13 @@ public class OauthService {
         Map<String, Object> kakaoProfileAttributes = getKakaoProfileAttributes(kakaoOauthToken, provider);
         KakaoUserInfo kakaoUserInfo = new KakaoUserInfo(kakaoProfileAttributes);
 
-        User user = userRepository.findByUserKey(kakaoUserInfo.getUserkey());
-        if(user==null) user = createUser(kakaoUserInfo);
+        User user = userRepository.findByUserKey(kakaoUserInfo.getUserkey()).orElse(null);
+        if(user==null) {
+            user = userService.createUser(kakaoUserInfo);
+        }
         String accessToken = jwtGenerator.generateAccessToken(user);
-        String refreshToken = jwtGenerator.generateRefreshToken();
-        userService.setSignature(user, refreshToken);
+        String refreshToken = jwtGenerator.generateRefreshToken(user);
+        userService.setSignature(user, refreshToken.replace(JwtProperties.REFRESH_TOKEN_PREFIX, ""));
         return LoginResponse.builder()
                 .id(user.getId())
                 .accessToken(accessToken)
@@ -115,13 +115,5 @@ public class OauthService {
                 .block();
     }
 
-    public User createUser(KakaoUserInfo kakaoUserInfo){
-        User newUser = User.builder()
-                .userKey(kakaoUserInfo.getUserkey())
-                .role(Role.USER)
-                .password(encoder.encode("null"))
-                .build();
-        userRepository.save(newUser);
-        return newUser;
-    }
+
 }

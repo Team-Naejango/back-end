@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.naejango.domain.user.entity.User;
-import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.TokenValidateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,72 +16,76 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 public class JwtValidator {
-    private final UserRepository userRepository;
-    /**
-     * access token 의 유효성을 검증
-     * access token payload의 "exp"(유효시간)을
-     * 현재 시간과 비교하여 더 늦다면 false 반환
-     */
-
-    public TokenValidateResponse validateToken(HttpServletRequest request){
+    public TokenValidateResponse validateAccessToken(HttpServletRequest request) {
         TokenValidateResponse validateResponse = new TokenValidateResponse();
 
         // AccessToken 의 유효성 검증
         String accessToken = getAccessToken(request);
-        if(accessToken!=null) {
+        if (accessToken != null) {
             DecodedJWT decodedAccessToken = decodeJwt(accessToken);
             if (isExpiredToken(decodedAccessToken)) {
-                validateResponse.setValidAccessToken(false);
+                validateResponse.setValidToken(false);
             } else {
-                validateResponse.setValidAccessToken(true);
+                validateResponse.setValidToken(true);
                 validateResponse.setUserKey(decodedAccessToken.getClaim("userKey").asString());
             }
         } else {
-            validateResponse.setValidAccessToken(false);
+            validateResponse.setValidToken(false);
         }
+        return validateResponse;
+    }
 
-        // RefreshToken 의 유효성 검증
+    public TokenValidateResponse validateRefreshToken(HttpServletRequest request, User user) {
+        TokenValidateResponse validateResponse = new TokenValidateResponse();
+
         String refreshToken = getRefreshToken(request);
         if (refreshToken != null) {
             DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
             if(isExpiredToken(decodedRefreshToken)) {
-                validateResponse.setValidRefreshToken(false);
+                validateResponse.setValidToken(false);
             } else {
-                if (isVerifiedSignature(decodedRefreshToken)) {
-                    validateResponse.setValidRefreshToken(true);
+                if (isVerifiedSignature(decodedRefreshToken, user)) {
+                    validateResponse.setValidToken(true);
                     validateResponse.setUserKey(decodedRefreshToken.getClaim("userKey").asString());
                 } else {
-                    validateResponse.setValidRefreshToken(false);
+                    validateResponse.setValidToken(false);
                 }
             }
         } else {
-            validateResponse.setValidRefreshToken(false);
+            validateResponse.setValidToken(false);
         }
 
         return validateResponse;
     }
 
-    private DecodedJWT decodeJwt(String token){
+    public DecodedJWT decodeJwt(String token){
         try {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token);
         } catch (JWTVerificationException | IllegalArgumentException e) {
             throw new RuntimeException(e);
         }
-        // Token 정보가 확인 되나, 디코딩이 되지 않는 exception
     }
 
-    /**
-     * request로 부터 access Token을 가져옴
-     *
-     * @param request : Http 요청
-     * @return accessToken
-     */
     public String getAccessToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
+        String authorizationHeader = request.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.ACCESS_TOKEN_PREFIX)) {
             return null;
         }
         return authorizationHeader.replace(JwtProperties.ACCESS_TOKEN_PREFIX, "");
+    }
+
+    public String getUserKey(HttpServletRequest request){
+        String refreshToken = getRefreshToken(request);
+        if (refreshToken == null) {
+            return null;
+        }
+        String userKey;
+        try {
+            userKey = decodeJwt(refreshToken).getClaim("userKey").asString();
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to decode refresh token");
+        }
+        return userKey;
     }
 
     /**
@@ -106,19 +109,12 @@ public class JwtValidator {
         return refreshTokenCookie.replace(JwtProperties.REFRESH_TOKEN_PREFIX, "");
     }
 
-    private boolean isExpiredToken(DecodedJWT decodedToken){
+    public boolean isExpiredToken(DecodedJWT decodedToken){
         Instant exp = decodedToken.getClaim("exp").asInstant();
         return exp.isBefore(Instant.now());
     }
 
-    private boolean isVerifiedSignature(DecodedJWT decodedJWT) {
-        String userKey;
-        try {
-            userKey = decodedJWT.getClaim("userKey").asString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        User user = userRepository.findByUserKey(userKey);
+    public boolean isVerifiedSignature(DecodedJWT decodedJWT, User user) {
         return user.getSignature().equals(decodedJWT.getSignature());
     }
 
