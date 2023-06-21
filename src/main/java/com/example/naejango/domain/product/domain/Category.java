@@ -1,4 +1,4 @@
-package com.example.naejango.domain.category.entity;
+package com.example.naejango.domain.product.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,16 +12,13 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Table(name="category")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CATEGORY_ID")
     private Integer id;
 
-    @Column(name = "CATEGORY_NAME")
+    @Column(nullable = false)
     private String name;
 
-//    @OneToMany(mappedBy = "category")
-//    private List<Item> items = new ArrayList<>();
-    // 이쪽 맵핑은 불필요할 수 도 있음
 }
