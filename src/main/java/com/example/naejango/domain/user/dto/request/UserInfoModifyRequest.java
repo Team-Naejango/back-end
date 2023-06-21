@@ -4,7 +4,15 @@ import lombok.Data;
 
 @Data
 public class UserInfoModifyRequest {
+
+    private Integer age;
+
     private String nickname;
-    private String profileImageUrl;
+
     private String intro;
+
+    private String phoneNumber;
+
+    private String imgUrl;
+
 }

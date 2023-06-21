@@ -1,6 +1,6 @@
 package com.example.naejango.global.auth;
 
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,7 +33,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collect = new ArrayList<>();
-        collect.add((GrantedAuthority) () -> "ROLE_" + user.getRole().toString());
+        collect.add((GrantedAuthority) () -> "ROLE_" + user.getUserProfile().getRole().toString());
         return collect;
     }
     @Override

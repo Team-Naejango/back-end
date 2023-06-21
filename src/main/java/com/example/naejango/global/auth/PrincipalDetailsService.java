@@ -1,7 +1,7 @@
 package com.example.naejango.global.auth;
 
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

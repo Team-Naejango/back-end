@@ -1,7 +1,7 @@
 package com.example.naejango.global.auth.application;
 
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.LoginResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
@@ -51,7 +51,7 @@ public class OauthService {
                 .id(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .isNew(!user.isCompleteProfile())
+                .isNew(!user.getUserProfile().isCompleteProfile())
                 .build();
     }
 

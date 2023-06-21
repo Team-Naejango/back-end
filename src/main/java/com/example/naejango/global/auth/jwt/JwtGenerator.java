@@ -2,7 +2,7 @@ package com.example.naejango.global.auth.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

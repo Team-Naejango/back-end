@@ -1,21 +1,22 @@
 package com.example.naejango.domain.user.dto.response;
 
-import com.example.naejango.domain.user.entity.Gender;
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.domain.UserProfile;
+import lombok.Data;
 
-
+@Data
 public class UserInfoResponse {
-    private final String nickname;
-    private final String profileImageUrl;
-    private final int age;
-    private final Gender gender;
-    private final String intro;
+    private String nickname;
+    private String profileImageUrl;
+    private int age;
+    private Gender gender;
+    private String intro;
 
-    public UserInfoResponse(User user) {
-        this.nickname =  user.getNickname();
-        this.profileImageUrl = user.getProfileImageUrl();
-        this.age = user.getAge();
-        this.gender = user.getGender();
-        this.intro = user.getIntro();
+    public UserInfoResponse(UserProfile userProfile) {
+        this.nickname =  userProfile.getNickname();
+        this.profileImageUrl = userProfile.getImgUrl();
+        this.age = userProfile.getAge();
+        this.gender = userProfile.getGender();
+        this.intro = userProfile.getIntro();
     }
 }

@@ -1,6 +1,6 @@
 package com.example.naejango.global.config;
 
-import com.example.naejango.domain.user.entity.Role;
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtValidator;

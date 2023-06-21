@@ -1,7 +1,7 @@
 package com.example.naejango.global.auth.filter;
 
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.auth.PrincipalDetails;
 import com.example.naejango.global.auth.dto.TokenValidateResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;

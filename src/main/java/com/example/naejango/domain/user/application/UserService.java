@@ -3,8 +3,7 @@ package com.example.naejango.domain.user.application;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.dto.request.UserInfoModifyRequest;
-import com.example.naejango.domain.user.entity.Role;
-import com.example.naejango.domain.user.entity.User;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.PrincipalDetails;
 import com.example.naejango.global.auth.jwt.JwtProperties;
@@ -60,7 +59,6 @@ public class UserService {
     public User createUser(KakaoUserInfo kakaoUserInfo){
         User newUser = User.builder()
                 .userKey(kakaoUserInfo.getUserkey())
-                .role(Role.USER)
                 .password(encoder.encode("null"))
                 .build();
         userRepository.save(newUser);
@@ -74,9 +72,15 @@ public class UserService {
         {
             throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + user.getId());
         });
-        persistenceUser.setNickname(userInfoModifyRequest.getNickname());
-        persistenceUser.setProfileImageUrl(userInfoModifyRequest.getProfileImageUrl());
-        persistenceUser.setIntro(userInfoModifyRequest.getIntro());
+
+        persistenceUser.getUserProfile().modifyUserProfile(
+                userInfoModifyRequest.getAge(),
+                userInfoModifyRequest.getNickname(),
+                userInfoModifyRequest.getIntro(),
+                userInfoModifyRequest.getPhoneNumber(),
+                userInfoModifyRequest.getImgUrl()
+        );
+
     }
 
 
