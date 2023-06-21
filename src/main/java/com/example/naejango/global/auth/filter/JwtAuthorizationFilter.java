@@ -27,25 +27,40 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private final JwtGenerator jwtGenerator;
     @Autowired
     private UserService userService;
+
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtGenerator jwtGenerator, JwtValidator jwtValidator) {
+        super(authenticationManager);
+        this.jwtGenerator = jwtGenerator;
+        this.jwtValidator = jwtValidator;
+    }
+
+    /**
+     * JwtAuthorizationFilter
+     * 인증이 필요한 api 접근시, jwt 검증 수행
+     */
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        System.out.println("인증 또는 권한이 필요한 요청");
-
-        // access token을 검증합니다.
+        // access token을 검증
         TokenValidateResponse accessTokenValidateResponse = jwtValidator.validateAccessToken(request);
         if(accessTokenValidateResponse.isValidToken()) {
             authenticate(accessTokenValidateResponse.getUserKey());
+            chain.doFilter(request, response);
+            return;
         }
 
-        // refresh token을 검증합니다.
+        // refresh token 소유 여부를 확인
         String refreshToken = jwtValidator.getRefreshToken(request);
         if(refreshToken == null){
             chain.doFilter(request, response);
             return;
         }
 
+        // refresh token을 검증
         User user = userService.findUser(request);
         TokenValidateResponse refreshTokenValidateResponse = jwtValidator.validateRefreshToken(request, user);
+
+        // refresh token이 유효할 시 access token을 재발행하여 header에 담아서 응답
         if (refreshTokenValidateResponse.isValidToken()) {
             String reissuedAccessToken = jwtGenerator.generateAccessToken(user);
             response.setHeader(JwtProperties.ACCESS_TOKEN_HEADER, reissuedAccessToken);
@@ -53,9 +68,15 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
+
         chain.doFilter(request, response);
     }
 
+    /**
+     * authenticate
+     * Authentication 객체를 생성하여 SecurityContext 에 넣음
+     * Authentication : UsernamePasswordAuthenticationToken
+     */
     private void authenticate (String userKey){
         User user = userService.findUser(userKey);
         PrincipalDetails principalDetails = new PrincipalDetails(user);
@@ -67,9 +88,5 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtGenerator jwtGenerator, JwtValidator jwtValidator) {
-        super(authenticationManager);
-        this.jwtGenerator = jwtGenerator;
-        this.jwtValidator = jwtValidator;
-    }
+
 }

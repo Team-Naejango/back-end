@@ -31,22 +31,46 @@ public class OauthService {
     private final InMemoryClientRegistrationRepository inMemoryClientRegistrationRepository;
 
     /**
-     * 주석 추가 예정
+     * login
+     * 1. code -> 카카오 Oauth 서버로 token 요청
+     * 2. token -> 카카오 프로필 서버로 카카오 profile 요청
+     * 3. profile -> 회원 정보 추출
+     * 4. 회원 정보 -> Login Response 생성하여 반환
+     * @param providerName ("kakao")
+     * @param code (토큰 요청 코드)
+     * @return LoginResponse
      */
     public LoginResponse login(String providerName, String code){
         ClientRegistration provider = inMemoryClientRegistrationRepository.findByRegistrationId(providerName);
 
-        KakaoOauthToken kakaoOauthToken = getToken(code, provider);
-        Map<String, Object> kakaoProfileAttributes = getKakaoProfileAttributes(kakaoOauthToken, provider);
+        KakaoOauthToken kakaoOauthToken = this.getToken(code, provider);
+        Map<String, Object> kakaoProfileAttributes = this.getKakaoProfileAttributes(kakaoOauthToken, provider);
         KakaoUserInfo kakaoUserInfo = new KakaoUserInfo(kakaoProfileAttributes);
+
+        return generateLoginResponse(kakaoUserInfo);
+    }
+
+    /**
+     * generateLoginResponse
+     * 카카오 프로필로 추출한 회원정보로 회원 리포지토리 조회
+     * 1. 기존 회원이 아닌 경우 save
+     * 2. access token / refresh token 생성
+     * 3. Response Dto 생성하여 반환
+     * @param kakaoUserInfo : 회원 정보
+     * @return LoginResponse
+     */
+
+    private LoginResponse generateLoginResponse(KakaoUserInfo kakaoUserInfo){
 
         User user = userRepository.findByUserKey(kakaoUserInfo.getUserkey()).orElse(null);
         if(user==null) {
             user = userService.createUser(kakaoUserInfo);
         }
+
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
         userService.setSignature(user, refreshToken.replace(JwtProperties.REFRESH_TOKEN_PREFIX, ""));
+
         return LoginResponse.builder()
                 .id(user.getId())
                 .accessToken(accessToken)
