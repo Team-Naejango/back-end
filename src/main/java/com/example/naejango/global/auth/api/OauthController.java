@@ -20,7 +20,6 @@ public class OauthController {
      */
     @GetMapping("/login/oauth/{provider}")
     public ResponseEntity<LoginResponse> login(@PathVariable String provider, @RequestParam String code) {
-        System.out.println("OauthController.login");
         LoginResponse loginResponse = oauthService.login(provider, code);
         return ResponseEntity.ok().body(loginResponse);
     }

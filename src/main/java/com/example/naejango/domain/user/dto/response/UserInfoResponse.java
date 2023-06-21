@@ -2,6 +2,7 @@ package com.example.naejango.domain.user.dto.response;
 
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.UserProfile;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
@@ -12,6 +13,7 @@ public class UserInfoResponse {
     private Gender gender;
     private String intro;
 
+    @Builder
     public UserInfoResponse(UserProfile userProfile) {
         this.nickname =  userProfile.getNickname();
         this.profileImageUrl = userProfile.getImgUrl();

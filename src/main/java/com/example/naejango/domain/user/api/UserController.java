@@ -3,7 +3,6 @@ package com.example.naejango.domain.user.api;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.dto.request.UserInfoModifyRequest;
 import com.example.naejango.domain.user.dto.response.UserInfoResponse;
-import com.example.naejango.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,17 +19,15 @@ public class UserController {
 
     @GetMapping("/info")
     public ResponseEntity<UserInfoResponse> userInfo(Authentication authentication) {
-        User user = userService.AuthenticationToUser(authentication);
-        UserInfoResponse userInfoResponse = new UserInfoResponse(user.getUserProfile());
-        return ResponseEntity.ok().body(userInfoResponse);
+        UserInfoResponse userInfo = userService.getUserInfo(authentication);
+        return ResponseEntity.ok().body(userInfo);
     }
 
     @PutMapping("/info")
     public ResponseEntity<UserInfoResponse> modifyInfo(Authentication authentication, @RequestBody UserInfoModifyRequest userInfoModifyRequest) {
         userService.modifyUserInfo(authentication, userInfoModifyRequest);
-        User user = userService.AuthenticationToUser(authentication);
-        UserInfoResponse userInfoResponse = new UserInfoResponse(user.getUserProfile());
-        return ResponseEntity.ok().body(userInfoResponse);
+        UserInfoResponse userInfo = userService.getUserInfo(authentication);
+        return ResponseEntity.ok().body(userInfo);
     }
 
     @DeleteMapping("")
