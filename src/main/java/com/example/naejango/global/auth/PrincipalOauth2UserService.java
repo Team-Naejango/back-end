@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        System.out.println("PrincipalOauth2UserService 실행");
         return super.loadUser(userRequest);
     }
 }
