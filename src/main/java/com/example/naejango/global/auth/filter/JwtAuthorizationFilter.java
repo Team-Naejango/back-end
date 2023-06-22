@@ -42,7 +42,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         // access token을 검증
-        TokenValidateResponse accessTokenValidateResponse = jwtValidator.validateAccessToken(request);
+        String accessToken = jwtValidator.getAccessToken(request);
+        TokenValidateResponse accessTokenValidateResponse = jwtValidator.validateAccessToken(accessToken);
         if(accessTokenValidateResponse.isValidToken()) {
             authenticate(accessTokenValidateResponse.getUserKey());
             chain.doFilter(request, response);
@@ -58,7 +59,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // refresh token을 검증
         User user = userService.findUser(request);
-        TokenValidateResponse refreshTokenValidateResponse = jwtValidator.validateRefreshToken(request, user);
+        TokenValidateResponse refreshTokenValidateResponse = jwtValidator.validateRefreshToken(refreshToken, user);
 
         // refresh token이 유효할 시 access token을 재발행하여 header에 담아서 응답
         if (refreshTokenValidateResponse.isValidToken()) {

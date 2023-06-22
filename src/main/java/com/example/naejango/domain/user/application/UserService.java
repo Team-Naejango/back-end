@@ -60,8 +60,6 @@ public class UserService {
         return new UserInfoResponse(user.getUserProfile());
     }
 
-
-
     @Transactional
     public void setSignature(User user, String refreshToken){
         User persistenceUser = findUser(user.getUserKey());
@@ -100,7 +98,10 @@ public class UserService {
     @Transactional
     public ResponseEntity<Void> deleteUser(Authentication authentication, HttpServletRequest request) {
         User user = findUser(authentication);
-        if(!jwtValidator.validateAccessToken(request).isValidToken() && !jwtValidator.validateRefreshToken(request, user).isValidToken()){
+
+        String accessToken = jwtValidator.getAccessToken(request);
+        String refreshToken = jwtValidator.getRefreshToken(request);
+        if(!jwtValidator.validateAccessToken(accessToken).isValidToken() && !jwtValidator.validateRefreshToken(refreshToken, user).isValidToken()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

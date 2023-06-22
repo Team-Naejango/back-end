@@ -16,11 +16,10 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 public class JwtValidator {
-    public TokenValidateResponse validateAccessToken(HttpServletRequest request) {
+    public TokenValidateResponse validateAccessToken(String accessToken) {
         TokenValidateResponse validateResponse = new TokenValidateResponse();
 
         // AccessToken 의 유효성 검증
-        String accessToken = getAccessToken(request);
         if (accessToken != null) {
             DecodedJWT decodedAccessToken = decodeJwt(accessToken);
             if (isExpiredToken(decodedAccessToken)) {
@@ -35,10 +34,9 @@ public class JwtValidator {
         return validateResponse;
     }
 
-    public TokenValidateResponse validateRefreshToken(HttpServletRequest request, User user) {
+    public TokenValidateResponse validateRefreshToken(String refreshToken, User user) {
         TokenValidateResponse validateResponse = new TokenValidateResponse();
 
-        String refreshToken = getRefreshToken(request);
         if (refreshToken != null) {
             DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
             if(isExpiredToken(decodedRefreshToken)) {
