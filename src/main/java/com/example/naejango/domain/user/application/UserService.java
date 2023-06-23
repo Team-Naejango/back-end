@@ -28,7 +28,6 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
     private final JwtValidator jwtValidator;
 
-    
     public User findUser(Long id) {
         return userRepository.findById(id).orElseThrow(()->{
             throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + id);
@@ -84,15 +83,11 @@ public class UserService {
         {
             throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + user.getId());
         });
-
         persistenceUser.getUserProfile().modifyUserProfile(
-                userInfoModifyRequest.getAge(),
                 userInfoModifyRequest.getNickname(),
                 userInfoModifyRequest.getIntro(),
-                userInfoModifyRequest.getPhoneNumber(),
                 userInfoModifyRequest.getImgUrl()
         );
-
     }
     
     @Transactional

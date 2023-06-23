@@ -24,6 +24,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     @Column(nullable = false)
     private String signature;
 
@@ -33,5 +37,4 @@ public class User {
     public void setSignature(String signature) {
         this.signature = signature;
     }
-
 }

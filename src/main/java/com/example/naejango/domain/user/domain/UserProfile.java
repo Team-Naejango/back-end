@@ -1,7 +1,9 @@
 package com.example.naejango.domain.user.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
@@ -9,6 +11,8 @@ import java.sql.Timestamp;
 
 @Entity
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Table(name="user_profile")
 public class UserProfile {
@@ -40,10 +44,6 @@ public class UserProfile {
     @Column(nullable = false)
     private int rate;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
     @Column
     private String imgUrl;
 
@@ -52,6 +52,7 @@ public class UserProfile {
 
     @Column(nullable = false)
     private Timestamp createdAt;
+
 
     /**
      * 회원간 오프라인 거래가 주 서비스이므로
@@ -63,11 +64,9 @@ public class UserProfile {
         return phoneNumber != null && gender != null && age != null;
     }
 
-    public void modifyUserProfile(Integer age, String nickname, String intro, String phoneNumber, String imgUrl) {
-        this.age = age;
+    public void modifyUserProfile(String nickname, String intro, String phoneNumber) {
         this.nickname = nickname;
         this.intro = intro;
         this.phoneNumber = phoneNumber;
-        this.imgUrl = imgUrl;
     }
 }
