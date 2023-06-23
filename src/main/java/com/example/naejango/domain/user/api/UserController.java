@@ -23,7 +23,7 @@ public class UserController {
         return ResponseEntity.ok().body(userInfo);
     }
 
-    @PutMapping("/info")
+    @PatchMapping("/info")
     public ResponseEntity<UserInfoResponse> modifyInfo(Authentication authentication, @RequestBody UserInfoModifyRequest userInfoModifyRequest) {
         userService.modifyUserInfo(authentication, userInfoModifyRequest);
         UserInfoResponse userInfo = userService.getUserInfo(authentication);
