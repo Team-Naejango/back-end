@@ -39,7 +39,6 @@ class UserControllerTest {
     @DisplayName("getUserInfoTest : UserInfoResponse Return")
     @WithMockUser()
     void getInfoTest() throws Exception {
-
         //given
         UserProfile testUserProfile = UserProfile.builder()
                 .nickname("nickname")
