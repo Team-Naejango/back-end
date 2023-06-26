@@ -19,12 +19,11 @@ public class JwtGenerator {
      * @return JwtAccessToken
      */
     public String generateAccessToken(User user) {
-        return JwtProperties.ACCESS_TOKEN_PREFIX
-                        + JWT.create()
-                        .withClaim("userKey", user.getUserKey())
-                        .withExpiresAt(LocalDateTime.now().plusMinutes(JwtProperties.ACCESS_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
-                        .withIssuer(JwtProperties.ISS)
-                        .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+        return JWT.create()
+                .withClaim("userKey", user.getUserKey())
+                .withExpiresAt(LocalDateTime.now().plusMinutes(JwtProperties.ACCESS_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
+                .withIssuer(JwtProperties.ISS)
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
     }
 
     /**
@@ -34,11 +33,10 @@ public class JwtGenerator {
      * @return JwtRefreshToken
      */
     public String generateRefreshToken(User user) {
-            return JwtProperties.REFRESH_TOKEN_PREFIX
-                        + JWT.create()
-                        .withClaim("userKey", user.getUserKey())
-                        .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
-                        .withIssuer(JwtProperties.ISS)
-                        .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+            return JWT.create()
+                    .withClaim("userKey", user.getUserKey())
+                    .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
+                    .withIssuer(JwtProperties.ISS)
+                    .sign(Algorithm.HMAC512(JwtProperties.SECRET));
     }
 }

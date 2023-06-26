@@ -5,7 +5,6 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.LoginResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.kakao.KakaoOauthToken;
 import com.example.naejango.global.auth.kakao.KakaoUserInfo;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +68,7 @@ public class OauthService {
 
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
-        userService.setSignature(user, refreshToken.replace(JwtProperties.REFRESH_TOKEN_PREFIX, ""));
+        userService.setSignature(user, refreshToken);
 
         return LoginResponse.builder()
                 .id(user.getId())

@@ -28,26 +28,18 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
     private final JwtValidator jwtValidator;
 
-    public User findUser(Long id) {
+    public User getUser(Long id) {
         return userRepository.findById(id).orElseThrow(()->{
             throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + id);
         });
     }
-    public User findUser(String userKey){
+    public User getUser(String userKey){
         return userRepository.findByUserKey(userKey).orElseThrow(()->{
             throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + userKey);
         });
     }
-    public User findUser(HttpServletRequest request) {
-        String userKey = jwtValidator.getUserKey(request);
-        if(userKey == null){
-            return null;
-        }
-        return userRepository.findByUserKey(userKey).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾지 못하였습니다.");
-        });
-    }
-    public User findUser(Authentication authentication) {
+
+    public User getUser(Authentication authentication) {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
         return userRepository.findById(principal.getUser().getId()).orElseThrow(()->{
             throw new IllegalArgumentException("회원을 찾지 못하였습니다.");
@@ -55,15 +47,14 @@ public class UserService {
     }
 
     public UserInfoResponse getUserInfo(Authentication authentication){
-        User user = findUser(authentication);
+        User user = getUser(authentication);
         return new UserInfoResponse(user.getUserProfile());
     }
 
     @Transactional
     public void setSignature(User user, String refreshToken){
-        User persistenceUser = findUser(user.getUserKey());
+        User persistenceUser = getUser(user.getUserKey());
         persistenceUser.setSignature(JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken).getSignature());
-        userRepository.save(user);
     }
 
     @Transactional
@@ -78,7 +69,7 @@ public class UserService {
 
     @Transactional
     public void modifyUserInfo(Authentication authentication, UserInfoModifyRequest userInfoModifyRequest) {
-        User user = findUser(authentication);
+        User user = getUser(authentication);
         User persistenceUser = userRepository.findById(user.getId()).orElseThrow(() ->
         {
             throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + user.getId());
@@ -89,20 +80,16 @@ public class UserService {
                 userInfoModifyRequest.getImgUrl()
         );
     }
-    
+
     @Transactional
     public ResponseEntity<Void> deleteUser(Authentication authentication, HttpServletRequest request) {
-        User user = findUser(authentication);
-
-        String accessToken = jwtValidator.getAccessToken(request);
-        String refreshToken = jwtValidator.getRefreshToken(request);
-        if(!jwtValidator.validateAccessToken(accessToken).isValidToken() && !jwtValidator.validateRefreshToken(refreshToken, user).isValidToken()){
+        User user = getUser(authentication);
+        String refreshTokenHeader = request.getHeader(JwtProperties.REFRESH_TOKEN_HEADER);
+        if (refreshTokenHeader == null || !jwtValidator.validateRefreshToken(refreshTokenHeader.replace(JwtProperties.REFRESH_TOKEN_PREFIX, ""), user).isValidToken()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        User persistenceUser = findUser(user.getId());
+        User persistenceUser = getUser(user.getId());
         userRepository.deleteUserById(persistenceUser.getId());
-
         return ResponseEntity.ok().build();
     }
 }
