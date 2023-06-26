@@ -9,8 +9,6 @@ import com.example.naejango.global.auth.dto.TokenValidateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 
 @Component
@@ -60,51 +58,9 @@ public class JwtValidator {
         try {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token);
         } catch (JWTVerificationException | IllegalArgumentException e) {
+            // Token이 있으나 복호화 실패
             throw new RuntimeException(e);
         }
-    }
-
-    public String getAccessToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
-        if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.ACCESS_TOKEN_PREFIX)) {
-            return null;
-        }
-        return authorizationHeader.replace(JwtProperties.ACCESS_TOKEN_PREFIX, "");
-    }
-
-    public String getUserKey(HttpServletRequest request){
-        String refreshToken = getRefreshToken(request);
-        if (refreshToken == null) {
-            return null;
-        }
-        String userKey;
-        try {
-            userKey = decodeJwt(refreshToken).getClaim("userKey").asString();
-        } catch (Exception e) {
-            throw new RuntimeException("Fail to decode refresh token");
-        }
-        return userKey;
-    }
-
-    /**
-     * request로 부터 refresh Token을 가져옴
-     *
-     * @param request : Http 요청
-     * @return refreshToken
-     */
-    public String getRefreshToken(HttpServletRequest request) {
-        String refreshTokenCookie = null;
-        Cookie[] cookies = request.getCookies();
-        if(cookies==null) return null;
-        for (Cookie cookie : cookies) {
-            if (cookie!=null && cookie.getName().equals(JwtProperties.REFRESH_TOKEN_HEADER)) {
-                refreshTokenCookie = cookie.getValue();
-            }
-        }
-        if (refreshTokenCookie==null || !refreshTokenCookie.startsWith(JwtProperties.REFRESH_TOKEN_PREFIX)) {
-            return null;
-        }
-        return refreshTokenCookie.replace(JwtProperties.REFRESH_TOKEN_PREFIX, "");
     }
 
     public boolean isExpiredToken(DecodedJWT decodedToken){
@@ -115,6 +71,5 @@ public class JwtValidator {
     public boolean isVerifiedSignature(DecodedJWT decodedJWT, User user) {
         return user.getSignature().equals(decodedJWT.getSignature());
     }
-
 
 }
