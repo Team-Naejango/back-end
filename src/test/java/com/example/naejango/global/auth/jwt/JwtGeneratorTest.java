@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JwtGeneratorTest {
+
     @Autowired
     private JwtGenerator jwtGenerator;
     private String accessToken;
@@ -40,17 +41,10 @@ class JwtGeneratorTest {
         }
 
         @Test
-        @DisplayName("Prefix가 정상")
-        void isProperPrefix() {
-            assertTrue(accessToken.startsWith(JwtProperties.ACCESS_TOKEN_PREFIX));
-            assertTrue(refreshToken.startsWith(JwtProperties.REFRESH_TOKEN_PREFIX));
-        }
-
-        @Test
         @DisplayName("token holder의 userKey를 담고있음")
         void decode(){
-            DecodedJWT decodedAccessToken = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(accessToken.replace(JwtProperties.ACCESS_TOKEN_PREFIX, ""));
-            DecodedJWT decodedRefreshToken = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken.replace(JwtProperties.REFRESH_TOKEN_PREFIX, ""));
+            DecodedJWT decodedAccessToken = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(accessToken);
+            DecodedJWT decodedRefreshToken = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken);
 
             assertEquals(testUser.getUserKey(), decodedAccessToken.getClaim("userKey").asString());
             assertEquals(testUser.getUserKey(), decodedRefreshToken.getClaim("userKey").asString());
