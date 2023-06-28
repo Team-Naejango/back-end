@@ -1,18 +1,16 @@
 package com.example.naejango.domain.user.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Builder
-@Table(name="users")
+@Table(name="user")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +25,16 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
     @Column(nullable = false)
     private String signature;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne
+    @JoinColumn(name = "id")
     private UserProfile userProfile;
+
+    public void updateProfile(UserProfile userProfile) {
+        this.userProfile = userProfile;
+    }
 
     public void setSignature(String signature) {
         this.signature = signature;

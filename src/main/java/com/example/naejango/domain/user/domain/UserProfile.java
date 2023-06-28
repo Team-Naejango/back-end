@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -14,15 +16,12 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Table(name="user_profile")
+@Table(name="userprofile")
+@EntityListeners(AuditingEntityListener.class)
 public class UserProfile {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @MapsId
-    @OneToOne
-    @JoinColumn(nullable = false, name = "id")
-    private User user;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
@@ -47,10 +46,11 @@ public class UserProfile {
     @Column
     private String imgUrl;
 
-    @Column(nullable = false)
+    @Column
     private Timestamp lastLogin;
 
-    @Column(nullable = false)
+    @Column
+    @CreatedDate
     private Timestamp createdAt;
 
 
@@ -69,4 +69,9 @@ public class UserProfile {
         this.intro = intro;
         this.phoneNumber = phoneNumber;
     }
+
+    public void setLastLogin() {
+        this.lastLogin = new Timestamp(System.currentTimeMillis());
+    }
+
 }
