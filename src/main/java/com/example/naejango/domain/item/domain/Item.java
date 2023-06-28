@@ -1,4 +1,4 @@
-package com.example.naejango.domain.product.domain;
+package com.example.naejango.domain.item.domain;
 
 import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -13,8 +13,8 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Table(name="product")
-public class Product {
+@Table(name="item")
+public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

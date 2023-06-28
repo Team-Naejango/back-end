@@ -1,4 +1,4 @@
-package com.example.naejango.domain.product.domain;
+package com.example.naejango.domain.item.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

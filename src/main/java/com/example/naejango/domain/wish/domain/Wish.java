@@ -1,6 +1,6 @@
 package com.example.naejango.domain.wish.domain;
 
-import com.example.naejango.domain.product.domain.Product;
+import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +25,6 @@ public class Wish {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "item_id")
+    private Item item;
 }
