@@ -32,6 +32,11 @@ public enum ErrorCode {
         return httpStatus;
     }
 
+    // CATEGORY_NOT_FOUND 등의 enum name
+    public String getName() {
+        return this.name();
+    }
+
     // BAD_REQUEST 등의 Status 이름
     public String getHttpStatusErrorName() {
         return httpStatus.name();
