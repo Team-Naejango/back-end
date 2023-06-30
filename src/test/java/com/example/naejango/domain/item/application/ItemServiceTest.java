@@ -22,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.awt.*;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -54,12 +53,13 @@ class ItemServiceTest {
     class createItem {
         @Test
         @DisplayName("성공")
-        void success() throws Exception {
+        void success() {
             // given
-            Point point = new Point(0, 1);
             User user = new User();
             Category category = new Category(1, "카테고리");
-            Storage storage = new Storage(1L, "a", "s", point, user);
+            Storage storage = Storage.builder()
+                    .name("이름")
+                    .build();
             RequestCreateItem requestCreateItem = RequestCreateItem
                     .builder()
                     .category("카테고리")
