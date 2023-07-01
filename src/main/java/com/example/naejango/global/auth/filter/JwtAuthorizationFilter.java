@@ -2,11 +2,12 @@ package com.example.naejango.global.auth.filter;
 
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.PrincipalDetails;
+import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.example.naejango.global.auth.dto.TokenValidateResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.jwt.JwtValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
+@Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private final JwtValidator jwtValidator;
     private final JwtGenerator jwtGenerator;
@@ -39,6 +41,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        log.info("JwtAuthorization Filter");
         String accessToken = this.getAccessToken(request);
 
         // access token 의 소유 여부 확인

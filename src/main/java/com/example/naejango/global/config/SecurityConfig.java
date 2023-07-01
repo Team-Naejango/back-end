@@ -3,7 +3,6 @@ package com.example.naejango.global.config;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
-import com.example.naejango.global.auth.filter.LoginAuthenticationFilter;
 import com.example.naejango.global.auth.handler.OauthLoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtValidator;
@@ -55,7 +54,6 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지않고 Stateless 하게 만듬
                 .and()
                 .addFilter(corsConfig.corsFilter())
-                .addFilter(new LoginAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtValidator, jwtGenerator, userRepository))
                 .authorizeRequests()
                 .antMatchers("/api/user/**")
