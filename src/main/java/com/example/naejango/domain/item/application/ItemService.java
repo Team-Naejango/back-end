@@ -3,9 +3,9 @@ package com.example.naejango.domain.item.application;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemStorage;
-import com.example.naejango.domain.item.dto.request.RequestCreateItem;
-import com.example.naejango.domain.item.dto.request.RequestModifyItem;
-import com.example.naejango.domain.item.dto.response.ResponseCreateItem;
+import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
+import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
+import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.ItemStorageRepository;
@@ -33,9 +33,9 @@ public class ItemService {
 
     /** 아이템 등록 */
     @Transactional
-    public ResponseCreateItem createItem(User user, RequestCreateItem requestCreateItem) {
-        Category category = categoryRepository.findByName(requestCreateItem.getCategory());
-        Storage storage = storageRepository.findById(requestCreateItem.getStorageId()).orElse(null);
+    public CreateItemResponseDto createItem(User user, CreateItemRequestDto createItemRequestDto) {
+        Category category = categoryRepository.findByName(createItemRequestDto.getCategory());
+        Storage storage = storageRepository.findById(createItemRequestDto.getStorageId()).orElse(null);
 
         if (category == null) {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
@@ -45,7 +45,7 @@ public class ItemService {
         }
 
 
-        Item item = requestCreateItem.toEntity(user, category);
+        Item item = createItemRequestDto.toEntity(user, category);
 
         ItemStorage itemStorage = ItemStorage.builder()
                 .id(null)
@@ -56,12 +56,14 @@ public class ItemService {
         Item savedItem = itemRepository.save(item);
         itemStorageRepository.save(itemStorage);
 
-        return new ResponseCreateItem(savedItem);
+        return new CreateItemResponseDto(savedItem);
     }
 
     /** 아이템 수정 */
     @Transactional
-    public void modifyItem(User user, RequestModifyItem requestModifyItem) {
+    public void modifyItem(User user, ModifyItemRequestDto modifyItemRequestDto) {
+        Category category = categoryRepository.findByName(modifyItemRequestDto.getCategory());
+        Item item = itemRepository.findById(modifyItemRequestDto.getId()).orElse(null);
 
     }
 }

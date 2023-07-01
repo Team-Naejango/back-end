@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestCreateItem {
+public class CreateItemRequestDto {
     private String category;
 
     private String name;

@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class RequestModifyItem {
+public class ModifyItemRequestDto {
 
     private Long id;
 
