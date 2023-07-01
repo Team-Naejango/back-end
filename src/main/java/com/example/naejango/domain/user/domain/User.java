@@ -25,7 +25,7 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-    @Column(nullable = false)
+    @Column
     private String signature;
 
     @OneToOne
