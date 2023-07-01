@@ -65,5 +65,13 @@ public class ItemService {
         Category category = categoryRepository.findByName(modifyItemRequestDto.getCategory());
         Item item = itemRepository.findById(modifyItemRequestDto.getId()).orElse(null);
 
+        if (item == null) {
+            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+        if (category == null) {
+            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        modifyItemRequestDto.toEntity(item, category);
     }
 }
