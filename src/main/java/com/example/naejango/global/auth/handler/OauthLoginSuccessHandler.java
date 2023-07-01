@@ -5,7 +5,6 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.LoginResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -46,11 +44,8 @@ public class OauthLoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
         userService.setSignature(user, refreshToken);
-        response.sendRedirect("/");
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.addHeader(JwtProperties.ACCESS_TOKEN_HEADER, accessToken);
-        response.addCookie(new Cookie(JwtProperties.REFRESH_TOKEN_HEADER, refreshToken));
+        String redirectUrl = "/";
+        response.sendRedirect(redirectUrl + "?accessToken=" + accessToken + "?refreshToken=" + refreshToken);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
