@@ -1,4 +1,4 @@
-package com.example.naejango.global.auth;
+package com.example.naejango.global.auth.principal;
 
 import com.example.naejango.domain.user.domain.User;
 import lombok.Getter;
@@ -15,9 +15,17 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     private final User user;
 
-    public PrincipalDetails(User user){
+    private Map<String, Object> attributes;
+
+    public PrincipalDetails(User user, Map<String, Object> attributes) {
+        this.user = user;
+        this.attributes = attributes;
+    }
+
+    public PrincipalDetails(User user) {
         this.user = user;
     }
+
 
     @Override
     public <A> A getAttribute(String name) {
@@ -35,6 +43,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
         collect.add((GrantedAuthority) () -> "ROLE_" + user.getRole().toString());
         return collect;
     }
+
     @Override
     public String getPassword() {
         return user.getPassword();

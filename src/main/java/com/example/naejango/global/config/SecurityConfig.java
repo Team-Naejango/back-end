@@ -3,8 +3,11 @@ package com.example.naejango.global.config;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
+import com.example.naejango.global.auth.filter.LoginAuthenticationFilter;
+import com.example.naejango.global.auth.handler.OauthLoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtValidator;
+import com.example.naejango.global.auth.principal.PrincipalOauth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +22,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final PrincipalOauth2UserService principalOauth2UserService;
+    private final OauthLoginSuccessHandler oauthLoginSuccessHandler;
     private final CorsConfig corsConfig;
     private final JwtValidator jwtValidator;
     private final JwtGenerator jwtGenerator;
@@ -42,13 +47,15 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-                .addFilter(corsConfig.corsFilter())
                 .csrf().disable() // csrf 보안 필요하지 않으므로 disable 처리
                 .formLogin().disable() // 기본 로그인 폼 사용안하므로 disable 처리
                 .httpBasic().disable()// Http basic Auth 기반으로 로그인 인증창이 뜸 disable 시에 인증창 뜨지 않음
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용하지않고 Stateless 하게 만듬
                 .and()
+                .addFilter(corsConfig.corsFilter())
+                .addFilter(new LoginAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtValidator, jwtGenerator, userRepository))
                 .authorizeRequests()
                 .antMatchers("/api/user/**")
@@ -58,8 +65,11 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
                 .and()
                 .oauth2Login()
-                .loginPage("/loginPage");
-
+                .loginPage("/localtest")
+                .userInfoEndpoint()
+                .userService(principalOauth2UserService)
+                .and()
+                .successHandler(oauthLoginSuccessHandler);
         return http.build();
     }
 }

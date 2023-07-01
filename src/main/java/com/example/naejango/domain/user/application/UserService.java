@@ -2,19 +2,19 @@ package com.example.naejango.domain.user.application;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.dto.request.UserInfoModifyRequest;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.dto.response.UserInfoResponse;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.PrincipalDetails;
+import com.example.naejango.global.auth.oauth.Oauth2UserInfo;
+import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.jwt.JwtValidator;
-import com.example.naejango.global.auth.kakao.KakaoUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder;
     private final JwtValidator jwtValidator;
 
     public User getUser(Long id) {
@@ -58,10 +57,11 @@ public class UserService {
     }
 
     @Transactional
-    public User createUser(KakaoUserInfo kakaoUserInfo){
+    public User join(Oauth2UserInfo oauth2UserInfo){
         User newUser = User.builder()
-                .userKey(kakaoUserInfo.getUserkey())
-                .password(encoder.encode("null"))
+                .userKey(oauth2UserInfo.getUserKey())
+                .password("null")
+                .role(Role.USER)
                 .build();
         userRepository.save(newUser);
         return newUser;

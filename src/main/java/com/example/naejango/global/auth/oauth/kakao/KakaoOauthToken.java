@@ -1,4 +1,4 @@
-package com.example.naejango.global.auth.kakao;
+package com.example.naejango.global.auth.oauth.kakao;
 
 import lombok.Data;
 

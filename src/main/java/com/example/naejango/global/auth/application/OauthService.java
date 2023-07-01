@@ -5,8 +5,8 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.LoginResponse;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.auth.kakao.KakaoOauthToken;
-import com.example.naejango.global.auth.kakao.KakaoUserInfo;
+import com.example.naejango.global.auth.oauth.kakao.KakaoOauthToken;
+import com.example.naejango.global.auth.oauth.kakao.KakaoUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -60,21 +60,17 @@ public class OauthService {
      */
 
     private LoginResponse generateLoginResponse(KakaoUserInfo kakaoUserInfo){
-
-        User user = userRepository.findByUserKey(kakaoUserInfo.getUserkey()).orElse(null);
+        User user = userRepository.findByUserKey(kakaoUserInfo.getUserKey()).orElse(null);
         if(user==null) {
-            user = userService.createUser(kakaoUserInfo);
+            user = userService.join(kakaoUserInfo);
         }
-
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
         userService.setSignature(user, refreshToken);
-
         return LoginResponse.builder()
                 .id(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .isNew(!user.getUserProfile().isCompleteProfile())
                 .build();
     }
 

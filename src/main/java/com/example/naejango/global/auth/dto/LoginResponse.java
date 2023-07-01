@@ -11,7 +11,6 @@ import lombok.ToString;
 @Builder
 public class LoginResponse {
     private Long id;
-    private boolean isNew;
     private String accessToken;
     private String refreshToken;
 }

@@ -60,10 +60,6 @@ public class UserProfile {
      * 회원 가입 시 또는 서비스 이용시
      * 회원정보가 미 기입되었는지 판별할 필요가 있음
      */
-    public boolean isCompleteProfile(){
-        return phoneNumber != null && gender != null && age != null;
-    }
-
     public void modifyUserProfile(String nickname, String intro, String phoneNumber) {
         this.nickname = nickname;
         this.intro = intro;
