@@ -44,7 +44,7 @@ public class OauthLoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
         userService.setSignature(user, refreshToken);
-        String redirectUrl = "/";
+        String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
         response.sendRedirect(redirectUrl + "?accessToken=" + accessToken + "?refreshToken=" + refreshToken);
 
         return LoginResponse.builder()
