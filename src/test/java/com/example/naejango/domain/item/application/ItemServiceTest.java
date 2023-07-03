@@ -2,8 +2,8 @@ package com.example.naejango.domain.item.application;
 
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.dto.request.RequestCreateItem;
-import com.example.naejango.domain.item.dto.response.ResponseCreateItem;
+import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
+import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.ItemStorageRepository;
@@ -60,7 +60,7 @@ class ItemServiceTest {
             Category category = new Category();
             Storage storage = new Storage();
 
-            RequestCreateItem requestCreateItem = RequestCreateItem
+            CreateItemRequestDto createItemRequestDto = CreateItemRequestDto
                     .builder()
                     .category("카테고리")
                     .name("아이템 이름")
@@ -74,17 +74,17 @@ class ItemServiceTest {
 
             BDDMockito.given(storageRepository.findById(any())).willReturn(Optional.of(storage));
 
-            BDDMockito.given(itemRepository.save(any())).willReturn(requestCreateItem.toEntity(user, category));
+            BDDMockito.given(itemRepository.save(any())).willReturn(createItemRequestDto.toEntity(user, category));
 
             // when
-            ResponseCreateItem responseCreateItem = itemService.createItem(user, requestCreateItem);
+            CreateItemResponseDto createItemResponseDto = itemService.createItem(user, createItemRequestDto);
 
             // then
-            Assertions.assertEquals(responseCreateItem, new ResponseCreateItem(requestCreateItem.toEntity(user, category)));
+            Assertions.assertEquals(createItemResponseDto, new CreateItemResponseDto(createItemRequestDto.toEntity(user, category)));
             verify(itemRepository).save(any());
             verify(itemStorageRepository).save(any());
 
-            log.info(responseCreateItem.toString());
+            log.info(createItemResponseDto.toString());
         }
 
         @Test
@@ -95,7 +95,7 @@ class ItemServiceTest {
             User user = new User();
             Storage storage = new Storage();
 
-            RequestCreateItem requestCreateItem = RequestCreateItem
+            CreateItemRequestDto createItemRequestDto = CreateItemRequestDto
                     .builder()
                     .category("카테고리")
                     .name("아이템 이름")
@@ -113,7 +113,7 @@ class ItemServiceTest {
 
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(user, requestCreateItem);
+                itemService.createItem(user, createItemRequestDto);
             });
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.CATEGORY_NOT_FOUND);
@@ -129,7 +129,7 @@ class ItemServiceTest {
             User user = new User();
             Category category = new Category();
 
-            RequestCreateItem requestCreateItem = RequestCreateItem
+            CreateItemRequestDto createItemRequestDto = CreateItemRequestDto
                     .builder()
                     .category("카테고리")
                     .name("아이템 이름")
@@ -147,7 +147,7 @@ class ItemServiceTest {
 
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(user, requestCreateItem);
+                itemService.createItem(user, createItemRequestDto);
             });
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.STORAGE_NOT_FOUND);

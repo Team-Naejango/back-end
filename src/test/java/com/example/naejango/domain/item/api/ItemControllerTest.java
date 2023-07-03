@@ -2,8 +2,8 @@ package com.example.naejango.domain.item.api;
 
 import com.example.naejango.domain.item.application.ItemService;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.dto.request.RequestCreateItem;
-import com.example.naejango.domain.item.dto.response.ResponseCreateItem;
+import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
+import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.user.application.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +25,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.mockito.ArgumentMatchers.any;
-
 
 @WebMvcTest(ItemController.class)
 @ExtendWith(MockitoExtension.class)
@@ -50,8 +49,8 @@ class ItemControllerTest {
         @DisplayName("성공")
         void success() throws Exception {
             // given
-            RequestCreateItem requestCreateItem =
-                    RequestCreateItem.builder()
+            CreateItemRequestDto createItemRequestDto =
+                    CreateItemRequestDto.builder()
                             .category("생필품")
                             .name("아이템 이름")
                             .description("아이템 설명")
@@ -60,13 +59,13 @@ class ItemControllerTest {
                             .StorageId(1L)
                             .build();
 
-            ResponseCreateItem responseCreateItem =
-                    ResponseCreateItem.builder().build();
+            CreateItemResponseDto createItemResponseDto =
+                    CreateItemResponseDto.builder().build();
 
-            String content = objectMapper.writeValueAsString(requestCreateItem);
+            String content = objectMapper.writeValueAsString(createItemRequestDto);
 
-            BDDMockito.given(itemService.createItem(any(), any(RequestCreateItem.class)))
-                    .willReturn(responseCreateItem);
+            BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
+                    .willReturn(createItemResponseDto);
 
 
             // when
