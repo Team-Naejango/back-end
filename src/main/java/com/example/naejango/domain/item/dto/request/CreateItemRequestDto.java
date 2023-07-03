@@ -24,7 +24,7 @@ public class CreateItemRequestDto {
 
     private ItemType type;
 
-    private Long StorageId;
+    private Long storageId;
 
     public Item toEntity(User user, Category category) {
         return Item.builder()

@@ -12,7 +12,7 @@ public class ModifyItemRequestDto {
 
     private Long id;
 
-    private Long StorageId;
+    private Long storageId;
 
     private String category;
 

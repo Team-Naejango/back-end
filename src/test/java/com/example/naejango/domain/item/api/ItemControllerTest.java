@@ -56,7 +56,7 @@ class ItemControllerTest {
                             .description("아이템 설명")
                             .imgUrl("아이템 이미지 Url")
                             .type(ItemType.BUY)
-                            .StorageId(1L)
+                            .storageId(1L)
                             .build();
 
             CreateItemResponseDto createItemResponseDto =

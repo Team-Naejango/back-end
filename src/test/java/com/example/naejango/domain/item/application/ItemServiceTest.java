@@ -67,7 +67,7 @@ class ItemServiceTest {
                     .description("아이템 설명")
                     .imgUrl("이미지 URL")
                     .type(ItemType.SELL)
-                    .StorageId(1L)
+                    .storageId(1L)
                     .build();
 
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
@@ -102,7 +102,7 @@ class ItemServiceTest {
                     .description("아이템 설명")
                     .imgUrl("이미지 URL")
                     .type(ItemType.SELL)
-                    .StorageId(1L)
+                    .storageId(1L)
                     .build();
 
             BDDMockito.given(categoryRepository.findByName(any()))
@@ -136,7 +136,7 @@ class ItemServiceTest {
                     .description("아이템 설명")
                     .imgUrl("이미지 URL")
                     .type(ItemType.SELL)
-                    .StorageId(1L)
+                    .storageId(1L)
                     .build();
 
 
