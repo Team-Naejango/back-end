@@ -2,8 +2,8 @@ package com.example.naejango.domain.user.application;
 
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.PrincipalDetails;
 import com.example.naejango.global.auth.jwt.JwtValidator;
+import com.example.naejango.global.auth.principal.PrincipalDetails;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
