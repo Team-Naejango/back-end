@@ -1,7 +1,18 @@
+import org.hidetake.gradle.swagger.generator.GenerateSwaggerUI
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
+buildscript {
+	ext {
+		restdocsApiSpecVersion = '0.16.2' // restdocsApiSpecVersion 버전 변수 설정
+	}
+}
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.12'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+	id 'org.hidetake.swagger.generator' version '2.18.2'
 }
 
 group = 'com.example'
@@ -15,7 +26,7 @@ configurations {
 	all {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 		// logback 제외하고 log4j2 사용
-		}
+	}
 }
 
 repositories {
@@ -42,6 +53,12 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation "com.epages:restdocs-api-spec-mockmvc:${restdocsApiSpecVersion}"
+	testImplementation "com.epages:restdocs-api-spec-restassured:${restdocsApiSpecVersion}"
+
+	swaggerUI 'org.webjars:swagger-ui:4.11.1'
 }
 
 tasks.named('test') {
@@ -59,3 +76,54 @@ task copyPrivate(type: Copy) {
 jar {
 	enabled = false
 }
+
+// application.yml 에 숨겨둔 ec2 ip 주소 가져오도록 설정
+Properties properties = new Properties()
+properties.load(project.rootProject.file('src/main/resources/application.yml').newDataInputStream())
+def serverUrl = properties.getProperty('server-url')
+
+// openapi3 설정
+openapi3 {
+	servers = [{url = "http://localhost:8080"}, {url = serverUrl}]
+	title = "Restdocs-Swagger API Documentation"
+	description = "Spring REST Docs with SwaggerUI"
+	version = "0.0.1"
+	format = "yaml"
+	outputDirectory = 'build/resources/main/static/api-spec'
+}
+
+// Task 및 설정 추가
+// GenerateSwaggerUI 태스크가, openapi3 task 를 의존하도록 설정
+tasks.withType(GenerateSwaggerUI) {
+	dependsOn 'openapi3'
+}
+
+// bootJar 실행 전, openapi3 를 실행하도록 설정
+bootJar{
+	dependsOn(':openapi3')
+}
+
+// 생성된 SwaggerUI 를 jar 에 포함시키기 위해 build/resources 경로로 로 복사
+tasks.register('copySwaggerUI', Copy) {
+	dependsOn 'generateSwaggerUISample'
+
+	def generateSwaggerUISampleTask = tasks.named('generateSwaggerUISample', GenerateSwaggerUI).get()
+
+	from("${generateSwaggerUISampleTask.outputDir}")
+	into("${project.buildDir}/resources/main/static/docs")
+}
+
+// bootJar 실행 전, copySwaggerUI 를 실행하도록 설정
+tasks.withType(BootJar) {
+	dependsOn 'copySwaggerUI'
+}
+
+// swaggerSources 설정 추가
+// 내 API 스펙이 있는 위치를 이름과 함께 지정
+swaggerSources {
+	sample {
+		setInputFile(file("${project.buildDir}/resources/main/static/api-spec/openapi3.yaml"))
+	}
+}
+
+

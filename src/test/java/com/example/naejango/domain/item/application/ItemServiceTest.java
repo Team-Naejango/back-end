@@ -21,7 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -48,32 +50,31 @@ class ItemServiceTest {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    @DisplayName("아이템 생성")
+    @DisplayName("Service 아이템 생성")
     @WithMockUser()
     class createItem {
+        User user = new User();
+        Category category = new Category();
+        Storage storage1 = Storage.builder().id(1L).build();
+        Storage storage2 = Storage.builder().id(2L).build();
+        Storage storage3 = Storage.builder().id(3L).build();
+        CreateItemRequestDto createItemRequestDto =
+                CreateItemRequestDto.builder()
+                        .name("아이템 이름")
+                        .description("아이템 설명")
+                        .imgUrl("이미지 URL")
+                        .type(ItemType.SELL)
+                        .category("카테고리")
+                        .storageIdList(new ArrayList<>(List.of(1L, 2L)))
+                        .build();
+
         @Test
         @Order(1)
         @DisplayName("성공")
         void 성공() {
             // given
-            User user = new User();
-            Category category = new Category();
-            Storage storage = new Storage();
-
-            CreateItemRequestDto createItemRequestDto = CreateItemRequestDto
-                    .builder()
-                    .category("카테고리")
-                    .name("아이템 이름")
-                    .description("아이템 설명")
-                    .imgUrl("이미지 URL")
-                    .type(ItemType.SELL)
-                    .storageId(1L)
-                    .build();
-
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
-
-            BDDMockito.given(storageRepository.findById(any())).willReturn(Optional.of(storage));
-
+            BDDMockito.given(storageRepository.findByUserId(any())).willReturn(new ArrayList<>(List.of(storage1, storage2, storage3)));
             BDDMockito.given(itemRepository.save(any())).willReturn(createItemRequestDto.toEntity(user, category));
 
             // when
@@ -82,34 +83,17 @@ class ItemServiceTest {
             // then
             Assertions.assertEquals(createItemResponseDto, new CreateItemResponseDto(createItemRequestDto.toEntity(user, category)));
             verify(itemRepository).save(any());
-            verify(itemStorageRepository).save(any());
+            verify(itemStorageRepository).saveAll(any());
 
             log.info(createItemResponseDto.toString());
         }
 
         @Test
         @Order(2)
-        @DisplayName("실패_카테고리만_Null")
-        void 실패_카테고리만_Null() {
+        @DisplayName("실패_잘못된_카테고리_이름으로_요청_예외처리")
+        void 실패_잘못된_카테고리_이름으로_요청_예외처리() {
             // given
-            User user = new User();
-            Storage storage = new Storage();
-
-            CreateItemRequestDto createItemRequestDto = CreateItemRequestDto
-                    .builder()
-                    .category("카테고리")
-                    .name("아이템 이름")
-                    .description("아이템 설명")
-                    .imgUrl("이미지 URL")
-                    .type(ItemType.SELL)
-                    .storageId(1L)
-                    .build();
-
-            BDDMockito.given(categoryRepository.findByName(any()))
-                    .willReturn(null);
-
-            BDDMockito.given(storageRepository.findById(any()))
-                    .willReturn(Optional.of(storage));
+            BDDMockito.given(categoryRepository.findByName(any())).willReturn(null);
 
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
@@ -123,28 +107,28 @@ class ItemServiceTest {
 
         @Test
         @Order(3)
-        @DisplayName("실패_창고만_Null")
-        void 실패_창고만_Null() {
+        @DisplayName("실패_창고_생성_전에_아이템_등록_요청_예외처리")
+        void 실패_창고_생성_전에_아이템_등록_요청_예외처리() {
             // given
-            User user = new User();
-            Category category = new Category();
-
-            CreateItemRequestDto createItemRequestDto = CreateItemRequestDto
-                    .builder()
-                    .category("카테고리")
-                    .name("아이템 이름")
-                    .description("아이템 설명")
-                    .imgUrl("이미지 URL")
-                    .type(ItemType.SELL)
-                    .storageId(1L)
-                    .build();
-
-
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
+            BDDMockito.given(storageRepository.findByUserId(any())).willReturn(new ArrayList<>(Collections.emptyList()));
+            // when & then
+            CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
+                itemService.createItem(user, createItemRequestDto);
+            });
 
-            BDDMockito.given(storageRepository.findById(any()))
-                    .willReturn(Optional.empty());
+            Assertions.assertEquals(exception.getErrorCode(), ErrorCode.STORAGE_NOT_EXIST);
 
+            log.info(exception.getErrorCode().toString());
+        }
+
+        @Test
+        @Order(4)
+        @DisplayName("실패_등록되지_않은_창고_ID_값으로_요청_예외처리")
+        void 실패_등록되지_않은_창고_ID_값으로_요청_예외처리() {
+            // given
+            BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
+            BDDMockito.given(storageRepository.findByUserId(any())).willReturn(new ArrayList<>(List.of(storage1)));
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
                 itemService.createItem(user, createItemRequestDto);
