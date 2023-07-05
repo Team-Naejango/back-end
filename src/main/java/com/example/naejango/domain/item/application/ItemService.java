@@ -3,9 +3,11 @@ package com.example.naejango.domain.item.application;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemStorage;
+import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
+import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.ItemStorageRepository;
@@ -17,6 +19,9 @@ import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,47 +36,90 @@ public class ItemService {
 
     private final StorageRepository storageRepository;
 
-    /** 아이템 등록 */
+    /** 아이템 생성 */
     @Transactional
     public CreateItemResponseDto createItem(User user, CreateItemRequestDto createItemRequestDto) {
         Category category = categoryRepository.findByName(createItemRequestDto.getCategory());
-        Storage storage = storageRepository.findById(createItemRequestDto.getStorageId()).orElse(null);
 
         if (category == null) {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
         }
-        if (storage == null) {
-            throw new CustomException(ErrorCode.STORAGE_NOT_FOUND);
-        }
-
 
         Item item = createItemRequestDto.toEntity(user, category);
 
-        ItemStorage itemStorage = ItemStorage.builder()
-                .id(null)
-                .storage(storage)
-                .item(item)
-                .build();
+        connectItemToStorage(user.getId(), item, createItemRequestDto.getStorageIdList());
 
         Item savedItem = itemRepository.save(item);
-        itemStorageRepository.save(itemStorage);
 
         return new CreateItemResponseDto(savedItem);
     }
 
-    /** 아이템 수정 */
+    /** 아이템 정보 수정 */
     @Transactional
-    public void modifyItem(User user, ModifyItemRequestDto modifyItemRequestDto) {
+    public ModifyItemResponseDto modifyItem(User user, ModifyItemRequestDto modifyItemRequestDto) {
         Category category = categoryRepository.findByName(modifyItemRequestDto.getCategory());
-        Item item = itemRepository.findById(modifyItemRequestDto.getId()).orElse(null);
+        Item item = itemRepository.findById(modifyItemRequestDto.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
 
-        if (item == null) {
-            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
         if (category == null) {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
+        // 요청 보낸 유저와 아이템을 등록한 유저가 같은지 확인
+        if (user != item.getUser()) {
+            throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
+        }
+
         modifyItemRequestDto.toEntity(item, category);
+
+        Item savedItem = itemRepository.save(item);
+
+        return new ModifyItemResponseDto(savedItem);
+    }
+
+    /** 아이템 창고 등록 수정 */
+    @Transactional
+    public void connectItem(User user, ConnectItemRequestDto connectItemRequestDto) {
+        Item item = itemRepository.findById(connectItemRequestDto.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+
+        // 요청 보낸 유저와 아이템을 등록한 유저가 같은지 확인
+        if (user != item.getUser()) {
+            throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
+        }
+
+        connectItemToStorage(user.getId(), item, connectItemRequestDto.getStorageIdList());
+    }
+
+    /** 아이템과 창고 연결 */
+    @Transactional
+    public void connectItemToStorage(Long userId, Item item, List<Long> storageIdList) {
+        List<Storage> storageList = storageRepository.findByUserId(userId); // 현재 유저의 창고 목록
+        if (storageList.isEmpty()) {
+            throw new CustomException(ErrorCode.STORAGE_NOT_EXIST);
+        }
+
+        // 현재 유저의 창고 목록 중 등록 요청에 포함되지 않은 창고는 제거
+        storageList.removeIf(storage -> !storageIdList.contains(storage.getId()));
+
+        // 현재 유저의 창고 목록에 없는 ID값 요청은 예외처리
+        for (Storage storage : storageList) {
+            storageIdList.remove(storage.getId());
+        }
+        if(!storageIdList.isEmpty()){
+            throw new CustomException(ErrorCode.STORAGE_NOT_FOUND);
+        }
+
+        List<ItemStorage> itemStorageList = new ArrayList<>();
+        for (Storage storage : storageList) {
+            ItemStorage itemStorage = ItemStorage.builder()
+                    .id(null)
+                    .storage(storage)
+                    .item(item)
+                    .build();
+            itemStorageList.add(itemStorage);
+        }
+
+        itemStorageRepository.saveAll(itemStorageList);
     }
 }

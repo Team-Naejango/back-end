@@ -9,12 +9,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ModifyItemRequestDto {
-
     private Long id;
-
-    private Long storageId;
-
-    private String category;
 
     private String name;
 
@@ -24,6 +19,7 @@ public class ModifyItemRequestDto {
 
     private ItemType type;
 
+    private String category;
 
     public void toEntity(Item item, Category category) {
         item.modifyItem(name, description, imgUrl, type, category);

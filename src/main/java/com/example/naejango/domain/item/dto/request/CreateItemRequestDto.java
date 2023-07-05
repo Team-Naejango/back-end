@@ -9,13 +9,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateItemRequestDto {
-    private String category;
-
     private String name;
 
     private String description;
@@ -24,7 +24,9 @@ public class CreateItemRequestDto {
 
     private ItemType type;
 
-    private Long storageId;
+    private String category;
+
+    private List<Long> storageIdList;
 
     public Item toEntity(User user, Category category) {
         return Item.builder()

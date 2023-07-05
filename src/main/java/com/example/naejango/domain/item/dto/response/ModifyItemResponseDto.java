@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateItemResponseDto {
+public class ModifyItemResponseDto {
     private Long id;
 
     private String name;
@@ -24,7 +24,7 @@ public class CreateItemResponseDto {
 
     private String category;
 
-    public CreateItemResponseDto(Item item) {
+    public ModifyItemResponseDto(Item item) {
         this.id = item.getId();
         this.category = item.getCategory().toString();
         this.name = item.getName();

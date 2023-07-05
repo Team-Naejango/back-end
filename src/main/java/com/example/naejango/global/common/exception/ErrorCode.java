@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
     /** 400 BAD_REQUEST : 잘못된 요청 */
-
+    STORAGE_NOT_EXIST(HttpStatus.BAD_REQUEST, "창고가 등록되어있지 않습니다."),
 
     /** 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 
@@ -15,6 +15,7 @@ public enum ErrorCode {
     /** 404 NOT_FOUND : 리소스를 찾을 수 없음 */
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Category를 찾을 수 없습니다."),
     STORAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Storage를 찾을 수 없습니다."),
+    ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Item을 찾을 수 없습니다.")
     ;
 
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
