@@ -2,6 +2,7 @@ package com.example.naejango.global.config;
 
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
+import com.example.naejango.global.auth.handler.AccessDeniedHandlerImpl;
 import com.example.naejango.global.auth.handler.OauthLoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;
 import com.example.naejango.global.auth.principal.PrincipalOauth2UserService;
@@ -20,7 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private final PrincipalOauth2UserService principalOauth2UserService;
     private final OauthLoginSuccessHandler oauthLoginSuccessHandler;
-//    private final AccessDeniedHandlerImpl accessDeniedHandler;
+    private final AccessDeniedHandlerImpl accessDeniedHandler;
     private final JwtAuthenticator jwtAuthenticator;
     private final CorsConfig corsConfig;
 
@@ -40,8 +41,8 @@ public class SecurityConfig {
                 .and()
                 .addFilter(corsConfig.corsFilter())
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtAuthenticator))
-//                .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
-//                .and()
+                .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
+                .and()
                 .authorizeRequests()
                 .antMatchers("/api/user/**")
                 .hasAnyRole(Role.USER.toString(), Role.ADMIN.toString())

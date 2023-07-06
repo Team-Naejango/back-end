@@ -66,7 +66,7 @@ public class OauthService {
         }
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
-        userService.setSignature(user, refreshToken);
+        userService.refreshSignature(user, refreshToken);
         return LoginResponse.builder()
                 .id(user.getId())
                 .accessToken(accessToken)
@@ -133,6 +133,5 @@ public class OauthService {
                 })
                 .block();
     }
-
 
 }

@@ -51,9 +51,9 @@ public class UserService {
     }
 
     @Transactional
-    public void setSignature(User user, String refreshToken){
+    public void refreshSignature(User user, String refreshToken){
         User persistenceUser = getUser(user.getUserKey());
-        persistenceUser.setSignature(JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken).getSignature());
+        persistenceUser.refreshSignature(JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken).getSignature());
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class UserService {
         User newUser = User.builder()
                 .userKey(oauth2UserInfo.getUserKey())
                 .password("null")
-                .role(Role.USER)
+                .role(Role.TEMPORAL)
                 .build();
         userRepository.save(newUser);
         return newUser;
