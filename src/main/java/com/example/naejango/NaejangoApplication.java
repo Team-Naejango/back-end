@@ -8,7 +8,6 @@ public class NaejangoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(NaejangoApplication.class, args);
-		System.out.println(org.hibernate.Version.getVersionString());
 	}
 
 }

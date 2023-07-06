@@ -29,14 +29,14 @@ public class User {
     private String signature;
 
     @OneToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "userprofile_id")
     private UserProfile userProfile;
 
     public void updateProfile(UserProfile userProfile) {
         this.userProfile = userProfile;
     }
 
-    public void setSignature(String signature) {
+    public void refreshSignature(String signature) {
         this.signature = signature;
     }
 }

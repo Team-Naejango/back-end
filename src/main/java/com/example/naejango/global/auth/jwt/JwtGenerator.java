@@ -15,7 +15,6 @@ public class JwtGenerator {
     /**
      * AccessToken을 생성하는 메서드
      * 해싱 알고리즘(HMAC512)으로 jwt를 생성합니다.
-     *
      * @return JwtAccessToken
      */
     public String generateAccessToken(User user) {
@@ -29,7 +28,6 @@ public class JwtGenerator {
     /**
      * RefreshToken을 생성하는 메서드
      * 해싱 알고리즘(HMAC512)으로 jwt를 생성합니다.
-
      * @return JwtRefreshToken
      */
     public String generateRefreshToken(User user) {

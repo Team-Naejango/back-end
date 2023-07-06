@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 public class UserProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userprofile_id")
     private Long id;
 
     @Enumerated(value = EnumType.STRING)

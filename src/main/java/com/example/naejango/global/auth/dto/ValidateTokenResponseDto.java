@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TokenValidateResponse {
+public class ValidateTokenResponseDto {
     private String userKey;
     private boolean isValidToken;
 }

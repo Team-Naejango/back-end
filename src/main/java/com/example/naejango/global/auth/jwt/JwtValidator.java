@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.global.auth.dto.TokenValidateResponse;
+import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +14,8 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 public class JwtValidator {
-    public TokenValidateResponse validateAccessToken(String accessToken) {
-        TokenValidateResponse validateResponse = new TokenValidateResponse();
+    public ValidateTokenResponseDto validateAccessToken(String accessToken) {
+        ValidateTokenResponseDto validateResponse = new ValidateTokenResponseDto();
 
         // AccessToken 의 유효성 검증
         if (accessToken != null) {
@@ -32,8 +32,8 @@ public class JwtValidator {
         return validateResponse;
     }
 
-    public TokenValidateResponse validateRefreshToken(String refreshToken, User user) {
-        TokenValidateResponse validateResponse = new TokenValidateResponse();
+    public ValidateTokenResponseDto validateRefreshToken(String refreshToken, User user) {
+        ValidateTokenResponseDto validateResponse = new ValidateTokenResponseDto();
 
         if (refreshToken != null) {
             DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);

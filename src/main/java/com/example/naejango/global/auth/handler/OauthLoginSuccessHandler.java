@@ -25,13 +25,10 @@ public class OauthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final UserService userService;
     private final JwtGenerator jwtGenerator;
-
     private final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        log.info("login processing : {}", authentication.getName());
-        log.info("login request Url: {}", request.getRequestURL());
         PrincipalDetails userPrincipal = (PrincipalDetails) authentication.getPrincipal();
         response.getWriter().write(objectMapper.writeValueAsString(generateLoginResponse(userPrincipal, response)));
     }
@@ -43,9 +40,11 @@ public class OauthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         String accessToken = jwtGenerator.generateAccessToken(user);
         String refreshToken = jwtGenerator.generateRefreshToken(user);
-        userService.setSignature(user, refreshToken);
-        String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
-        response.sendRedirect(redirectUrl + "?accessToken=" + accessToken + "?refreshToken=" + refreshToken);
+        userService.refreshSignature(user, refreshToken);
+        // 프론트 local test 를 위한 redirect Url
+        // cookie 로 전달할 예정
+         String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
+         response.sendRedirect(redirectUrl + "?accessToken=" + accessToken + "&refreshToken=" + refreshToken);
 
         return LoginResponse.builder()
                 .accessToken(accessToken)
