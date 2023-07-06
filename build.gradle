@@ -84,23 +84,27 @@ def serverUrl = properties.getProperty('server-url')
 
 // openapi3 설정
 openapi3 {
+	println("project.buildDir: ${project.buildDir}")
 	servers = [{url = "http://localhost:8080"}, {url = serverUrl}]
 	title = "Restdocs-Swagger API Documentation"
 	description = "Spring REST Docs with SwaggerUI"
 	version = "0.0.1"
 	format = "yaml"
-	outputDirectory = 'build/resources/main/static/api-spec'
+	outputDirectory = "${project.buildDir}/api-spec"
+}
+
+// swaggerSources 설정 추가
+// 내 API 스펙이 있는 위치를 이름과 함께 지정
+swaggerSources {
+	sample {
+		setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
+	}
 }
 
 // Task 및 설정 추가
 // GenerateSwaggerUI 태스크가, openapi3 task 를 의존하도록 설정
 tasks.withType(GenerateSwaggerUI) {
 	dependsOn 'openapi3'
-}
-
-// bootJar 실행 전, openapi3 를 실행하도록 설정
-bootJar{
-	dependsOn(':openapi3')
 }
 
 // 생성된 SwaggerUI 를 jar 에 포함시키기 위해 build/resources 경로로 로 복사
@@ -117,13 +121,4 @@ tasks.register('copySwaggerUI', Copy) {
 tasks.withType(BootJar) {
 	dependsOn 'copySwaggerUI'
 }
-
-// swaggerSources 설정 추가
-// 내 API 스펙이 있는 위치를 이름과 함께 지정
-swaggerSources {
-	sample {
-		setInputFile(file("${project.buildDir}/resources/main/static/api-spec/openapi3.yaml"))
-	}
-}
-
 
