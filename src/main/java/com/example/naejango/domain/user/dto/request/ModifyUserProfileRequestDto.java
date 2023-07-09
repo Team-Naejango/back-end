@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfoModifyRequest {
+public class ModifyUserProfileRequestDto {
 
     private String nickname;
 

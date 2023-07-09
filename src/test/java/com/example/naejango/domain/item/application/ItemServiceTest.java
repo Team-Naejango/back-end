@@ -53,7 +53,7 @@ class ItemServiceTest {
     @DisplayName("Service 아이템 생성")
     @WithMockUser()
     class createItem {
-        User user = new User();
+        User user = User.builder().userKey("TEST_1234").build();
         Category category = new Category();
         Storage storage1 = Storage.builder().id(1L).build();
         Storage storage2 = Storage.builder().id(2L).build();

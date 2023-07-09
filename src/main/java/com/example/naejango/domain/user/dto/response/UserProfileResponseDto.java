@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserInfoResponse {
+public class UserProfileResponseDto {
     private String nickname;
     private String imgUrl;
     private int age;
@@ -16,7 +16,7 @@ public class UserInfoResponse {
     private String intro;
 
     @Builder
-    public UserInfoResponse(UserProfile userProfile) {
+    public UserProfileResponseDto(UserProfile userProfile) {
         this.nickname =  userProfile.getNickname();
         this.imgUrl = userProfile.getImgUrl();
         this.age = userProfile.getAge();

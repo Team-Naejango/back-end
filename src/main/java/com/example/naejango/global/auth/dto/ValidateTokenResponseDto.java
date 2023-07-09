@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ValidateTokenResponseDto {
-    private String userKey;
+    private Long userId;
     private boolean isValidToken;
 }

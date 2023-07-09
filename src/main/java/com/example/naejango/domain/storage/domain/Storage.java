@@ -1,5 +1,6 @@
 package com.example.naejango.domain.storage.domain;
 
+import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
 
@@ -7,12 +8,12 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Builder
 @ToString
+@Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name="storage")
+@Table(name = "storage")
 public class Storage implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,12 +39,25 @@ public class Storage implements Serializable {
      다시 데이터를 객체에 맵핑하는 것도 복잡해지기 때문에
      그냥 double 형태로 위도와 경도를 넣음
      */
-
     @Embedded
     private Location location;
 
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId")
     private User user;
+
+
+    public void toBeNamedMethod(User user) {
+        this.user = user;
+        user.allocateStorage(this);
+    }
+
+
+    public Storage(CreateStorageRequestDto requestDto) {
+        this.name = requestDto.getName();
+        this.imgUrl = requestDto.getImgUrl();
+        this.description = requestDto.getDescription();
+        this.address = requestDto.getAddress();
+        this.location = new Location(requestDto.getLatitude(), requestDto.getLongitude());
+    }
 }

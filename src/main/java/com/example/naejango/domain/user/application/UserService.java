@@ -3,18 +3,18 @@ package com.example.naejango.domain.user.application;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.domain.Role;
-import com.example.naejango.domain.user.dto.request.UserInfoModifyRequest;
+import com.example.naejango.domain.user.domain.UserProfile;
+import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
+import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.domain.user.dto.response.UserInfoResponse;
+import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.oauth.Oauth2UserInfo;
-import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,71 +25,65 @@ import javax.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
     private final JwtValidator jwtValidator;
 
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + id);
-        });
-    }
-    public User getUser(String userKey){
-        return userRepository.findByUserKey(userKey).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + userKey);
-        });
-    }
-
-    public User getUser(Authentication authentication) {
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        return userRepository.findById(principal.getUser().getId()).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾지 못하였습니다.");
-        });
-    }
-
-    public UserInfoResponse getUserInfo(Authentication authentication){
-        User user = getUser(authentication);
-        return new UserInfoResponse(user.getUserProfile());
-    }
-
     @Transactional
-    public void refreshSignature(User user, String refreshToken){
-        User persistenceUser = getUser(user.getUserKey());
-        persistenceUser.refreshSignature(JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken).getSignature());
-    }
-
-    @Transactional
-    public User join(Oauth2UserInfo oauth2UserInfo){
+    public Long join(Oauth2UserInfo oauth2UserInfo){
         User newUser = User.builder()
                 .userKey(oauth2UserInfo.getUserKey())
                 .password("null")
                 .role(Role.TEMPORAL)
                 .build();
         userRepository.save(newUser);
-        return newUser;
+        return newUser.getId();
     }
 
     @Transactional
-    public void modifyUserInfo(Authentication authentication, UserInfoModifyRequest userInfoModifyRequest) {
-        User user = getUser(authentication);
-        User persistenceUser = userRepository.findById(user.getId()).orElseThrow(() ->
-        {
-            throw new IllegalArgumentException("회원을 찾을 수 없습니다. " + user.getId());
-        });
-        persistenceUser.getUserProfile().modifyUserProfile(
-                userInfoModifyRequest.getNickname(),
-                userInfoModifyRequest.getIntro(),
-                userInfoModifyRequest.getImgUrl()
-        );
+    public void createUserProfile(CreateUserProfileRequestDto requestDto, Long userId) {
+        UserProfile userProfile = new UserProfile(requestDto);
+        userProfileRepository.save(userProfile);
+        User persistenceUser = findUser(userId);
+        persistenceUser.createUserProfile(userProfile);
     }
 
     @Transactional
-    public ResponseEntity<Void> deleteUser(Authentication authentication, HttpServletRequest request) {
-        User user = getUser(authentication);
+    public void modifyUserProfile(ModifyUserProfileRequestDto requestDto, Long userId) {
+        User persistenceUserWithProfile = findUserWithProfile(userId);
+        UserProfile persistenceUserProfile = persistenceUserWithProfile.getUserProfile();
+        persistenceUserProfile.modifyUserProfile(requestDto);
+    }
+
+
+    @Transactional
+    public void refreshSignature(Long userId, String refreshToken){
+        User persistenceUser = findUser(userId);
+        persistenceUser.refreshSignature(JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken).getSignature());
+    }
+
+
+
+
+    @Transactional
+    public ResponseEntity<Void> deleteUser(HttpServletRequest request, Long userId) {
         String refreshTokenHeader = request.getHeader(JwtProperties.REFRESH_TOKEN_HEADER);
-        if (refreshTokenHeader == null || !jwtValidator.validateRefreshToken(refreshTokenHeader.replace(JwtProperties.REFRESH_TOKEN_PREFIX, ""), user).isValidToken()) {
+        if (refreshTokenHeader == null || !jwtValidator.validateRefreshToken(refreshTokenHeader.replace(JwtProperties.REFRESH_TOKEN_PREFIX, "")).isValidToken()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        User persistenceUser = getUser(user.getId());
-        userRepository.deleteUserById(persistenceUser.getId());
+        userRepository.deleteUserById(userId);
         return ResponseEntity.ok().build();
     }
+
+    public User findUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(()->{
+            throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
+        });
+    }
+
+    public User findUserWithProfile(Long userId) {
+        return userRepository.findById(userId).orElseThrow(()->{
+            throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
+        });
+    }
+
 }
