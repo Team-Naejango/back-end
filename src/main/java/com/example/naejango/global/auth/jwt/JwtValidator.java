@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,9 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 public class JwtValidator {
+
+    private final UserRepository userRepository;
+
     public ValidateTokenResponseDto validateAccessToken(String accessToken) {
         ValidateTokenResponseDto validateResponse = new ValidateTokenResponseDto();
 
@@ -24,7 +28,7 @@ public class JwtValidator {
                 validateResponse.setValidToken(false);
             } else {
                 validateResponse.setValidToken(true);
-                validateResponse.setUserKey(decodedAccessToken.getClaim("userKey").asString());
+                validateResponse.setUserId(decodedAccessToken.getClaim("userId").asLong());
             }
         } else {
             validateResponse.setValidToken(false);
@@ -32,7 +36,7 @@ public class JwtValidator {
         return validateResponse;
     }
 
-    public ValidateTokenResponseDto validateRefreshToken(String refreshToken, User user) {
+    public ValidateTokenResponseDto validateRefreshToken(String refreshToken) {
         ValidateTokenResponseDto validateResponse = new ValidateTokenResponseDto();
 
         if (refreshToken != null) {
@@ -40,9 +44,13 @@ public class JwtValidator {
             if(isExpiredToken(decodedRefreshToken)) {
                 validateResponse.setValidToken(false);
             } else {
+                Long userId = decodedRefreshToken.getClaim("userId").asLong();
+                User user = userRepository.findById(userId).orElseThrow(() -> {
+                    throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
+                });
                 if (isVerifiedSignature(decodedRefreshToken, user)) {
                     validateResponse.setValidToken(true);
-                    validateResponse.setUserKey(decodedRefreshToken.getClaim("userKey").asString());
+                    validateResponse.setUserId(userId);
                 } else {
                     validateResponse.setValidToken(false);
                 }

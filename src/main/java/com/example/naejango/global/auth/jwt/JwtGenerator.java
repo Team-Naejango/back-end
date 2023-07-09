@@ -2,7 +2,6 @@ package com.example.naejango.global.auth.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.example.naejango.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +16,9 @@ public class JwtGenerator {
      * 해싱 알고리즘(HMAC512)으로 jwt를 생성합니다.
      * @return JwtAccessToken
      */
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(Long userId) {
         return JWT.create()
-                .withClaim("userKey", user.getUserKey())
+                .withClaim("userId", userId)
                 .withExpiresAt(LocalDateTime.now().plusMinutes(JwtProperties.ACCESS_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
@@ -30,9 +29,9 @@ public class JwtGenerator {
      * 해싱 알고리즘(HMAC512)으로 jwt를 생성합니다.
      * @return JwtRefreshToken
      */
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(Long userId) {
             return JWT.create()
-                    .withClaim("userKey", user.getUserKey())
+                    .withClaim("userId", userId)
                     .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
                     .withIssuer(JwtProperties.ISS)
                     .sign(Algorithm.HMAC512(JwtProperties.SECRET));

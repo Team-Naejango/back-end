@@ -11,6 +11,7 @@ public class OauthController {
     @GetMapping("/localtest")
     public String localtest() {
         return "<h1>test</h1>" +
-                "<a href=\"http://localhost:8080/oauth2/authorization/kakao\"><img height=\"38px\" src=\"https://developers.kakao.com/tool/resource/static/img/button/kakaosync/complete/ko/kakao_login_medium_narrow.png\"></a>";
+                "<a href=\"http://localhost:8080/oauth2/authorization/kakao\">" +
+                "<img height=\"38px\" src=\"https://developers.kakao.com/tool/resource/static/img/button/kakaosync/complete/ko/kakao_login_medium_narrow.png\"></a>";
     }
 }

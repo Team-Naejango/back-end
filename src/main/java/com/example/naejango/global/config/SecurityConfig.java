@@ -1,7 +1,7 @@
 package com.example.naejango.global.config;
 
 import com.example.naejango.domain.user.domain.Role;
-import com.example.naejango.global.auth.filter.JwtAuthorizationFilter;
+import com.example.naejango.global.auth.filter.JwtAuthenticationFilter;
 import com.example.naejango.global.auth.handler.AccessDeniedHandlerImpl;
 import com.example.naejango.global.auth.handler.OauthLoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;
@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(corsConfig.corsFilter())
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(), jwtAuthenticator))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtAuthenticator))
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()

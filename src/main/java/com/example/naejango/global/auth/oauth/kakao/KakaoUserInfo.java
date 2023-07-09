@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class KakaoUserInfo implements Oauth2UserInfo {
 
-
     /**
      * kakao 로부터 가져온 회원정보를 담는 객체입니다.
      * 본 프로젝트에서는 kakao 회원정보 중 회원의 고유 id 만을 사용합니다.

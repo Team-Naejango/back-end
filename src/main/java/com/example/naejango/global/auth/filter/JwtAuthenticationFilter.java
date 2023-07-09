@@ -12,19 +12,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final JwtAuthenticator jwtAuthenticator;
 
     @Autowired
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtAuthenticator jwtAuthenticator) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtAuthenticator jwtAuthenticator) {
         super(authenticationManager);
         this.jwtAuthenticator = jwtAuthenticator;
     }
 
     /**
      * JwtAuthorizationFilter
-     * 인증이 필요한 api 접근시, jwt 검증 수행
+     * jwt를 검증하고 authenticate 해주는 필터
+     * jwtAuthenticator 에서 jwt 가 유효함이 검증되면 authentication 을 생성해주며
+     * jwt 가 없거나 유효하지 않으면 아무 작업을 수행하지 않고 그냥 반환
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {

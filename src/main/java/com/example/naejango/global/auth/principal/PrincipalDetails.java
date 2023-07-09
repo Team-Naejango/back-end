@@ -12,24 +12,15 @@ import java.util.Map;
 
 @Getter
 public class PrincipalDetails implements UserDetails, OAuth2User {
-
     private final User user;
-
-    private Map<String, Object> attributes;
-
-    public PrincipalDetails(User user, Map<String, Object> attributes) {
-        this.user = user;
-        this.attributes = attributes;
-    }
 
     public PrincipalDetails(User user) {
         this.user = user;
     }
 
-
     @Override
     public <A> A getAttribute(String name) {
-        return OAuth2User.super.getAttribute(name);
+        return null;
     }
 
     @Override

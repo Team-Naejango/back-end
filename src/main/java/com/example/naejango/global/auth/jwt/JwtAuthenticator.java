@@ -21,6 +21,13 @@ public class JwtAuthenticator {
     private final JwtGenerator jwtGenerator;
     private final UserRepository userRepository;
 
+    /**
+     * jwt 검증을 시도하고 그 결과에 따라 authentication 객체를 생성해주는 메서드
+     * access token 이 유효한 경우 authentication 생성 후 반환
+     * access token 이 없거나 유효하지 않은 경우 refresh token 의 유효성 검증 수행
+     * refresh token 이 유효한 경우 access token 을 재발행하여 cookie 로 전달
+     * refresh token 이 없거나 유효하지 않은 경우 아무 작업 수행하지 않고 반환
+     */
     public void jwtAuthenticate(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = this.getAccessToken(request);
 
@@ -31,28 +38,37 @@ public class JwtAuthenticator {
             // access token 이 유효한 경우
             if (ValidateAccessTokenResponseDto.isValidToken()) {
                 // Authenticate 진행
-                authenticate(ValidateAccessTokenResponseDto.getUserKey());
+                authenticate(ValidateAccessTokenResponseDto.getUserId());
                 return;
             }
         }
 
         String refreshToken = this.getRefreshToken(request);
-
         // access token 은 없고 refresh token 이 있는 경우
         if (refreshToken != null) {
-            User user = getUser(refreshToken);
             // refresh token 유효성 검증 수행
-            ValidateTokenResponseDto refreshValidateTokenResponseDto = jwtValidator.validateRefreshToken(refreshToken, user);
+            ValidateTokenResponseDto refreshValidateTokenResponseDto = jwtValidator.validateRefreshToken(refreshToken);
             // refresh token 이 유효한 경우
             if (refreshValidateTokenResponseDto.isValidToken()) {
                 // access token 을 재발행하여 cookie 로 응답
-                String reissuedAccessToken = jwtGenerator.generateAccessToken(user);
-                response.setHeader(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + reissuedAccessToken); // 해결 할 것 (쿠키로 반환)
+                reissueAccessToken(response, refreshValidateTokenResponseDto.getUserId());
                 // authenticate 진행
-                authenticate(user.getUserKey());
+                authenticate(refreshValidateTokenResponseDto.getUserId());
             }
         }
 
+    }
+
+    /**
+     * access token 이 없거나 유효하지 않은데
+     * refresh token 만 유효한 경우
+     * access token 을 재 발행하여 쿠키에 담아 반환
+     */
+
+    private void reissueAccessToken(HttpServletResponse response, Long userId) {
+        String reissuedAccessToken = jwtGenerator.generateAccessToken(userId);
+        Cookie accessTokenCookie = new Cookie("AccessToken", JwtProperties.ACCESS_TOKEN_PREFIX + reissuedAccessToken);
+        response.addCookie(accessTokenCookie);
     }
 
     /**
@@ -61,8 +77,10 @@ public class JwtAuthenticator {
      * Authentication : UsernamePasswordAuthenticationToken
      * exception : jwtToken을 지니고 있는데 해당 회원이 없는 경우
      */
-    private void authenticate (String userKey){
-        User user = this.getUser(userKey);
+    private void authenticate (Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
+        });
         PrincipalDetails principalDetails = new PrincipalDetails(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 principalDetails,
@@ -72,11 +90,9 @@ public class JwtAuthenticator {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private User getUser(String userKey) {
-        return userRepository.findByUserKey(userKey).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾지 못하였습니다.");
-        });
-    }
+    /**
+     * HttpServletRequest 에서 access token 을 가져오는 메서드
+     */
 
     private String getAccessToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
@@ -85,6 +101,10 @@ public class JwtAuthenticator {
         }
         return null;
     }
+
+    /**
+     * HttpServletRequest 에서 refresh token 을 가져오는 메서드
+     */
 
     private String getRefreshToken(HttpServletRequest request) {
         String refreshTokenCookie = null;
@@ -101,4 +121,5 @@ public class JwtAuthenticator {
         }
         return null;
     }
+
 }
