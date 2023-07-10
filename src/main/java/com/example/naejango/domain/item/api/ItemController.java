@@ -6,8 +6,6 @@ import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
-import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.dto.BaseResponseDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +21,13 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final UserService userService;
+
     private final CommonDtoHandler commonDtoHandler;
     /** 아이템 생성 */
     @PostMapping("")
     public ResponseEntity<CreateItemResponseDto> createItem(Authentication authentication, @RequestBody CreateItemRequestDto createItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        User user = userService.findUser(userId);
-        CreateItemResponseDto createItemResponseDto = itemService.createItem(user, createItemRequestDto);
+        CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, createItemRequestDto);
         return ResponseEntity.created(URI.create("/api/item/"+createItemResponseDto.getId())).body(createItemResponseDto);
     }
 
@@ -38,8 +35,7 @@ public class ItemController {
     @PutMapping("/")
     public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        User user = userService.findUser(userId);
-        ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(user, modifyItemRequestDto);
+        ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, modifyItemRequestDto);
 
         return ResponseEntity.ok().body(modifyItemResponseDto);
     }
@@ -48,8 +44,7 @@ public class ItemController {
     @PutMapping("/connect")
     public ResponseEntity<BaseResponseDto> connectItem(Authentication authentication, @RequestBody ConnectItemRequestDto connectItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        User user = userService.findUser(userId);
-        itemService.connectItem(user, connectItemRequestDto);
+        itemService.connectItem(userId, connectItemRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(new BaseResponseDto(200, "success"));
     }

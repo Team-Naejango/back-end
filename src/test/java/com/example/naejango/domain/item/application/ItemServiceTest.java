@@ -10,6 +10,7 @@ import com.example.naejango.domain.item.repository.ItemStorageRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -47,13 +49,15 @@ class ItemServiceTest {
     @Mock
     private StorageRepository storageRepository;
 
+    @Mock
+    private UserRepository userRepository;
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     @DisplayName("Service 아이템 생성")
     @WithMockUser()
     class createItem {
-        User user = User.builder().userKey("TEST_1234").build();
+        User user = User.builder().id(1L).userKey("TEST_1234").build();
         Category category = new Category();
         Storage storage1 = Storage.builder().id(1L).build();
         Storage storage2 = Storage.builder().id(2L).build();
@@ -76,9 +80,10 @@ class ItemServiceTest {
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
             BDDMockito.given(storageRepository.findByUserId(any())).willReturn(new ArrayList<>(List.of(storage1, storage2, storage3)));
             BDDMockito.given(itemRepository.save(any())).willReturn(createItemRequestDto.toEntity(user, category));
+            BDDMockito.given(userRepository.findById(any())).willReturn(Optional.of(user));
 
             // when
-            CreateItemResponseDto createItemResponseDto = itemService.createItem(user, createItemRequestDto);
+            CreateItemResponseDto createItemResponseDto = itemService.createItem(any(), createItemRequestDto);
 
             // then
             Assertions.assertEquals(createItemResponseDto, new CreateItemResponseDto(createItemRequestDto.toEntity(user, category)));
@@ -97,7 +102,7 @@ class ItemServiceTest {
 
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(user, createItemRequestDto);
+                itemService.createItem(any(), createItemRequestDto);
             });
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.CATEGORY_NOT_FOUND);
@@ -110,11 +115,12 @@ class ItemServiceTest {
         @DisplayName("실패_창고_생성_전에_아이템_등록_요청_예외처리")
         void 실패_창고_생성_전에_아이템_등록_요청_예외처리() {
             // given
+            BDDMockito.given(userRepository.findById(any())).willReturn(Optional.of(user));
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
             BDDMockito.given(storageRepository.findByUserId(any())).willReturn(new ArrayList<>(Collections.emptyList()));
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(user, createItemRequestDto);
+                itemService.createItem(any(), createItemRequestDto);
             });
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.STORAGE_NOT_EXIST);
@@ -127,11 +133,12 @@ class ItemServiceTest {
         @DisplayName("실패_등록되지_않은_창고_ID_값으로_요청_예외처리")
         void 실패_등록되지_않은_창고_ID_값으로_요청_예외처리() {
             // given
+            BDDMockito.given(userRepository.findById(any())).willReturn(Optional.of(user));
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(category);
             BDDMockito.given(storageRepository.findByUserId(any())).willReturn(new ArrayList<>(List.of(storage1)));
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(user, createItemRequestDto);
+                itemService.createItem(any(), createItemRequestDto);
             });
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.STORAGE_NOT_FOUND);

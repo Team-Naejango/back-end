@@ -10,6 +10,7 @@ import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.handler.CommonDtoHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
@@ -41,6 +42,9 @@ class ItemControllerTest extends RestDocsSupportTest {
     @MockBean
     UserService userService;
 
+    @MockBean
+    CommonDtoHandler commonDtoHandler;
+
     @Nested
     @DisplayName("Controller 아이템 생성")
     @WithMockUser()
@@ -58,7 +62,7 @@ class ItemControllerTest extends RestDocsSupportTest {
         CreateItemResponseDto createItemResponseDto =
                 CreateItemResponseDto.builder().build();
 
-
+        Long userId;
 
         @Test
         @Order(1)
@@ -67,6 +71,8 @@ class ItemControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(createItemRequestDto);
 
+            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+                    .willReturn(userId);
             BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
                     .willReturn(createItemResponseDto);
 
@@ -114,6 +120,8 @@ class ItemControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(createItemRequestDto);
 
+            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+                    .willReturn(userId);
             BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
                     .willThrow(new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
@@ -138,6 +146,8 @@ class ItemControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(createItemRequestDto);
 
+            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+                    .willReturn(userId);
             BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
                     .willThrow(new CustomException(ErrorCode.STORAGE_NOT_EXIST));
 
@@ -161,6 +171,8 @@ class ItemControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(createItemRequestDto);
 
+            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+                    .willReturn(userId);
             BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
                     .willThrow(new CustomException(ErrorCode.STORAGE_NOT_FOUND));
 

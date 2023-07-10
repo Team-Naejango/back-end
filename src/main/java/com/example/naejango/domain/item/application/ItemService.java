@@ -14,6 +14,7 @@ import com.example.naejango.domain.item.repository.ItemStorageRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +37,18 @@ public class ItemService {
 
     private final StorageRepository storageRepository;
 
+    private final UserRepository userRepository;
+
     /** 아이템 생성 */
     @Transactional
-    public CreateItemResponseDto createItem(User user, CreateItemRequestDto createItemRequestDto) {
+    public CreateItemResponseDto createItem(Long userId, CreateItemRequestDto createItemRequestDto) {
         Category category = categoryRepository.findByName(createItemRequestDto.getCategory());
-
         if (category == null) {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Item item = createItemRequestDto.toEntity(user, category);
 
@@ -56,17 +61,17 @@ public class ItemService {
 
     /** 아이템 정보 수정 */
     @Transactional
-    public ModifyItemResponseDto modifyItem(User user, ModifyItemRequestDto modifyItemRequestDto) {
+    public ModifyItemResponseDto modifyItem(Long userId, ModifyItemRequestDto modifyItemRequestDto) {
         Category category = categoryRepository.findByName(modifyItemRequestDto.getCategory());
-        Item item = itemRepository.findById(modifyItemRequestDto.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
-
         if (category == null) {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
-        // 요청 보낸 유저와 아이템을 등록한 유저가 같은지 확인
-        if (user != item.getUser()) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Item item = itemRepository.findById(modifyItemRequestDto.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+        if (user != item.getUser()) { // 요청 보낸 유저와 아이템을 등록한 유저가 같은지 확인
             throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
         }
 
@@ -79,10 +84,11 @@ public class ItemService {
 
     /** 아이템 창고 등록 수정 */
     @Transactional
-    public void connectItem(User user, ConnectItemRequestDto connectItemRequestDto) {
+    public void connectItem(Long userId, ConnectItemRequestDto connectItemRequestDto) {
         Item item = itemRepository.findById(connectItemRequestDto.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
-
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         // 요청 보낸 유저와 아이템을 등록한 유저가 같은지 확인
         if (user != item.getUser()) {
             throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
