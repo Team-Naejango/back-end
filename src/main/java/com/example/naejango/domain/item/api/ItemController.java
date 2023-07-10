@@ -9,7 +9,6 @@ import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +20,8 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-
     private final CommonDtoHandler commonDtoHandler;
+
     /** 아이템 생성 */
     @PostMapping("")
     public ResponseEntity<CreateItemResponseDto> createItem(Authentication authentication, @RequestBody CreateItemRequestDto createItemRequestDto) {
@@ -32,7 +31,7 @@ public class ItemController {
     }
 
     /** 아이템 정보 수정 */
-    @PutMapping("/")
+    @PutMapping("")
     public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, modifyItemRequestDto);
@@ -46,7 +45,7 @@ public class ItemController {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         itemService.connectItem(userId, connectItemRequestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponseDto(200, "success"));
+        return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
     }
 
 }
