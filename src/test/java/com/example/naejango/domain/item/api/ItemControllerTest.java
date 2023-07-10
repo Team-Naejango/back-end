@@ -5,16 +5,16 @@ import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.application.ItemService;
 import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
+import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
+import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,6 +34,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @WebMvcTest(ItemController.class)
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class ItemControllerTest extends RestDocsSupportTest {
 
     @MockBean
@@ -46,9 +47,13 @@ class ItemControllerTest extends RestDocsSupportTest {
     CommonDtoHandler commonDtoHandler;
 
     @Nested
+    @Order(1)
     @DisplayName("Controller 아이템 생성")
     @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class createItem {
+        Long userId;
+
         CreateItemRequestDto createItemRequestDto =
                 CreateItemRequestDto.builder()
                         .name("아이템 이름")
@@ -60,14 +65,19 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .build();
 
         CreateItemResponseDto createItemResponseDto =
-                CreateItemResponseDto.builder().build();
-
-        Long userId;
+                CreateItemResponseDto.builder()
+                        .id(1L)
+                        .name("아이템 이름")
+                        .description("아이템 설명")
+                        .imgUrl("이미지 URL")
+                        .type(ItemType.SELL)
+                        .category("카테고리")
+                        .build();
 
         @Test
         @Order(1)
-        @DisplayName("성공")
-        void 성공() throws Exception {
+        @DisplayName("아이템_생성_성공")
+        void 아이템_생성_성공() throws Exception {
             // given
             String content = objectMapper.writeValueAsString(createItemRequestDto);
 
@@ -87,6 +97,8 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             // then
             resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
+            resultActions.andExpect(MockMvcResultMatchers.jsonPath("id").isNumber());
+            resultActions.andExpect(MockMvcResultMatchers.header().exists("Location"));
 
             resultActions.andDo(restDocs.document(
                     resource(
@@ -96,19 +108,27 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     .requestHeaders(
                                             headerWithName("Authorization").description("JWT")
                                     )
+                                    .responseHeaders(
+                                            headerWithName("Location").description("생성된 아이템 URI")
+                                    )
                                     .requestFields(
-                                            fieldWithPath("name").description("이름"),
+                                            fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("type").description("아이템 타입"),
+                                            fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
                                             fieldWithPath("category").description("카테고리"),
                                             fieldWithPath("storageIdList").description("창고 ID 리스트")
                                     )
                                     .responseFields(
-
+                                            fieldWithPath("id").description("아이템 ID"),
+                                            fieldWithPath("name").description("아이템 이름"),
+                                            fieldWithPath("description").description("아이템 설명"),
+                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("category").description("카테고리")
                                     )
-                                    .requestSchema(Schema.schema("CreateItemRequestDto.Post"))
-                                    .responseSchema(Schema.schema("CreateItemResponseDto.Post"))
+                                    .requestSchema(Schema.schema("아이템 생성 Request"))
+                                    .responseSchema(Schema.schema("아이템 생성 Response"))
                                     .build()
                     )));
         }
@@ -165,7 +185,7 @@ class ItemControllerTest extends RestDocsSupportTest {
         }
 
         @Test
-        @Order(3)
+        @Order(4)
         @DisplayName("실패_등록되지_않은_창고_ID_값으로_요청_404_발생")
         void 실패_등록되지_않은_창고_ID_값으로_요청_404_발생() throws Exception {
             // given
@@ -187,6 +207,148 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             // then
             resultActions.andExpect(MockMvcResultMatchers.status().isNotFound());
+        }
+    }
+
+    @Nested
+    @Order(2)
+    @DisplayName("Controller 아이템 정보 수정")
+    @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class modifyItem {
+        Long userId;
+
+        ModifyItemRequestDto modifyItemRequestDto =
+                ModifyItemRequestDto.builder()
+                        .id(1L)
+                        .name("아이템 이름")
+                        .description("아이템 설명")
+                        .imgUrl("이미지 URL")
+                        .type(ItemType.SELL)
+                        .category("카테고리")
+                        .build();
+
+        ModifyItemResponseDto modifyItemResponseDto =
+                ModifyItemResponseDto.builder()
+                        .id(1L)
+                        .name("아이템 이름")
+                        .description("아이템 설명")
+                        .imgUrl("이미지 URL")
+                        .type(ItemType.SELL)
+                        .category("카테고리")
+                        .build();
+
+        @Test
+        @Order(1)
+        @DisplayName("아이템_정보_수정_성공")
+        void 아이템_정보_수정_성공() throws Exception {
+            // given
+            String content = objectMapper.writeValueAsString(modifyItemRequestDto);
+
+            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+                    .willReturn(userId);
+            BDDMockito.given(itemService.modifyItem(any(), any(ModifyItemRequestDto.class)))
+                    .willReturn(modifyItemResponseDto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .put("/api/item")
+                    .header("Authorization", "JWT")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(content)
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("아이템")
+                                    .description("아이템 정보 수정")
+                                    .requestHeaders(
+                                            headerWithName("Authorization").description("JWT")
+                                    )
+                                    .requestFields(
+                                            fieldWithPath("id").description("아이템 id"),
+                                            fieldWithPath("name").description("아이템 이름"),
+                                            fieldWithPath("description").description("아이템 설명"),
+                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("category").description("카테고리")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("id").description("아이템 id"),
+                                            fieldWithPath("name").description("아이템 이름"),
+                                            fieldWithPath("description").description("아이템 설명"),
+                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("category").description("카테고리")
+                                    )
+                                    .requestSchema(Schema.schema("아이템 정보 수정 Request"))
+                                    .responseSchema(Schema.schema("아이템 정보 수정 Response"))
+                                    .build()
+                    )));
+        }
+    }
+
+    @Nested
+    @Order(3)
+    @DisplayName("Controller 아이템 창고 등록 수정")
+    @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class connectItem {
+        Long userId;
+
+        ConnectItemRequestDto connectItemRequestDto =
+                ConnectItemRequestDto.builder()
+                        .id(1L)
+                        .storageIdList(new ArrayList<>(List.of(1L, 2L)))
+                        .build();
+
+        @Test
+        @Order(1)
+        @DisplayName("아이템_창고_등록_수정_성공")
+        void 아이템_창고_등록_수정_성공() throws Exception {
+            // given
+            String content = objectMapper.writeValueAsString(connectItemRequestDto);
+
+            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+                    .willReturn(userId);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .put("/api/item/connect")
+                    .header("Authorization", "JWT")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(content)
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("아이템")
+                                    .description("아이템 창고 등록 수정")
+                                    .requestHeaders(
+                                            headerWithName("Authorization").description("JWT")
+                                    )
+                                    .requestFields(
+                                            fieldWithPath("id").description("아이템 id"),
+                                            fieldWithPath("storageIdList").description("창고 ID 리스트")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("status").description("상태코드"),
+                                            fieldWithPath("message").description("메시지")
+                                    )
+                                    .requestSchema(Schema.schema("아이템 창고 등록 수정 Request"))
+                                    .responseSchema(Schema.schema("아이템 창고 등록 수정 Response"))
+                                    .build()
+                    )));
         }
     }
 }
