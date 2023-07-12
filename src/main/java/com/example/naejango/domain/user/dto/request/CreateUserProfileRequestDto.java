@@ -4,6 +4,7 @@ import com.example.naejango.domain.user.domain.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
@@ -13,6 +14,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CreateUserProfileRequestDto {
 
@@ -28,7 +30,7 @@ public class CreateUserProfileRequestDto {
     private String nickname;
 
     @NotNull
-    @Length(min = 0, max = 200)
+    @Length(max = 200)
     private String intro;
 
     @NotEmpty
