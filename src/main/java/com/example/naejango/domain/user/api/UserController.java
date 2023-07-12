@@ -26,6 +26,13 @@ public class UserController {
     private final UserService userService;
     private final CommonDtoHandler commonDtoHandler;
 
+    @PostMapping("/profile")
+    public ResponseEntity<Void> createUserProfile(@RequestBody CreateUserProfileRequestDto requestDto, Authentication authentication) {
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        userService.createUserProfile(requestDto, userId);
+        return ResponseEntity.ok().body(null);
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<UserProfileResponseDto> userProfile(Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
@@ -34,15 +41,8 @@ public class UserController {
         return ResponseEntity.ok().body(userProfileResponseDto);
     }
 
-    @PostMapping("/profile")
-    public ResponseEntity<Void> createUserProfile(@RequestBody @Valid CreateUserProfileRequestDto requestDto, Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        userService.createUserProfile(requestDto, userId);
-        return ResponseEntity.ok().body(null);
-    }
-
     @PatchMapping("/profile")
-    public ResponseEntity<UserProfileResponseDto> modifyInfo(@RequestBody @Valid ModifyUserProfileRequestDto modifyUserProfileRequestDto, Authentication authentication) {
+    public ResponseEntity<UserProfileResponseDto> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto modifyUserProfileRequestDto, Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         userService.modifyUserProfile(modifyUserProfileRequestDto, userId);
         User user = userService.findUser(userId);
