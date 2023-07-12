@@ -17,10 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
@@ -32,14 +31,13 @@ class UserRepositoryTest {
     UserRepository userRepository;
     @Autowired
     UserProfileRepository userProfileRepository;
-
     @PersistenceContext
     EntityManager em;
 
     @Test
     @Transactional
-    @DisplayName("User 저장 및 조회")
-    void basicTest() {
+    @DisplayName("saveUser : user 저장")
+    void saveTest() {
         // given
         User testUser = User.builder()
                 .userKey("TEST_1234")
@@ -53,14 +51,15 @@ class UserRepositoryTest {
         userRepository.save(testUser);
 
         // then
-        Optional<User> findUser = userRepository.findById(testUser.getId());
-        assertTrue(findUser.isPresent());
-        assertEquals(findUser.get().getUserKey(), testUser.getUserKey());
+        User findUser = userRepository.findById(testUser.getId()).orElseGet(() -> {
+            return User.builder().userKey("FAIL").build();
+        });
+        assertEquals(findUser.getUserKey(), testUser.getUserKey());
     }
 
     @Test
     @Transactional
-    @DisplayName("findUserWithProfile : User, UserProfile 저장 후 쿼리 한번에 조회")
+    @DisplayName("findUserWithProfile : User, UserProfile 조회")
     public void findUserWithProfileTest() {
         // given
         User testUser = User.builder()
@@ -84,20 +83,20 @@ class UserRepositoryTest {
 
         em.flush();
         em.clear();
-        
+
         // when
-        Optional<User> userWithProfileByUserId = userRepository.findUserWithProfileById(testUser.getId());
-        User user = userWithProfileByUserId.get();
+        User findUser = userRepository.findUserWithProfileById(testUser.getId()).orElseGet(() -> {
+            return User.builder().userKey("FAIL").build();
+        });
 
         // then
-        assertTrue(userWithProfileByUserId.isPresent());
-        // 1회의 쿼리로 User 및 UserProfile 을 조회
-        assertEquals(user.getUserProfile().getNickname(), testUserProfile.getNickname());
+        assertNotEquals("FAIL", findUser.getUserKey());
+        assertEquals(findUser.getUserProfile().getNickname(), testUserProfile.getNickname());
     }
-    
+
     @Test
     @Transactional
-    @DisplayName("User 삭제")
+    @DisplayName("deleteUser : User 삭제")
     public void deleteUserTest() {
         // given
         User testUser = User.builder()
@@ -107,12 +106,12 @@ class UserRepositoryTest {
                 .signature("REFRESH_TOKEN")
                 .userProfile(null)
                 .build();
-        
+
         userRepository.save(testUser);
-        
+
         em.flush();
         em.clear();
-        
+
         // when
         User savedUser = userRepository.findByUserKey("TEST_1234").orElseGet(() -> {
             return User.builder().userKey("FAIL").build();
@@ -129,6 +128,34 @@ class UserRepositoryTest {
         });
 
         assertEquals("SUCCESS", findUser.getUserKey());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("delete : UserProfile 삭제")
+    public void deleteUserProfileTest() {
+        // given
+        UserProfile testUserProfile = UserProfile.builder()
+                .age(20)
+                .gender(Gender.Male)
+                .phoneNumber("010-0000-0000")
+                .nickname("Nick")
+                .build();
+
+        userProfileRepository.save(testUserProfile);
+        Long saveduUserProfileId = testUserProfile.getId();
+
+        // when
+        userProfileRepository.deleteById(saveduUserProfileId);
+        em.flush();
+        em.clear();
+
+        // then
+        UserProfile findUserProfile = userProfileRepository.findById(saveduUserProfileId).orElseGet(() -> {
+            return UserProfile.builder().nickname("SUCCESS").build();
+        });
+
+        assertEquals("SUCCESS", findUserProfile.getNickname());
     }
 
 
