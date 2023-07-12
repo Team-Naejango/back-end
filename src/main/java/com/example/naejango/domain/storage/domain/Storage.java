@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @ToString
@@ -46,12 +47,13 @@ public class Storage implements Serializable {
     @JoinColumn(name = "userId")
     private User user;
 
+    @OneToMany(mappedBy = "storage")
+    List<StorageItem> storageItems;
 
     public void toBeNamedMethod(User user) {
         this.user = user;
         user.allocateStorage(this);
     }
-
 
     public Storage(CreateStorageRequestDto requestDto) {
         this.name = requestDto.getName();
