@@ -1,6 +1,6 @@
 package com.example.naejango.global.auth.oauth;
 
-public interface Oauth2UserInfo {
+public interface OAuth2UserInfo {
     long getId();
     String getName();
     String getUserKey();

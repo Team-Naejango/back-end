@@ -1,10 +1,10 @@
 package com.example.naejango.global.auth.oauth.kakao;
 
-import com.example.naejango.global.auth.oauth.Oauth2UserInfo;
+import com.example.naejango.global.auth.oauth.OAuth2UserInfo;
 
 import java.util.Map;
 
-public class KakaoUserInfo implements Oauth2UserInfo {
+public class KakaoUserInfo implements OAuth2UserInfo {
 
     /**
      * kakao 로부터 가져온 회원정보를 담는 객체입니다.

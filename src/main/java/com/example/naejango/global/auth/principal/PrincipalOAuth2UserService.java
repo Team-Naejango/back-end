@@ -3,7 +3,7 @@ package com.example.naejango.global.auth.principal;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.oauth.Oauth2UserInfo;
+import com.example.naejango.global.auth.oauth.OAuth2UserInfo;
 import com.example.naejango.global.auth.oauth.kakao.KakaoUserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
+public class PrincipalOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final UserService userService;
@@ -50,7 +50,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     }
 
     private OAuth2User processOAuth2User(OAuth2User oAuth2User) {
-        Oauth2UserInfo kakaoUserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+        OAuth2UserInfo kakaoUserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
         Optional<User> userOptional = userRepository.findByUserKey(kakaoUserInfo.getUserKey());
 
         User loginUser;

@@ -3,9 +3,9 @@ package com.example.naejango.global.config;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.global.auth.filter.JwtAuthenticationFilter;
 import com.example.naejango.global.auth.handler.AccessDeniedHandlerImpl;
-import com.example.naejango.global.auth.handler.OauthLoginSuccessHandler;
+import com.example.naejango.global.auth.handler.OAuthLoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;
-import com.example.naejango.global.auth.principal.PrincipalOauth2UserService;
+import com.example.naejango.global.auth.principal.PrincipalOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,8 +19,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final PrincipalOauth2UserService principalOauth2UserService;
-    private final OauthLoginSuccessHandler oauthLoginSuccessHandler;
+    private final PrincipalOAuth2UserService principalOauth2UserService;
+    private final OAuthLoginSuccessHandler oauthLoginSuccessHandler;
     private final AccessDeniedHandlerImpl accessDeniedHandler;
     private final JwtAuthenticator jwtAuthenticator;
     private final CorsConfig corsConfig;

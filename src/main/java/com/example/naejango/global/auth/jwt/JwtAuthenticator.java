@@ -111,7 +111,7 @@ public class JwtAuthenticator {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie != null && cookie.getName().equals(JwtProperties.REFRESH_TOKEN_HEADER)) {
+                if (cookie != null && cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE)) {
                     refreshTokenCookie = cookie.getValue();
                 }
             }
