@@ -77,7 +77,7 @@ class UserControllerTest extends RestDocsSupportTest {
         resultActions.andDo(restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("유저프로필 생성")
+                                        .tag("유저")
                                         .description("유저프로필 생성 하여 요청한 유저 엔티티에 할당")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
@@ -136,7 +136,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("UserProfile 조회")
+                                        .tag("유저")
                                         .description("요청하는 유저의 프로필 조회")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access token")
@@ -201,7 +201,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("UserProfile 수정")
+                                        .tag("유저")
                                         .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
@@ -243,7 +243,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("User, UserProfile 삭제")
+                                        .tag("유저")
                                         .description("요청 유저의 User, UserProfile 삭제")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
