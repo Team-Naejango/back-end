@@ -5,6 +5,7 @@ import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
+import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
@@ -28,6 +29,14 @@ public class ItemController {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, createItemRequestDto);
         return ResponseEntity.created(URI.create("/api/item/"+createItemResponseDto.getId())).body(createItemResponseDto);
+    }
+
+    /** 아이템 정보 조회 */
+    @GetMapping("/{itemId}")
+    public ResponseEntity<FindItemResponseDto> findItem(@PathVariable Long itemId) {
+        FindItemResponseDto findItemResponseDto = itemService.findItem(itemId);
+
+        return ResponseEntity.ok().body(findItemResponseDto);
     }
 
     /** 아이템 정보 수정 */

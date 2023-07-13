@@ -7,6 +7,7 @@ import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
+import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -56,6 +57,14 @@ public class ItemService {
         Item savedItem = itemRepository.save(item);
 
         return new CreateItemResponseDto(savedItem);
+    }
+
+    /** 아이템 정보 조회 */
+    public FindItemResponseDto findItem(Long itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+
+        return new FindItemResponseDto(item);
     }
 
     /** 아이템 정보 수정 */
