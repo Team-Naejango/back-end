@@ -9,6 +9,7 @@ import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
+import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.common.exception.CustomException;
@@ -213,6 +214,63 @@ class ItemControllerTest extends RestDocsSupportTest {
 
     @Nested
     @Order(2)
+    @DisplayName("Controller 아이템 정보 조회")
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class findItem {
+        Long itemId=1L;
+        FindItemResponseDto findItemResponseDto =
+                FindItemResponseDto.builder()
+                        .id(1L)
+                        .name("아이템 이름")
+                        .description("아이템 설명")
+                        .imgUrl("이미지 URL")
+                        .type(ItemType.SELL)
+                        .category("카테고리")
+                        .build();
+
+        @Test
+        @Order(1)
+        @DisplayName("아이템_정보_조회_성공")
+        void 아이템_정보_조회_성공() throws Exception {
+            // given
+            BDDMockito.given(itemService.findItem(any()))
+                    .willReturn(findItemResponseDto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/item/{itemId}", itemId)
+                    .header("Authorization", "JWT")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("아이템")
+                                    .description("아이템 정보 조회")
+                                    .pathParameters(
+                                            parameterWithName("itemId").description("아이템 ID")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("id").description("아이템 id"),
+                                            fieldWithPath("name").description("아이템 이름"),
+                                            fieldWithPath("description").description("아이템 설명"),
+                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("category").description("카테고리")
+                                    )
+                                    .responseSchema(Schema.schema("아이템 정보 조회 Response"))
+                                    .build()
+                    )));
+        }
+    }
+
+    @Nested
+    @Order(3)
     @DisplayName("Controller 아이템 정보 수정")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -296,7 +354,7 @@ class ItemControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(3)
+    @Order(4)
     @DisplayName("Controller 아이템 창고 등록 수정")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
