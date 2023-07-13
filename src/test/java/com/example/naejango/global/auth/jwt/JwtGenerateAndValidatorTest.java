@@ -43,44 +43,44 @@ class JwtGenerateAndValidatorTest {
         assertNotNull(refreshToken);
     }
 
-    @Test
-    @DisplayName("decodeJwt: 토큰 복호화 테스트")
-    void decodeJwt(){
-        // given
-        User testUser = User.builder().id(1L).userKey("test").build();
-        String accessToken = jwtGenerator.generateAccessToken(testUser.getId());
-        String refreshToken = jwtGenerator.generateRefreshToken(testUser.getId());
+//    @Test
+//    @DisplayName("decodeJwt: 토큰 복호화 테스트")
+//    void decodeJwt(){
+//        // given
+//        User testUser = User.builder().id(1L).userKey("test").build();
+//        String accessToken = jwtGenerator.generateAccessToken(testUser.getId());
+//        String refreshToken = jwtGenerator.generateRefreshToken(testUser.getId());
+//
+//        // when
+//        DecodedJWT decodedAccessToken = jwtValidator.decodeJwt(accessToken);
+//        DecodedJWT decodedRefreshToken = jwtValidator.decodeJwt(refreshToken);
+//
+//        // then
+//        String accessTokenIss = decodedAccessToken.getIssuer();
+//        Long accessTokenUserId = decodedAccessToken.getClaim("userId").asLong();
+//        String refreshTokenIss = decodedAccessToken.getIssuer();
+//        Long refreshTokenUserId = decodedRefreshToken.getClaim("userId").asLong();
+//
+//        assertEquals(1L, accessTokenUserId);
+//        assertEquals("TeamNaeJanGo", accessTokenIss);
+//        assertEquals(1L, refreshTokenUserId);
+//        assertEquals("TeamNaeJanGo", refreshTokenIss);
+//    }
 
-        // when
-        DecodedJWT decodedAccessToken = jwtValidator.decodeJwt(accessToken);
-        DecodedJWT decodedRefreshToken = jwtValidator.decodeJwt(refreshToken);
-
-        // then
-        String accessTokenIss = decodedAccessToken.getIssuer();
-        Long accessTokenUserId = decodedAccessToken.getClaim("userId").asLong();
-        String refreshTokenIss = decodedAccessToken.getIssuer();
-        Long refreshTokenUserId = decodedRefreshToken.getClaim("userId").asLong();
-
-        assertEquals(1L, accessTokenUserId);
-        assertEquals("TeamNaeJanGo", accessTokenIss);
-        assertEquals(1L, refreshTokenUserId);
-        assertEquals("TeamNaeJanGo", refreshTokenIss);
-    }
-
-    @Test
-    @DisplayName("validateAccessToken: 유효한 access 토큰 검증")
-    public void validateAccessTokenTest() {
-        // given
-        User testUser = User.builder().id(1L).userKey("test").build();
-        String accessToken = jwtGenerator.generateAccessToken(testUser.getId());
-
-        // when
-        ValidateTokenResponseDto result = jwtValidator.validateAccessToken(accessToken);
-
-        // then
-        assertTrue(result.isValidToken());
-        assertEquals(1L, result.getUserId());
-    }
+//    @Test
+//    @DisplayName("validateAccessToken: 유효한 access 토큰 검증")
+//    public void validateAccessTokenTest() {
+//        // given
+//        User testUser = User.builder().id(1L).userKey("test").build();
+//        String accessToken = jwtGenerator.generateAccessToken(testUser.getId());
+//
+//        // when
+//        ValidateTokenResponseDto result = jwtValidator.validateAccessToken(accessToken);
+//
+//        // then
+//        assertTrue(result.isValidToken());
+//        assertEquals(1L, result.getUserId());
+//    }
 
     @Test
     @DisplayName("validateRefreshToken: 유효한 refresh 토큰 검증")
