@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -217,10 +218,9 @@ class ItemControllerTest extends RestDocsSupportTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class modifyItem {
         Long userId;
-
+        Long itemId=1L;
         ModifyItemRequestDto modifyItemRequestDto =
                 ModifyItemRequestDto.builder()
-                        .id(1L)
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
@@ -247,12 +247,12 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
-            BDDMockito.given(itemService.modifyItem(any(), any(ModifyItemRequestDto.class)))
+            BDDMockito.given(itemService.modifyItem(any(), any(), any(ModifyItemRequestDto.class)))
                     .willReturn(modifyItemResponseDto);
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .put("/api/item")
+                    .put("/api/item/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
@@ -270,8 +270,10 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     .requestHeaders(
                                             headerWithName("Authorization").description("JWT")
                                     )
+                                    .pathParameters(
+                                            parameterWithName("itemId").description("아이템 ID")
+                                    )
                                     .requestFields(
-                                            fieldWithPath("id").description("아이템 id"),
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
@@ -300,10 +302,9 @@ class ItemControllerTest extends RestDocsSupportTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class connectItem {
         Long userId;
-
+        Long itemId=1L;
         ConnectItemRequestDto connectItemRequestDto =
                 ConnectItemRequestDto.builder()
-                        .id(1L)
                         .storageIdList(new ArrayList<>(List.of(1L, 2L)))
                         .build();
 
@@ -319,7 +320,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .put("/api/item/connect")
+                    .put("/api/item/connect/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
@@ -337,8 +338,10 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     .requestHeaders(
                                             headerWithName("Authorization").description("JWT")
                                     )
+                                    .pathParameters(
+                                            parameterWithName("itemId").description("아이템 ID")
+                                    )
                                     .requestFields(
-                                            fieldWithPath("id").description("아이템 id"),
                                             fieldWithPath("storageIdList").description("창고 ID 리스트")
                                     )
                                     .responseFields(
