@@ -88,7 +88,7 @@ jar {
 
 // application.yml 에 숨겨둔 ec2 ip 주소 가져오도록 설정
 Properties properties = new Properties()
-properties.load(project.rootProject.file('src/main/resources/application.yml').newDataInputStream())
+properties.load(project.rootProject.file('src/main/resources/application-dev.yml').newDataInputStream())
 def serverUrl = properties.getProperty('server-url')
 
 // openapi3 설정
