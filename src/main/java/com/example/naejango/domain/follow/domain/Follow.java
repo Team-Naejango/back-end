@@ -1,5 +1,6 @@
 package com.example.naejango.domain.follow.domain;
 
+import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,6 @@ public class Follow {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "following_id")
-    private User following;
+    @JoinColumn(name = "storage_id")
+    private Storage storage;
 }
