@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConnectItemRequestDto {
-    private Long id;
 
     private List<Long> storageIdList;
+
 }

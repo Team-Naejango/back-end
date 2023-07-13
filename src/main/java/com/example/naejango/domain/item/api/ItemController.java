@@ -31,19 +31,19 @@ public class ItemController {
     }
 
     /** 아이템 정보 수정 */
-    @PutMapping("")
-    public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
+    @PutMapping("/{itemId}")
+    public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, modifyItemRequestDto);
+        ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, itemId, modifyItemRequestDto);
 
         return ResponseEntity.ok().body(modifyItemResponseDto);
     }
 
     /** 아이템 창고 등록 수정 */
-    @PutMapping("/connect")
-    public ResponseEntity<BaseResponseDto> connectItem(Authentication authentication, @RequestBody ConnectItemRequestDto connectItemRequestDto) {
+    @PutMapping("/connect/{itemId}")
+    public ResponseEntity<BaseResponseDto> connectItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ConnectItemRequestDto connectItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        itemService.connectItem(userId, connectItemRequestDto);
+        itemService.connectItem(userId, itemId,connectItemRequestDto);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
     }

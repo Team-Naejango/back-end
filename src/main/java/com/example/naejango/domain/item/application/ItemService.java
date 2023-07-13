@@ -60,7 +60,7 @@ public class ItemService {
 
     /** 아이템 정보 수정 */
     @Transactional
-    public ModifyItemResponseDto modifyItem(Long userId, ModifyItemRequestDto modifyItemRequestDto) {
+    public ModifyItemResponseDto modifyItem(Long userId, Long itemId, ModifyItemRequestDto modifyItemRequestDto) {
         Category category = categoryRepository.findByName(modifyItemRequestDto.getCategory());
         if (category == null) {
             throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
@@ -68,7 +68,7 @@ public class ItemService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Item item = itemRepository.findById(modifyItemRequestDto.getId())
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
         if (user != item.getUser()) { // 요청 보낸 유저와 아이템을 등록한 유저가 같은지 확인
             throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
@@ -83,8 +83,8 @@ public class ItemService {
 
     /** 아이템 창고 등록 수정 */
     @Transactional
-    public void connectItem(Long userId, ConnectItemRequestDto connectItemRequestDto) {
-        Item item = itemRepository.findById(connectItemRequestDto.getId())
+    public void connectItem(Long userId, Long itemId, ConnectItemRequestDto connectItemRequestDto) {
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
