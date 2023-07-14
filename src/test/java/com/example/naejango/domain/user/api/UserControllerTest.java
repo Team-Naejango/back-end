@@ -230,7 +230,7 @@ class UserControllerTest extends RestDocsSupportTest {
     void deleteUserTest() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .delete("http://localhost:8080/api/user/")
+                        .delete("http://localhost:8080/api/user")
                         .header("Authorization", "access 토큰")
                         .cookie(new Cookie("Refresh_Token_Cookie", "Refresh Token"))
         );
