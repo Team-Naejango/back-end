@@ -24,7 +24,7 @@ public class StorageService {
         User persistenceUser = userService.findUser(userId);
         Storage storage = new Storage(requestDto);
         storageRepository.save(storage);
-        storage.toBeNamedMethod(persistenceUser);
+        storage.assignUser(persistenceUser);
     }
 
     public List<Storage> storageList(Long userId) {

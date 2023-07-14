@@ -45,7 +45,7 @@ public class Storage implements Serializable {
     @OneToMany(mappedBy = "storage")
     List<StorageItem> storageItems;
 
-    public void toBeNamedMethod(User user) {
+    public void assignUser(User user) {
         this.user = user;
         user.allocateStorage(this);
     }
