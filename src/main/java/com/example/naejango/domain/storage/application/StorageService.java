@@ -20,11 +20,12 @@ public class StorageService {
     private final UserService userService;
 
     @Transactional
-    public void createStorage(CreateStorageRequestServiceDto requestDto, Long userId) {
+    public Long createStorage(CreateStorageRequestServiceDto requestDto, Long userId) {
         User persistenceUser = userService.findUser(userId);
         Storage storage = new Storage(requestDto);
         storageRepository.save(storage);
         storage.assignUser(persistenceUser);
+        return storage.getId();
     }
 
     public List<Storage> storageList(Long userId) {

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -34,8 +35,10 @@ public class StorageController {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         Point storageLocation = geomUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
         CreateStorageRequestServiceDto serviceDto = requestDto.toServiceDto(storageLocation);
-        storageService.createStorage(serviceDto, userId);
-        return ResponseEntity.ok().body(null);
+        Long storageId = storageService.createStorage(serviceDto, userId);
+
+        String storageUri = "/api/storage/" + storageId.toString();
+        return ResponseEntity.created(URI.create(storageUri)).body(null);
     }
 
     /**
