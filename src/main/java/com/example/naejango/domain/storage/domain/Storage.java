@@ -3,6 +3,7 @@ package com.example.naejango.domain.storage.domain;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,8 +17,10 @@ import java.util.List;
 @Getter
 @Table(name = "storage")
 public class Storage implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "storage_id")
     private Long id;
 
     @Column(nullable = false)
@@ -31,20 +34,12 @@ public class Storage implements Serializable {
 
     @Column(nullable = false)
     private String address;
-    /*
-     Hibernate-spatial 라이브러리를 이용하여
-     DB의 Geometry 데이터와 객체 맵핑을 하려고 했으나
-     "Cannot get geometry object from data you send to the GEOMETRY field"
-     라는 오류가 계속 발생함
-     네이티브 쿼리를 이용하여 데이터를 넣을 수 있으나
-     다시 데이터를 객체에 맵핑하는 것도 복잡해지기 때문에
-     그냥 double 형태로 위도와 경도를 넣음
-     */
-    @Embedded
-    private Location location;
+
+    @Column(columnDefinition = "POINT")
+    private Point location;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "storage")
@@ -60,6 +55,5 @@ public class Storage implements Serializable {
         this.imgUrl = requestDto.getImgUrl();
         this.description = requestDto.getDescription();
         this.address = requestDto.getAddress();
-        this.location = new Location(requestDto.getLatitude(), requestDto.getLongitude());
     }
 }

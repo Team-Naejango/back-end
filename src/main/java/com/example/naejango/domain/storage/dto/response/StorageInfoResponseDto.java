@@ -20,8 +20,8 @@ public class StorageInfoResponseDto {
         this.name = storage.getName();
         this.imgUrl = storage.getImgUrl();
         this.description = storage.getDescription();
-        this.latitude = storage.getLocation().getLatitude();
-        this.longitude = storage.getLocation().getLongitude();
+        this.latitude = storage.getLocation().getX();
+        this.longitude = storage.getLocation().getY();
         this.address = storage.getAddress();
     }
 }

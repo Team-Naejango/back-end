@@ -1,19 +1,23 @@
 package com.example.naejango.domain.storage.repository;
 
-import com.example.naejango.domain.storage.domain.Location;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @DataJpaTest
@@ -24,16 +28,12 @@ class StorageRepositoryTest {
     private StorageRepository storageRepository;
     @Autowired
     private UserRepository userRepository;
+    private final GeometryFactory factory = new GeometryFactory();
 
     @Test
-    @DisplayName("Storage 저장")
-    void saveStorage() {
+    @DisplayName("save: 창고 생성")
+    public void saveStorage() {
         // given
-        Location testLocation = Location.builder()
-                .latitude(123.123)
-                .longitude(456.456)
-                .build();
-
         User testUser = User.builder()
                 .userKey("test_1234")
                 .password("null")
@@ -46,20 +46,38 @@ class StorageRepositoryTest {
                 .imgUrl("Test Url")
                 .address("Test Address")
                 .description("This is for a test")
-                .location(testLocation)
+                .location(factory.createPoint(new Coordinate(123.123, 456.456)))
                 .user(testUser)
                 .build();
 
-        // when
-        userRepository.save(testUser);
-        Storage saveStorage = storageRepository.save(testStorage);
-        Storage findStorage = storageRepository.findById(saveStorage.getId())
-                .orElse(Storage.builder().name("fail").build());
+        storageRepository.save(testStorage);
 
-        log.info("findStorage = {}",findStorage.toString());
+        // when
+        Storage findStorage = storageRepository.findById(testStorage.getId()).orElse(
+                Storage.builder().name("FAIL").build()
+        );
 
         // then
-        Assertions.assertEquals(testStorage.getLocation().getLatitude(), 123.123);
+        assertEquals(findStorage, testStorage);
+        assertEquals(findStorage.getLocation().getX(), 123.123);
+        assertEquals(findStorage.getLocation().getY(), 456.456);
     }
 
+    @Test
+    @DisplayName("findByUserId: 요청한 회원의 id 로 보유 창고 조회")
+    public void findByUserId() {
+        // given
+        User testUser = User.builder().userKey("test_1234").role(Role.USER).password("null").build();
+        Storage testStorage1 = Storage.builder().name("test1").address("address1").location(factory.createPoint(new Coordinate(1.1, 2.2))).user(testUser).build();
+        Storage testStorage2 = Storage.builder().name("test2").address("address2").location(factory.createPoint(new Coordinate(1.1, 2.2))).user(testUser).build();
+        userRepository.save(testUser);
+        storageRepository.save(testStorage1);
+        storageRepository.save(testStorage2);
+
+        // when
+        List<Storage> findStorages = storageRepository.findByUserId(testUser.getId());
+
+        // then
+        assertEquals(findStorages.size(), 2);
+    }
 }
