@@ -2,12 +2,15 @@ package com.example.naejango.domain.storage.api;
 
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
+import com.example.naejango.domain.storage.dto.request.CreateStorageRequestServiceDto;
 import com.example.naejango.domain.storage.dto.response.StorageInfoResponseDto;
 import com.example.naejango.domain.storage.dto.response.StorageListResponseDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.dto.response.StorageNearbyListDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.GeomUtil;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,20 @@ import java.util.List;
 public class StorageController {
     private final StorageService storageService;
     private final CommonDtoHandler commonDtoHandler;
+    private final GeomUtil geomUtil;
+
+    /**
+     * 창고 생성 api
+     * 창고를 생성하여 요청한 회원에게 할당하는 api
+     */
+    @PostMapping("/")
+    public ResponseEntity<Void> createStorage(@RequestBody CreateStorageRequestDto requestDto, Authentication authentication) {
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Point storageLocation = geomUtil.createPoint(requestDto.getLatitude(), requestDto.getLongitude());
+        CreateStorageRequestServiceDto serviceDto = requestDto.toServiceDto(storageLocation);
+        storageService.createStorage(serviceDto, userId);
+        return ResponseEntity.ok().body(null);
+    }
 
     /**
      * 내 창고 화면에서 창고 리스트의 각 창고 정보를 가져오는 api
@@ -55,10 +72,4 @@ public class StorageController {
         return ResponseEntity.ok().body(new StorageNearbyListDto());
     }
 
-    @PostMapping("/")
-    public ResponseEntity<Void> createStorage(@RequestBody CreateStorageRequestDto requestDto, Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        storageService.createStorage(requestDto, userId);
-        return ResponseEntity.ok().body(null);
-    }
 }

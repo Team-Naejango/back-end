@@ -1,6 +1,6 @@
 package com.example.naejango.domain.storage.domain;
 
-import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
+import com.example.naejango.domain.storage.dto.request.CreateStorageRequestServiceDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
@@ -50,10 +50,11 @@ public class Storage implements Serializable {
         user.allocateStorage(this);
     }
 
-    public Storage(CreateStorageRequestDto requestDto) {
+    public Storage(CreateStorageRequestServiceDto requestDto) {
         this.name = requestDto.getName();
         this.imgUrl = requestDto.getImgUrl();
         this.description = requestDto.getDescription();
         this.address = requestDto.getAddress();
+        this.location = requestDto.getLocation();
     }
 }
