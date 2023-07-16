@@ -7,6 +7,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -45,9 +47,8 @@ public class JwtValidator {
                 validateResponse.setValidToken(false);
             } else {
                 Long userId = decodedRefreshToken.getClaim("userId").asLong();
-                User user = userRepository.findById(userId).orElseThrow(() -> {
-                    throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
-                });
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
                 if (isVerifiedSignature(decodedRefreshToken, user)) {
                     validateResponse.setValidToken(true);
                     validateResponse.setUserId(userId);

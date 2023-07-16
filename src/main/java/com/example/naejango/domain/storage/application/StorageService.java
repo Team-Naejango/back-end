@@ -6,6 +6,8 @@ import com.example.naejango.domain.storage.dto.response.StorageInfoResponseDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +35,8 @@ public class StorageService {
     }
 
     public StorageInfoResponseDto StorageInfo(Long storageId) {
-        Storage storage = storageRepository.findById(storageId).orElseThrow(()->{
-            throw new IllegalArgumentException("창고를 찾을 수 없습니다.");
-        });
+        Storage storage = storageRepository.findById(storageId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
         return new StorageInfoResponseDto(storage);
     }
 

@@ -12,6 +12,8 @@ import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.oauth.OAuth2UserInfo;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.jwt.JwtValidator;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,9 +70,8 @@ public class UserService {
         if (refreshToken == null || !jwtValidator.validateRefreshToken(refreshToken.replace(JwtProperties.REFRESH_TOKEN_PREFIX, "")).isValidToken()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        User user = userRepository.findUserWithProfileById(userId).orElseThrow(() -> {
-            throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
-        });
+        User user = userRepository.findUserWithProfileById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         userRepository.deleteUserById(userId);
         userProfileRepository.deleteById(user.getUserProfile().getId());
         return ResponseEntity.ok().build();
@@ -90,15 +91,13 @@ public class UserService {
     }
 
     public User findUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
-        });
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     public User findUserWithProfile(Long userId) {
-        return userRepository.findById(userId).orElseThrow(()->{
-            throw new IllegalArgumentException("회원을 찾을 수 없습니다. userId: " + userId);
-        });
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
 }
