@@ -23,7 +23,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     }
 
     /**
-     * JwtAuthorizationFilter
+     * JwtAuthenticationFilter
      * jwt를 검증하고 authenticate 해주는 필터
      * jwtAuthenticator 에서 jwt 가 유효함이 검증되면 authentication 을 생성해주며
      * jwt 가 없거나 유효하지 않으면 아무 작업을 수행하지 않고 그냥 반환
