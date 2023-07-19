@@ -28,7 +28,7 @@ public class UserProfile {
     private Gender gender;
 
     @Column(nullable = false)
-    private Integer age;
+    private String birth;
 
     @Column(nullable = false)
     private String nickname;
@@ -39,12 +39,12 @@ public class UserProfile {
     @Column(nullable = false)
     private String phoneNumber;
 
+    @Column
+    private String imgUrl;
+
     @ColumnDefault("0")
     @Column(nullable = false)
     private int rate;
-
-    @Column
-    private String imgUrl;
 
     @Column
     private Timestamp lastLogin;
@@ -56,7 +56,7 @@ public class UserProfile {
 
     public UserProfile(CreateUserProfileRequestDto requestDto) {
         this.gender = requestDto.getGender();
-        this.age = requestDto.getAge();
+        this.birth = requestDto.getBirth();
         this.nickname = requestDto.getNickname();
         this.intro = requestDto.getIntro();
         this.phoneNumber = requestDto.getPhoneNumber();

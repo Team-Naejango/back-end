@@ -20,7 +20,7 @@ public class CreateUserProfileRequestDto {
 
     @NotEmpty(message = "나이는 필수 입력값 입니다.")
     @Size(min = 1, max = 200, message = "올바른 나이를 입력하세요")
-    private int age;
+    private String birth;
 
     @NotNull
     private Gender gender;
