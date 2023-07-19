@@ -71,7 +71,7 @@ class UserRepositoryTest {
                 .build();
 
         UserProfile testUserProfile = UserProfile.builder()
-                .age(20)
+                .birth("")
                 .gender(Gender.Male)
                 .phoneNumber("010-0000-0000")
                 .nickname("Nick")
@@ -136,7 +136,7 @@ class UserRepositoryTest {
     public void deleteUserProfileTest() {
         // given
         UserProfile testUserProfile = UserProfile.builder()
-                .age(20)
+                .birth("")
                 .gender(Gender.Male)
                 .phoneNumber("010-0000-0000")
                 .nickname("Nick")

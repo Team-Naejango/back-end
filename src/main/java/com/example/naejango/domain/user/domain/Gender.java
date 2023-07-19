@@ -4,7 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public enum Gender {
     @JsonProperty("남")
-    Male,
+    Male("남"),
     @JsonProperty("여")
-    Female
+    Female("여");
+
+    private final String gender;
+
+    public String getGender() {
+        return gender;
+    }
+
+    Gender(String gender){
+        this.gender = gender;
+    }
 }

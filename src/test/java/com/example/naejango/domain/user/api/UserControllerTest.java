@@ -48,7 +48,7 @@ class UserControllerTest extends RestDocsSupportTest {
         //given
         CreateUserProfileRequestDto requestDto = CreateUserProfileRequestDto
                 .builder()
-                .age(20)
+                .birth("생년월일")
                 .nickname("닉네임")
                 .imgUrl("이미지 링크")
                 .phoneNumber("전화번호")
@@ -83,12 +83,12 @@ class UserControllerTest extends RestDocsSupportTest {
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
                                         )
                                         .requestFields(
-                                                fieldWithPath("age").description("나이"),
+                                                fieldWithPath("birth").description("생년월일"),
                                                 fieldWithPath("nickname").description("닉네임"),
                                                 fieldWithPath("imgUrl").description("이미지 링크"),
                                                 fieldWithPath("phoneNumber").description("전화번호"),
                                                 fieldWithPath("intro").description("소개글"),
-                                                fieldWithPath("gender").description("성별(male, female)")
+                                                fieldWithPath("gender").description("성별(남/여)")
                                         )
                                         .responseFields()
                                         .requestSchema(
@@ -105,7 +105,7 @@ class UserControllerTest extends RestDocsSupportTest {
     void userProfileTest() throws Exception {
         //given
         UserProfile testUserProfile = UserProfile.builder()
-                .age(20)
+                .birth("생년월")
                 .nickname("닉네임")
                 .imgUrl("이미지 링크")
                 .phoneNumber("전화번호")
@@ -126,10 +126,10 @@ class UserControllerTest extends RestDocsSupportTest {
 
         resultActions
                 .andExpect(MockMvcResultMatchers.status().isOk()
-                ).andExpect(jsonPath("$.age").value(testUserProfile.getAge())
+                ).andExpect(jsonPath("$.birth").value(testUserProfile.getBirth())
                 ).andExpect(jsonPath("$.nickname").value(testUserProfile.getNickname())
                 ).andExpect(jsonPath("$.imgUrl").value(testUserProfile.getImgUrl())
-                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().name())
+                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().getGender())
                 ).andExpect(jsonPath("$.intro").value(testUserProfile.getIntro()));
 
         resultActions.andDo(
@@ -143,12 +143,12 @@ class UserControllerTest extends RestDocsSupportTest {
                                         )
                                         .requestFields()
                                         .responseFields(
-                                                fieldWithPath("age").description("나이"),
+                                                fieldWithPath("birth").description("생년월일"),
                                                 fieldWithPath("nickname").description("닉네임"),
                                                 fieldWithPath("imgUrl").description("이미지 링크"),
                                                 fieldWithPath("phoneNumber").description("전화번호"),
                                                 fieldWithPath("intro").description("소개글"),
-                                                fieldWithPath("gender").description("성별(male, female)")
+                                                fieldWithPath("gender").description("성별(남/여)")
                                         )
                                         .requestSchema(
                                                 Schema.schema("UserProfileResponseDto.Get")
@@ -164,7 +164,7 @@ class UserControllerTest extends RestDocsSupportTest {
     void modifyProfileTest() throws Exception {
         //given
         UserProfile testUserProfile = UserProfile.builder()
-                .age(20)
+                .birth("생년월일")
                 .nickname("닉네임")
                 .imgUrl("이미지 링크")
                 .phoneNumber("전화번호")
@@ -193,8 +193,8 @@ class UserControllerTest extends RestDocsSupportTest {
                 .andExpect(MockMvcResultMatchers.status().isOk()
                 ).andExpect(jsonPath("$.nickname").value(testUserProfile.getNickname())
                 ).andExpect(jsonPath("$.imgUrl").value(testUserProfile.getImgUrl())
-                ).andExpect(jsonPath("$.age").value(testUserProfile.getAge())
-                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().name())
+                ).andExpect(jsonPath("$.birth").value(testUserProfile.getBirth())
+                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().getGender())
                 ).andExpect(jsonPath("$.intro").value(testUserProfile.getIntro()));
 
         resultActions.andDo(
@@ -208,7 +208,7 @@ class UserControllerTest extends RestDocsSupportTest {
                                         )
                                         .requestFields()
                                         .responseFields(
-                                                fieldWithPath("age").description("나이"),
+                                                fieldWithPath("birth").description("생년월일"),
                                                 fieldWithPath("nickname").description("닉네임"),
                                                 fieldWithPath("imgUrl").description("이미지 링크"),
                                                 fieldWithPath("phoneNumber").description("전화번호"),
