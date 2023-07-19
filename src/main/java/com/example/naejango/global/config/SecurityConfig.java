@@ -8,6 +8,7 @@ import com.example.naejango.global.auth.jwt.JwtAuthenticator;
 import com.example.naejango.global.auth.principal.PrincipalOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -44,6 +45,8 @@ public class SecurityConfig {
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/api/user/profile")
+                .hasAnyRole(Role.TEMPORAL.toString(), Role.ADMIN.toString())
                 .antMatchers("/api/user/**")
                 .hasAnyRole(Role.USER.toString(), Role.ADMIN.toString())
                 .antMatchers("/api/admin/**")
