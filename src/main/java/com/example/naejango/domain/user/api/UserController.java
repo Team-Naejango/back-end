@@ -2,6 +2,7 @@ package com.example.naejango.domain.user.api;
 
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
@@ -29,7 +30,8 @@ public class UserController {
     @PostMapping("/profile")
     public ResponseEntity<Void> createUserProfile(@RequestBody CreateUserProfileRequestDto requestDto, Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        userService.createUserProfile(requestDto, userId);
+        UserProfile userProfile = new UserProfile(requestDto);
+        userService.createUserProfile(userProfile, userId);
         return ResponseEntity.ok().body(null);
     }
 
