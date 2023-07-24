@@ -51,14 +51,6 @@ jobs:
         with:
           postgresql version: '14'
 
-      - name: Set up Postgis Extension
-        uses: huaxk/postgis-action@v1
-        with:
-          postgresql version: '11'
-          postgresql password: ${{ secrets.POSTGRESQL_PASSWORD }}
-          postgresql user: master
-          postgresql db: naejango_db
-
         # (4) 빌드 (RDS 접근 권한 설정)
         # (4-1) AWS 권한 획득 (RDS 서버)
       - name: Configure AWS RDS Credentials
