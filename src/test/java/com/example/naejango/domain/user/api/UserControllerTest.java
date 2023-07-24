@@ -68,7 +68,7 @@ class UserControllerTest extends RestDocsSupportTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
-        Mockito.verify(userServiceMock, Mockito.atLeastOnce()).createUserProfile(any(CreateUserProfileRequestDto.class), anyLong());
+        Mockito.verify(userServiceMock, Mockito.atLeastOnce()).createUserProfile(any(UserProfile.class), anyLong());
 
         resultActions.andExpect(
                 MockMvcResultMatchers
