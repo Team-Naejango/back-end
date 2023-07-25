@@ -2,9 +2,11 @@ package com.example.naejango.global.auth.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/api/auth")
+@RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class OauthController {
 
@@ -25,5 +27,7 @@ public class OauthController {
                 "<a href=\"http://localhost:8080/oauth2/authorization/kakao\">" +
                 "<img height=\"38px\" src=\"https://developers.kakao.com/tool/resource/static/img/button/kakaosync/complete/ko/kakao_login_medium_narrow.png\"></a>";
     }
+
+
 
 }
