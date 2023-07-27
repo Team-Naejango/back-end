@@ -1,11 +1,11 @@
 package com.example.naejango.domain.storage.api;
 
+import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestServiceDto;
 import com.example.naejango.domain.storage.dto.response.StorageInfoResponseDto;
 import com.example.naejango.domain.storage.dto.response.StorageListResponseDto;
-import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.dto.response.StorageNearbyListDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
@@ -54,7 +54,7 @@ public class StorageController {
 
     /**
      * 위도, 경도, 반경 값을 쿼리 파라미터로 받아 해당 좌표 근처의 창고 조회
-     * 추후 JPQL 또는 DSL 등 더 학습하고여 정렬 및 페이징 처리필요
+     * 추후 JPQL 또는 DSL 등 학습하여 정렬 및 페이징 처리필요
      */
     @GetMapping("/nearby")
     public ResponseEntity<List<StorageNearbyListDto>> storageNearbyList(@RequestParam("longitude") double longitude,

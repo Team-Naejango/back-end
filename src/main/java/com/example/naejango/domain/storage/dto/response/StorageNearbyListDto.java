@@ -4,7 +4,6 @@ import com.example.naejango.domain.storage.domain.Storage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 @Getter
 @NoArgsConstructor
@@ -12,12 +11,11 @@ import org.locationtech.jts.geom.Point;
 public class StorageNearbyListDto {
     private Long id;
     private String name;
-    private Point location;
+    private double longitude;
+    private double latitude;
     private int distance;
+
     public StorageNearbyListDto(Storage storage, int distance) {
-        id  = storage.getId();
-        name = storage.getName();
-        location = storage.getLocation();
-        this.distance = distance;
+        this(storage.getId(), storage.getName(), storage.getLocation().getX(), storage.getLocation().getY(), distance);
     }
 }
