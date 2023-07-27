@@ -11,8 +11,8 @@ public class CreateStorageRequestDto {
     private String imgUrl;
     private String description;
     private String address;
-    private double latitude;
     private double longitude;
+    private double latitude;
 
     public CreateStorageRequestServiceDto toServiceDto(Point location) {
         return new CreateStorageRequestServiceDto(name, imgUrl, description, address, location);

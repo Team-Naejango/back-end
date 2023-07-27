@@ -9,6 +9,7 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,11 +35,17 @@ public class StorageService {
         return storageRepository.findByUserId(userId);
     }
 
+    public List<Storage> storageNearby(Point center) {
+        return storageRepository.findNearbyStorage(center, 1000);
+    }
+
     public StorageInfoResponseDto StorageInfo(Long storageId) {
         Storage storage = storageRepository.findById(storageId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
         return new StorageInfoResponseDto(storage);
     }
+
+
 
 
 
