@@ -7,6 +7,7 @@ import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticator {
     private final JwtValidator jwtValidator;
     private final JwtGenerator jwtGenerator;
@@ -109,15 +111,12 @@ public class JwtAuthenticator {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie != null && cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE)) {
+                if (cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE)) {
                     refreshTokenCookie = cookie.getValue();
                 }
             }
         }
-        if (refreshTokenCookie != null && refreshTokenCookie.startsWith(JwtProperties.REFRESH_TOKEN_PREFIX)) {
-            return refreshTokenCookie.replace(JwtProperties.REFRESH_TOKEN_PREFIX, "");
-        }
-        return null;
+        return refreshTokenCookie;
     }
 
 }

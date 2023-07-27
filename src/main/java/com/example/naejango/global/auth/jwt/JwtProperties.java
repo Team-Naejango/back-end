@@ -16,8 +16,6 @@ public class JwtProperties {
     private long accessTokenExpirationLength;
     @Value("${jwt.refresh-token.header}")
     private String refreshTokenCookie;
-    @Value("${jwt.refresh-token.prefix}")
-    private String refreshTokenPrefix;
     @Value("${jwt.refresh-token.expiration-length}")
     private long refreshTokenExpirationLength;
     @Value("${jwt.iss}")
@@ -28,7 +26,6 @@ public class JwtProperties {
     public static String ACCESS_TOKEN_PREFIX;
     public static long ACCESS_TOKEN_EXPIRATION_TIME;
     public static String REFRESH_TOKEN_COOKIE;
-    public static String REFRESH_TOKEN_PREFIX;
     public static long REFRESH_TOKEN_EXPIRATION_TIME;
     public static String ISS;
 
@@ -41,7 +38,6 @@ public class JwtProperties {
         ACCESS_TOKEN_EXPIRATION_TIME = accessTokenExpirationLength;
 
         REFRESH_TOKEN_COOKIE = refreshTokenCookie;
-        REFRESH_TOKEN_PREFIX = refreshTokenPrefix;
         REFRESH_TOKEN_EXPIRATION_TIME = refreshTokenExpirationLength;
         ISS = iss;
     }

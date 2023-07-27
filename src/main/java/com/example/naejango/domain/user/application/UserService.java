@@ -65,7 +65,7 @@ public class UserService {
     @Transactional
     public ResponseEntity<Void> deleteUser(HttpServletRequest request, Long userId) {
         String refreshToken = this.getRefreshToken(request);
-        if (refreshToken == null || !jwtValidator.validateRefreshToken(refreshToken.replace(JwtProperties.REFRESH_TOKEN_PREFIX, "")).isValidToken()) {
+        if (refreshToken == null || !jwtValidator.validateRefreshToken(refreshToken).isValidToken()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         User user = userRepository.findUserWithProfileById(userId)
