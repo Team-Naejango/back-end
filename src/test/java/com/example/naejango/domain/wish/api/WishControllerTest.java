@@ -72,7 +72,7 @@ class WishControllerTest extends RestDocsSupportTest {
             resultActions.andDo(restDocs.document(
                     resource(
                             ResourceSnippetParameters.builder()
-                                    .tag("관심 상품")
+                                    .tag("관심")
                                     .description("관심 목록 조회")
                                     .requestHeaders(
                                             headerWithName("Authorization").description("JWT")
@@ -122,7 +122,7 @@ class WishControllerTest extends RestDocsSupportTest {
             resultActions.andDo(restDocs.document(
                     resource(
                             ResourceSnippetParameters.builder()
-                                    .tag("관심 상품")
+                                    .tag("관심")
                                     .description("관심 등록")
                                     .requestHeaders(
                                             headerWithName("Authorization").description("JWT")
@@ -171,7 +171,7 @@ class WishControllerTest extends RestDocsSupportTest {
             resultActions.andDo(restDocs.document(
                     resource(
                             ResourceSnippetParameters.builder()
-                                    .tag("관심 상품")
+                                    .tag("관심")
                                     .description("관심 해제")
                                     .requestHeaders(
                                             headerWithName("Authorization").description("JWT")
