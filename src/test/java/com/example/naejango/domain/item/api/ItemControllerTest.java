@@ -11,7 +11,6 @@ import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
-import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
@@ -38,12 +37,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 @WebMvcTest(ItemController.class)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class ItemControllerTest extends RestDocsSupportTest {
-
     @MockBean
     ItemService itemService;
-
-    @MockBean
-    UserService userService;
 
     @MockBean
     CommonDtoHandler commonDtoHandler;
