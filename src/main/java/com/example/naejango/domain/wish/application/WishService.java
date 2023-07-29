@@ -39,6 +39,12 @@ public class WishService {
 
     /** 아이템 관심 등록 */
     public void addWish(Long userId, Long itemId){
+        // 이미 관심 등록 되어있는지 체크, DB에 존재하면 true return
+        boolean existCheck = wishRepository.existsByUserIdAndItemId(userId, itemId);
+        if (existCheck) {
+            throw new CustomException(ErrorCode.WISH_ALREADY_EXIST);
+        }
+
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
         User user = userRepository.findById(userId)
@@ -57,6 +63,9 @@ public class WishService {
     /** 아이템 관심 해제 */
     public void deleteWish(Long userId, Long itemId){
         Wish wish = wishRepository.findByUserIdAndItemId(userId, itemId);
+        if (wish == null) {
+            throw new CustomException(ErrorCode.WISH_NOT_FOUND);
+        }
 
         wishRepository.delete(wish);
     }

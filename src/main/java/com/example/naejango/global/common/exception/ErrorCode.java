@@ -16,12 +16,13 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Category를 찾을 수 없습니다."),
     STORAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Storage를 찾을 수 없습니다."),
-    ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Item을 찾을 수 없습니다.")
-    ;
+    ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Item을 찾을 수 없습니다."),
+    WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Wish를 찾을 수 없습니다."),
 
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
+    WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다.")
 
-
+    ;
     private final HttpStatus httpStatus;
     private final String message;
 
