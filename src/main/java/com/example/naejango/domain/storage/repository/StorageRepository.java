@@ -20,6 +20,6 @@ public interface StorageRepository extends JpaRepository<Storage, Long> {
     /**
      * 특정 Point 및 반경을 기준으로 조회
      */
-    @Query("SELECT s FROM Storage s WHERE FUNCTION('ST_DWithin', :point, s.location, :radius, false) = true")
+    @Query("SELECT s FROM Storage s WHERE ST_DWithin(:point, s.location, :radius, false) = true")
     List<Storage> findNearbyStorage(@Param("point") Point point, @Param("radius") int radius);
 }
