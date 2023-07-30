@@ -7,6 +7,7 @@ import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestServiceDto;
+import com.example.naejango.domain.storage.dto.response.StorageInfoResponseDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -39,11 +40,10 @@ class StorageControllerTest extends RestDocsSupportTest {
     private CommonDtoHandler commonDtoHandlerMock;
     @MockBean
     private GeomUtil geomUtilMock;
-
     private final GeomUtil geomUtil = new GeomUtil();
 
     @Test
-    @DisplayName("")
+    @DisplayName("createStorage: 창고 생성")
     void createStorageTest() throws Exception {
         //given
         double testLon = 126.0;
@@ -52,6 +52,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                 new CreateStorageRequestDto("name", "imgUrl", "description", "address", testLon, testLat);
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
+
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
@@ -87,15 +88,12 @@ class StorageControllerTest extends RestDocsSupportTest {
                                         .responseFields()
                                         .requestSchema(
                                                 Schema.schema("창고 생성 Request")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+                                        ).build()
+                        )));
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("storageList: 요청 회원의 창고 목록 조회")
     void storageList() throws Exception {
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -140,7 +138,7 @@ class StorageControllerTest extends RestDocsSupportTest {
     }
     
     @Test
-    @DisplayName("3")
+    @DisplayName("storageNearbyList: 근처 창고 조회")
     void storageNearbyTest() throws Exception {
         // given
         String centerLongitude ="126.0";
@@ -175,9 +173,9 @@ class StorageControllerTest extends RestDocsSupportTest {
         );
 
         // then
-        verify(geomUtilMock, times(1)).createPoint(centerLon, centerLat);
+        verify(geomUtilMock, times(1)).createPoint(126.0, 37.0);
+        verify(storageServiceMock, only()).storageNearby(geomUtil.createPoint(126.0, 37.0));
         verify(geomUtilMock, atLeast(1)).calculateDistance(any(Point.class), any(Point.class));
-        verify(storageServiceMock, only()).storageNearby(center);
 
         resultActions.andExpect(
                 MockMvcResultMatchers
@@ -189,7 +187,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("창고")
-                                        .description("근처 창고 목록 반환")
+                                        .description("근처 창고 목록 조회")
                                         .requestParameters(
                                                 parameterWithName("longitude").description("경도"),
                                                 parameterWithName("latitude").description("위도"),
@@ -208,11 +206,52 @@ class StorageControllerTest extends RestDocsSupportTest {
                                         )
                                         .responseSchema(
                                                 Schema.schema("근처 창고 조회 결과")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+                                        ).build()
+                        )));
     }
 
+    @Test
+    @DisplayName("storageInfo: 창고 상세 정보 조회")
+    void storageInfoTest() throws Exception {
+        // given
+        Storage testStorage = Storage.builder()
+                .name("name").description("description")
+                .address("address").imgUrl("imgUrl")
+                .location(geomUtil.createPoint(126.0, 37.0)).build();
+        StorageInfoResponseDto responseDto = new StorageInfoResponseDto(testStorage);
+
+        Long testStorageId = 123L;
+
+        BDDMockito.given(storageServiceMock.StorageInfo(testStorageId)).willReturn(responseDto);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                RestDocumentationRequestBuilders
+                        .get("http://localhost:8080/api/storage/{storageId}", testStorageId)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        );
+
+        // then
+        verify(storageServiceMock, times(1)).StorageInfo(123L);
+
+        // RestDocs
+        resultActions.andDo(restDocs.document(
+                resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("창고")
+                                .description("창고 상세 정보 조회")
+                                .pathParameters(
+                                        parameterWithName("storageId").description("창고 id")
+                                )
+                                .responseFields(
+                                        fieldWithPath("name").description("창고 이름"),
+                                        fieldWithPath("description").description("창고 소개"),
+                                        fieldWithPath("imgUrl").description("창고 이미지 url"),
+                                        fieldWithPath("longitude").description("창고 좌표 - 경도"),
+                                        fieldWithPath("latitude").description("창고 좌표 - 위도"),
+                                        fieldWithPath("address").description("창고 위치의 주소")
+                                ).build()
+                )));
+    }
 }
