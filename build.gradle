@@ -82,6 +82,7 @@ task copyTestConfig(type: Copy) {
 	}
 }
 
+// plain jar 생성 제외
 jar {
 	enabled = false
 }
@@ -93,7 +94,6 @@ def serverUrl = properties.getProperty('server-url')
 
 // openapi3 설정
 openapi3 {
-	println("project.buildDir: ${project.buildDir}")
 	servers = [{url = "http://localhost:8080"}, {url = serverUrl}]
 	title = "Restdocs-Swagger API Documentation"
 	description = "Spring REST Docs with SwaggerUI"
