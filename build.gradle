@@ -62,9 +62,33 @@ dependencies {
 	swaggerUI 'org.webjars:swagger-ui:4.11.1'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+tasks.named('test') { // build 할 때 'unitTest' Task 포함시키고 싶으면 dependsOn 주석 해제
+//	dependsOn 'unitTest'
+	useJUnitPlatform() {
+		includeTags 'api'
+	}
+	testLogging { // 테스트 결과 출력
+		afterSuite { testDescriptor, testResult ->
+			if (testDescriptor.parent == null) {
+				println "Test Results: ${testResult.resultType} (${testResult.testCount} tests, ${testResult.successfulTestCount} successes, ${testResult.failedTestCount} failures, ${testResult.skippedTestCount} skipped)"
+			}
+		}
+	}
 }
+
+tasks.register('unitTest', Test){
+	useJUnitPlatform(){
+		excludeTags 'api'
+	}
+	testLogging { // 테스트 결과 출력
+		afterSuite { testDescriptor, testResult ->
+			if (testDescriptor.parent == null) {
+				println "Test Results: ${testResult.resultType} (${testResult.testCount} tests, ${testResult.successfulTestCount} successes, ${testResult.failedTestCount} failures, ${testResult.skippedTestCount} skipped)"
+			}
+		}
+	}
+}
+
 
 task copyPrivateConfig(type: Copy) {
 	copy {
