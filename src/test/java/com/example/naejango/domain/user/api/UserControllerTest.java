@@ -12,6 +12,7 @@ import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
@@ -43,6 +44,7 @@ class UserControllerTest extends RestDocsSupportTest {
     CommonDtoHandler commonDtoHandlerMock;
 
     @Test
+    @Tag("api")
     @DisplayName("creatUserProfile : UserProfile 을 생성하고 User 에 할당")
     void createUserProfileTest() throws Exception {
         //given
@@ -101,6 +103,7 @@ class UserControllerTest extends RestDocsSupportTest {
     }
 
     @Test
+    @Tag("api")
     @DisplayName("userProfile : UserProfile 조회")
     void userProfileTest() throws Exception {
         //given
@@ -160,6 +163,7 @@ class UserControllerTest extends RestDocsSupportTest {
     }
 
     @Test
+    @Tag("api")
     @DisplayName("modifyProfile : UserProfile 수정")
     void modifyProfileTest() throws Exception {
         //given
@@ -226,6 +230,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
 
     @Test
+    @Tag("api")
     @DisplayName("deleteUser: User 및 해당 User 의 UserProfile 삭제")
     void deleteUserTest() throws Exception {
         ResultActions resultActions = mockMvc.perform(

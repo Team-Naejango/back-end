@@ -73,6 +73,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
         @Test
         @Order(1)
+        @Tag("api")
         @DisplayName("아이템_생성_성공")
         void 아이템_생성_성공() throws Exception {
             // given
@@ -225,6 +226,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
         @Test
         @Order(1)
+        @Tag("api")
         @DisplayName("아이템_정보_조회_성공")
         void 아이템_정보_조회_성공() throws Exception {
             // given
@@ -293,6 +295,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
         @Test
         @Order(1)
+        @Tag("api")
         @DisplayName("아이템_정보_수정_성공")
         void 아이템_정보_수정_성공() throws Exception {
             // given
@@ -363,6 +366,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
         @Test
         @Order(1)
+        @Tag("api")
         @DisplayName("아이템_창고_등록_수정_성공")
         void 아이템_창고_등록_수정_성공() throws Exception {
             // given

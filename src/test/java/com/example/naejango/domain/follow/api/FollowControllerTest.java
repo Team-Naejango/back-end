@@ -50,6 +50,7 @@ class FollowControllerTest extends RestDocsSupportTest {
 
         @Test
         @Order(1)
+        @Tag("api")
         @DisplayName("팔로우_목록_조회_성공")
         void 팔로우_목록_조회_성공() throws Exception {
             // given
@@ -99,7 +100,8 @@ class FollowControllerTest extends RestDocsSupportTest {
         Long userId;
 
         @Test
-        @Order(2)
+        @Order(1)
+        @Tag("api")
         @DisplayName("팔로우_등록_성공")
         void 팔로우_등록_성공() throws Exception {
             // given
@@ -148,7 +150,8 @@ class FollowControllerTest extends RestDocsSupportTest {
         Long userId;
 
         @Test
-        @Order(3)
+        @Order(1)
+        @Tag("api")
         @DisplayName("관심_해제_성공")
         void 관심_해제_성공() throws Exception {
             // given
