@@ -19,6 +19,8 @@ public enum ErrorCode {
     ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Item을 찾을 수 없습니다."),
     WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Wish를 찾을 수 없습니다."),
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Follow를 찾을 수 없습니다."),
+    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Transaction을 찾을 수 없습니다."),
+
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다."),
     FOLLOW_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 팔로우 등록 되어있습니다.")
