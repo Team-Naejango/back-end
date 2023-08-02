@@ -10,6 +10,7 @@ import com.example.naejango.domain.storage.dto.response.StorageNearbyDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
 import org.mockito.BDDMockito;
@@ -44,6 +45,7 @@ class StorageControllerTest extends RestDocsSupportTest {
     private final GeomUtil geomUtil = new GeomUtil();
 
     @Test
+    @Tag("api")
     @DisplayName("createStorage: 창고 생성")
     void createStorageTest() throws Exception {
         //given
@@ -93,6 +95,7 @@ class StorageControllerTest extends RestDocsSupportTest {
     }
 
     @Test
+    @Tag("api")
     @DisplayName("storageList: 요청 회원의 창고 목록 조회")
     void storageList() throws Exception {
         // when
@@ -153,6 +156,7 @@ class StorageControllerTest extends RestDocsSupportTest {
     }
 
     @Test
+    @Tag("api")
     @DisplayName("storageNearbyList: 근처 창고 조회")
     void storageNearbyTest() throws Exception {
         // given
