@@ -10,16 +10,22 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface StorageRepository extends JpaRepository<Storage, Long> {
+public interface StorageRepository extends JpaRepository<Storage, Long>, StorageJPQLRepository {
+    /**
+     * 회원 Id를 기준으로 조회
+     */
+    @Query(value = "select s from Storage s where s.user.id = :userId")
+    List<Storage> findByUserId(@Param("userId") Long userId);
 
     /**
-     * 창고를 등록한 유저를 기준으로 조회
+     * 특정 좌표 및 반경 내에 있는 모든 창고의 개수 조회
      */
-    List<Storage> findByUserId(Long userId);
+    @Query(value = "select count(s) from Storage s where St_DWithin(:center, s.location, :radius, false) = true")
+    int countStorageWithinRadius(@Param("center") Point center, @Param("radius") int radius);
 
     /**
-     * 특정 Point 및 반경을 기준으로 조회
+     * 특정 좌표 및 반경 내에 있는 모든 창고 조회
      */
-    @Query("SELECT s FROM Storage s WHERE ST_DWithin(:point, s.location, :radius, false) = true")
-    List<Storage> findNearbyStorage(@Param("point") Point point, @Param("radius") int radius);
+    @Query(value = "select s from Storage s where St_DWithin(:center, s.location, :radius, false) = true")
+    List<Storage> findStorageWithinRadius (@Param("center") Point center, @Param("radius") int radius);
 }

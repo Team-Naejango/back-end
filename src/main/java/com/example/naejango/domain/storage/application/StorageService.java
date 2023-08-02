@@ -1,13 +1,12 @@
 package com.example.naejango.domain.storage.application;
 
 import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.storage.dto.request.CreateStorageRequestServiceDto;
-import com.example.naejango.domain.storage.dto.response.StorageInfoResponseDto;
+import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
+import com.example.naejango.domain.storage.dto.response.StorageNearbyDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.handler.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
@@ -21,32 +20,29 @@ import java.util.List;
 public class StorageService {
     private final StorageRepository storageRepository;
     private final UserService userService;
+    private final GeomUtil geomUtil;
 
     @Transactional
-    public Long createStorage(CreateStorageRequestServiceDto requestDto, Long userId) {
-        User persistenceUser = userService.findUser(userId);
-        Storage storage = new Storage(requestDto);
+    public Long createStorage(CreateStorageRequestDto requestDto, Long userId) {
+        Point location = geomUtil.createPoint(requestDto.getLongitude(), requestDto.getLatitude());
+        Storage storage = new Storage(requestDto, location);
         storageRepository.save(storage);
+        User persistenceUser = userService.findUser(userId);
         storage.assignUser(persistenceUser);
         return storage.getId();
     }
 
-    public List<Storage> storageList(Long userId) {
+    public List<Storage> myStorageList(Long userId) {
         return storageRepository.findByUserId(userId);
     }
 
-    public List<Storage> storageNearby(Point center) {
-        return storageRepository.findNearbyStorage(center, 1000);
+    public List<StorageNearbyDto> storageNearby(Point center, int radius, int limit, int page) {
+        int offset = limit * (page - 1);
+        return storageRepository.findStorageNearby(center, radius, offset, limit);
     }
 
-    public StorageInfoResponseDto StorageInfo(Long storageId) {
-        Storage storage = storageRepository.findById(storageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
-        return new StorageInfoResponseDto(storage);
+    public int countStorageNearby(Point center, int radius) {
+        return storageRepository.countStorageWithinRadius(center, radius);
     }
-
-
-
-
 
 }

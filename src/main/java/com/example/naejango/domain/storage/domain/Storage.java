@@ -1,12 +1,14 @@
 package com.example.naejango.domain.storage.domain;
 
-import com.example.naejango.domain.storage.dto.request.CreateStorageRequestServiceDto;
+import com.example.naejango.domain.item.domain.ItemStorage;
+import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -43,18 +45,19 @@ public class Storage implements Serializable {
     private User user;
 
     @OneToMany(mappedBy = "storage")
-    List<StorageItem> storageItems;
+    List<ItemStorage> itemStorages = new ArrayList<>();
 
     public void assignUser(User user) {
         this.user = user;
         user.allocateStorage(this);
     }
 
-    public Storage(CreateStorageRequestServiceDto requestDto) {
+    public Storage(CreateStorageRequestDto requestDto, Point location) {
         this.name = requestDto.getName();
         this.imgUrl = requestDto.getImgUrl();
         this.description = requestDto.getDescription();
         this.address = requestDto.getAddress();
-        this.location = requestDto.getLocation();
+        this.location = location;
+        this.itemStorages = new ArrayList<>();
     }
 }

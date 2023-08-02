@@ -8,20 +8,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class StorageInfoResponseDto {
+public class StorageInfoDto {
+    private Long id;
     private String name;
     private String imgUrl;
     private String description;
-    private double latitude;
-    private double longitude;
     private String address;
 
-    public StorageInfoResponseDto(Storage storage) {
+    public StorageInfoDto(Storage storage) {
+        this.id = storage.getId();
         this.name = storage.getName();
         this.imgUrl = storage.getImgUrl();
         this.description = storage.getDescription();
-        this.latitude = storage.getLocation().getX();
-        this.longitude = storage.getLocation().getY();
         this.address = storage.getAddress();
     }
 }
