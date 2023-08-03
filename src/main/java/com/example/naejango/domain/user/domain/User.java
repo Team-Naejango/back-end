@@ -1,5 +1,6 @@
 package com.example.naejango.domain.user.domain;
 
+import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.storage.domain.Storage;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
-public class User {
+public class User extends TimeAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")

@@ -1,5 +1,6 @@
 package com.example.naejango.domain.storage.domain;
 
+import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.item.domain.ItemStorage;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.user.domain.User;
@@ -18,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "storage")
-public class Storage implements Serializable {
+public class Storage extends TimeAuditingEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
