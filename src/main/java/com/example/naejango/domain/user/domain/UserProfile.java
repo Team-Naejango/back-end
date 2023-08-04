@@ -1,10 +1,10 @@
 package com.example.naejango.domain.user.domain;
 
+import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 @Getter
 @Table(name = "userprofile")
 @EntityListeners(AuditingEntityListener.class)
-public class UserProfile {
+public class UserProfile extends TimeAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userprofile_id")
@@ -33,7 +33,7 @@ public class UserProfile {
     @Column(nullable = false)
     private String nickname;
 
-    @Column
+    @Column()
     private String intro;
 
     @Column(nullable = false)
@@ -48,11 +48,6 @@ public class UserProfile {
 
     @Column
     private Timestamp lastLogin;
-
-    @Column
-    @CreatedDate
-    private Timestamp createdAt;
-
 
     public UserProfile(CreateUserProfileRequestDto requestDto) {
         this.gender = requestDto.getGender();

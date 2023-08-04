@@ -1,5 +1,6 @@
 package com.example.naejango.domain.item.domain;
 
+import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Table(name="item")
-public class Item {
+public class Item extends TimeAuditingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
