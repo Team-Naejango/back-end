@@ -68,7 +68,7 @@ public class JwtValidator {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token);
         } catch (JWTVerificationException | IllegalArgumentException e) {
             // Token이 있으나 복호화 실패
-            throw new RuntimeException(e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN_ACCESS);
         }
     }
 
@@ -78,7 +78,7 @@ public class JwtValidator {
     }
 
     public boolean isVerifiedSignature(DecodedJWT decodedJWT, User user) {
-        return user.getSignature().equals(decodedJWT.getSignature());
+        return user.getSignature() == null || user.getSignature().equals(decodedJWT.getSignature());
     }
 
 }

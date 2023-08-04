@@ -70,7 +70,7 @@ public class JwtAuthenticator {
      */
     private void reissueAccessToken(HttpServletResponse response, Long userId) {
         String reissuedAccessToken = jwtGenerator.generateAccessToken(userId);
-        Cookie accessTokenCookie = new Cookie("AccessToken", JwtProperties.ACCESS_TOKEN_PREFIX + reissuedAccessToken);
+        Cookie accessTokenCookie = new Cookie("AccessToken", reissuedAccessToken);
         response.addCookie(accessTokenCookie);
     }
 
@@ -94,6 +94,7 @@ public class JwtAuthenticator {
 
     /**
      * HttpServletRequest 에서 access token 을 가져오는 메서드
+     * Header 에 access token 이 없거나 유효하지 않은 형태인 경우 null 을 반환
      */
     private String getAccessToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
@@ -105,6 +106,7 @@ public class JwtAuthenticator {
 
     /**
      * HttpServletRequest 에서 refresh token 을 가져오는 메서드
+     * refresh cookie 가 없는 경우 null 을 반환
      */
     private String getRefreshToken(HttpServletRequest request) {
         String refreshTokenCookie = null;

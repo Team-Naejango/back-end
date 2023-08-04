@@ -9,8 +9,10 @@ import com.example.naejango.global.auth.dto.GuestTokenResponse;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +29,7 @@ public class OauthController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final CommonDtoHandler commonDtoHandler;
     /**
      * 로그인 테스트를 위한 Controller
      */
@@ -51,7 +54,9 @@ public class OauthController {
      * */
 
     @GetMapping("/guest")
-    public ResponseEntity<GuestTokenResponse> guest(HttpServletResponse response) {
+    public ResponseEntity<GuestTokenResponse> guest(HttpServletResponse response, Authentication authentication) {
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        if (userId != null) return ResponseEntity.ok().body(null);
         User guest = userRepository.findByUserKey("Guest").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String accessToken = JWT.create()
@@ -59,6 +64,7 @@ public class OauthController {
                 .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+
         String refreshToken = JWT.create()
                 .withClaim("userId", guest.getId())
                 .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
