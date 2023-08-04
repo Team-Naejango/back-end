@@ -10,7 +10,7 @@ public enum ErrorCode {
 
 
     /** 403 FORBIDDEN : 사용자가 콘텐츠에 접근할 권리를 가지고 있지 않음 */
-
+    INVALID_TOKEN_ACCESS(HttpStatus.FORBIDDEN, "액세스 토큰 복호화에 실패하였습니다."),
 
     /** 404 NOT_FOUND : 리소스를 찾을 수 없음 */
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User를 찾을 수 없습니다."),
