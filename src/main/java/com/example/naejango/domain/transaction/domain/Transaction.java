@@ -28,7 +28,8 @@ public class Transaction {
     private int amount;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(value = EnumType.STRING)
+    private TransactionStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -42,7 +43,11 @@ public class Transaction {
     @JoinColumn(name = "item_id")
     private Item item;
 
+    public void waitTransaction(){
+        this.status = TransactionStatus.WAITING;
+    }
+
     public void completeTransaction(){
-        this.status = "accepted";
+        this.status = TransactionStatus.COMPLETION;
     }
 }

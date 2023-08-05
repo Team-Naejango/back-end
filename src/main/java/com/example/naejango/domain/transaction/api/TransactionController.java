@@ -39,7 +39,16 @@ public class TransactionController {
         return ResponseEntity.created(URI.create("/api/transaction/"+createTransactionResponseDto.getId())).body(createTransactionResponseDto);
     }
 
-    /** 거래 완료 요청 */
+    /** 거래 완료 대기로 수정 */
+    @PatchMapping("/{transactionId}")
+    public ResponseEntity<BaseResponseDto> waitTransaction(Authentication authentication, @PathVariable Long transactionId){
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        transactionService.waitTransaction(userId, transactionId);
+
+        return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
+    }
+
+    /** 거래 완료로 수정 */
     @PatchMapping("/{transactionId}")
     public ResponseEntity<BaseResponseDto> completeTransaction(Authentication authentication, @PathVariable Long transactionId){
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);

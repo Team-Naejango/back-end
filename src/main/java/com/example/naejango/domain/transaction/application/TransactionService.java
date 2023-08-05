@@ -56,7 +56,20 @@ public class TransactionService {
         return new CreateTransactionResponseDto(savedTransaction);
     }
 
-    /** 거래 완료 요청 */
+    /** 거래 완료 대기로 수정 */
+    @Transactional
+    public void waitTransaction(Long userId, Long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
+
+        if (!Objects.equals(transaction.getUser().getId(), userId)) {
+            throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
+        }
+
+        transaction.waitTransaction();
+    }
+
+    /** 거래 완료로 수정 */
     @Transactional
     public void completeTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
