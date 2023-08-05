@@ -40,6 +40,7 @@ public class TransactionService {
     }
 
     /** 거래 요청 등록 */
+    @Transactional
     public CreateTransactionResponseDto createTransaction(Long userId, CreateTransactionRequestDto createTransactionRequestDto){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -56,6 +57,7 @@ public class TransactionService {
     }
 
     /** 거래 완료 요청 */
+    @Transactional
     public void completeTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
@@ -68,6 +70,7 @@ public class TransactionService {
     }
 
     /** 거래 취소 */
+    @Transactional
     public void deleteTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
