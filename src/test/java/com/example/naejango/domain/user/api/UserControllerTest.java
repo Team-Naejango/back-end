@@ -45,15 +45,15 @@ class UserControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("creatUserProfile : UserProfile 을 생성하고 User 에 할당")
+    @DisplayName("UserProfile 생성")
     void createUserProfileTest() throws Exception {
         //given
         CreateUserProfileRequestDto requestDto = CreateUserProfileRequestDto
                 .builder()
-                .birth("생년월일")
+                .birth("19910617")
                 .nickname("닉네임")
                 .imgUrl("이미지 링크")
-                .phoneNumber("전화번호")
+                .phoneNumber("01094862225")
                 .intro("소개글")
                 .gender(Gender.Male)
                 .build();
@@ -79,7 +79,7 @@ class UserControllerTest extends RestDocsSupportTest {
         resultActions.andDo(restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("유저")
+                                        .tag("회원")
                                         .description("유저프로필 생성 하여 요청한 유저 엔티티에 할당")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
@@ -104,7 +104,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("userProfile : UserProfile 조회")
+    @DisplayName("UserProfile 조회")
     void userProfileTest() throws Exception {
         //given
         UserProfile testUserProfile = UserProfile.builder()
@@ -139,7 +139,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("유저")
+                                        .tag("회원")
                                         .description("요청하는 유저의 프로필 조회")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access token")
@@ -164,19 +164,20 @@ class UserControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("modifyProfile : UserProfile 수정")
+    @DisplayName("UserProfile 수정")
     void modifyProfileTest() throws Exception {
         //given
         UserProfile testUserProfile = UserProfile.builder()
-                .birth("생년월일")
+                .birth("19910617")
                 .nickname("닉네임")
                 .imgUrl("이미지 링크")
-                .phoneNumber("전화번호")
+                .phoneNumber("01012345678")
                 .intro("소개글")
                 .gender(Gender.Male)
                 .build();
 
-        ModifyUserProfileRequestDto requestDto = ModifyUserProfileRequestDto.builder().build();
+        var requestDto = ModifyUserProfileRequestDto.builder()
+                .nickname("변경 닉네").intro("변경 소개글").imgUrl("변경 이미지").build();
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
@@ -205,7 +206,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("유저")
+                                        .tag("회원")
                                         .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
@@ -231,7 +232,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("deleteUser: User 및 해당 User 의 UserProfile 삭제")
+    @DisplayName("회원 탈퇴 UserProfile 삭제")
     void deleteUserTest() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
@@ -248,7 +249,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
-                                        .tag("유저")
+                                        .tag("회원")
                                         .description("요청 유저의 User, UserProfile 삭제")
                                         .requestHeaders(
                                                 HeaderDocumentation.headerWithName("Authorization").description("access 토큰")

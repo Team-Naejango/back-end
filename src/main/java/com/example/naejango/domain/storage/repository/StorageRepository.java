@@ -12,15 +12,15 @@ import java.util.List;
 @Repository
 public interface StorageRepository extends JpaRepository<Storage, Long>, StorageJPQLRepository {
     /**
-     * 회원 Id를 기준으로 조회
+     * 회원 id를 기준으로 조회
      */
-    @Query(value = "select s from Storage s where s.user.id = :userId")
+    @Query("select s from Storage s where s.user.id = :userId")
     List<Storage> findByUserId(@Param("userId") Long userId);
 
     /**
      * 특정 좌표 및 반경 내에 있는 모든 창고의 개수 조회
      */
-    @Query(value = "select count(s) from Storage s where St_DWithin(:center, s.location, :radius, false) = true")
+    @Query("select count(s) from Storage s where St_DWithin(:center, s.location, :radius, false) = true")
     int countStorageWithinRadius(@Param("center") Point center, @Param("radius") int radius);
 
     /**

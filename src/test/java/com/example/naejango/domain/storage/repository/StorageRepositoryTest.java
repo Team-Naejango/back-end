@@ -1,13 +1,13 @@
 package com.example.naejango.domain.storage.repository;
 
 import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyDto;
+import com.example.naejango.domain.storage.dto.Coord;
+import com.example.naejango.domain.storage.dto.response.StorageNearbyInfo;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.common.handler.GeomUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
@@ -37,7 +38,7 @@ class StorageRepositoryTest {
     private final GeomUtil geomUtil = new GeomUtil();
 
     @Test
-    @DisplayName("save: 창고 생성 / findById: 창고 조회")
+    @DisplayName("Storage 생성 및 조회")
     public void saveAndFindStorage() {
         // given
         User testUser = User.builder()
@@ -68,7 +69,7 @@ class StorageRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByUserId: userId 로 창고 조회")
+    @DisplayName("userId 로 Storage 조회")
     void findByUserIdTest(){
         // given
         User testUser = User.builder()
@@ -107,11 +108,11 @@ class StorageRepositoryTest {
         List<Storage> result = storageRepository.findByUserId(testUser.getId());
 
         // then
-        Assertions.assertThat(result.size()).isEqualTo(3);
+        assertThat(result.size()).isEqualTo(3);
     }
 
     @Test
-    @DisplayName("findStorageWithinRadius: 좌표 및 반경 기준으로 근처 창고 및 창고 개수 조회")
+    @DisplayName("좌표 및 반경 기준으로 근처 Storage 조회")
     public void findStorageWithinRadiusTest() {
         // given
         Storage testStorage1 = Storage.builder()
@@ -148,14 +149,14 @@ class StorageRepositoryTest {
         int count2 = storageRepository.countStorageWithinRadius(testStorage1.getLocation(), 2500);
 
         // then
-        Assertions.assertThat(result1).containsExactly(testStorage2, testStorage3);
+        assertThat(result1).containsExactly(testStorage2, testStorage3);
         assertEquals(count1, 2);
-        Assertions.assertThat(result2).containsExactly(testStorage1, testStorage3);
+        assertThat(result2).containsExactly(testStorage1, testStorage3);
         assertEquals(count2, 2);
     }
 
     @Test
-    @DisplayName("findStorageNearby: 좌표 및 반경 기준으로 근처 창고를 거리가 가까운 순으로 조회, 페이징 기능 구현")
+    @DisplayName("좌표 및 반경 기준으로 근처 Storage 조회 (정렬 및 페이징)")
     void findStorageNearbyTest(){
         // given
         Point center = factory.createPoint(new Coordinate(126.0, 37.0));
@@ -171,11 +172,12 @@ class StorageRepositoryTest {
         }
 
         // when
-        List<StorageNearbyDto> storageNearbyDto = storageRepository.findStorageNearby(center, 2000, 10, 5);
+        List<StorageNearbyInfo> storageNearbyInfo = storageRepository.findStorageNearby(center, 2000, 10, 5);
 
         // then
-        Assertions.assertThat(storageNearbyDto.size()).isEqualTo(5);
-        Assertions.assertThat(storageNearbyDto.get(0).getName()).isEqualTo("Test11");
+        assertThat(storageNearbyInfo.size()).isEqualTo(5);
+        assertThat(storageNearbyInfo.get(0).getName()).isEqualTo("Test11");
+        assertThat(storageNearbyInfo.get(0).getCoord()).isEqualTo(new Coord(126.0 + 0.00001*11, 37.0 + 0.00001*11));
     }
 
 }

@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class StorageInfoDto {
+public class StorageInfo {
     private Long id;
     private String name;
     private String imgUrl;
     private String description;
     private String address;
 
-    public StorageInfoDto(Storage storage) {
+    public StorageInfo(Storage storage) {
         this.id = storage.getId();
         this.name = storage.getName();
         this.imgUrl = storage.getImgUrl();

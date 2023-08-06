@@ -7,7 +7,6 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -24,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class UserRepositoryTest {
     @Autowired
@@ -51,9 +49,7 @@ class UserRepositoryTest {
         userRepository.save(testUser);
 
         // then
-        User findUser = userRepository.findById(testUser.getId()).orElseGet(() -> {
-            return User.builder().userKey("FAIL").build();
-        });
+        User findUser = userRepository.findById(testUser.getId()).orElseGet(() -> User.builder().userKey("FAIL").build());
         assertEquals(findUser.getUserKey(), testUser.getUserKey());
     }
 
@@ -85,9 +81,7 @@ class UserRepositoryTest {
         em.clear();
 
         // when
-        User findUser = userRepository.findUserWithProfileById(testUser.getId()).orElseGet(() -> {
-            return User.builder().userKey("FAIL").build();
-        });
+        User findUser = userRepository.findUserWithProfileById(testUser.getId()).orElseGet(() -> User.builder().userKey("FAIL").build());
 
         // then
         assertNotEquals("FAIL", findUser.getUserKey());
@@ -113,9 +107,7 @@ class UserRepositoryTest {
         em.clear();
 
         // when
-        User savedUser = userRepository.findByUserKey("TEST_1234").orElseGet(() -> {
-            return User.builder().userKey("FAIL").build();
-        });
+        User savedUser = userRepository.findByUserKey("TEST_1234").orElseGet(() -> User.builder().userKey("FAIL").build());
 
         userRepository.deleteUserById(savedUser.getId());
 
@@ -123,9 +115,7 @@ class UserRepositoryTest {
         em.clear();
 
         // then
-        User findUser = userRepository.findByUserKey("TEST_1234").orElseGet(() -> {
-            return User.builder().userKey("SUCCESS").build();
-        });
+        User findUser = userRepository.findByUserKey("TEST_1234").orElseGet(() -> User.builder().userKey("SUCCESS").build());
 
         assertEquals("SUCCESS", findUser.getUserKey());
     }
@@ -151,9 +141,7 @@ class UserRepositoryTest {
         em.clear();
 
         // then
-        UserProfile findUserProfile = userProfileRepository.findById(saveduUserProfileId).orElseGet(() -> {
-            return UserProfile.builder().nickname("SUCCESS").build();
-        });
+        UserProfile findUserProfile = userProfileRepository.findById(saveduUserProfileId).orElseGet(() -> UserProfile.builder().nickname("SUCCESS").build());
 
         assertEquals("SUCCESS", findUserProfile.getNickname());
     }
