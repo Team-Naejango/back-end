@@ -1,6 +1,7 @@
 package com.example.naejango.domain.user.dto.request;
 
 import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.global.common.handler.EnumConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,11 +19,12 @@ import javax.validation.constraints.Size;
 @Builder
 public class CreateUserProfileRequestDto {
 
-    @NotEmpty(message = "나이는 필수 입력값 입니다.")
-    @Size(min = 1, max = 200, message = "올바른 나이를 입력하세요")
+    @NotEmpty
+    @Size(min = 8, max = 8, message = "올바른 생년월일을 입력하세요. (yyyymmdd)")
     private String birth;
 
-    @NotNull
+    @EnumConstraint(enumClass = Gender.class,
+            message = "올바른 성별 값을 입력하세요. (남/여)")
     private Gender gender;
 
     @NotBlank
@@ -34,7 +36,7 @@ public class CreateUserProfileRequestDto {
     private String intro;
 
     @NotEmpty
-    @Length(min = 10, max = 11)
+    @Length(min = 11, max = 11, message = "올바른 전화번호를 입력하세요 (01012345678")
     private String phoneNumber;
 
     @NotNull

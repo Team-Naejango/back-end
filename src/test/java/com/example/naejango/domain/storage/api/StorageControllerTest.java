@@ -5,8 +5,10 @@ import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyDto;
+import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
+import com.example.naejango.domain.storage.dto.response.StorageNearbyInfo;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -46,13 +48,14 @@ class StorageControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("createStorage: 창고 생성")
+    @DisplayName("창고 생성")
     void createStorageTest() throws Exception {
         //given
         double testLon = 126.0;
         double testLat = 37.0;
+        Coord testCoord = new Coord(testLon, testLat);
         CreateStorageRequestDto requestDto =
-                new CreateStorageRequestDto("name", "imgUrl", "description", "address", testLon, testLat);
+                new CreateStorageRequestDto("name", "imgUrl", "description", "address", testCoord);
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
@@ -63,6 +66,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
+                        .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
@@ -84,8 +88,9 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("imgUrl").description("이미지 링"),
                                                 fieldWithPath("description").description("창고 소개"),
                                                 fieldWithPath("address").description("주소"),
-                                                fieldWithPath("longitude").description("경도"),
-                                                fieldWithPath("latitude").description("위도")
+                                                fieldWithPath("coord").description("좌표"),
+                                                fieldWithPath("coord.longitude").description("경도"),
+                                                fieldWithPath("coord.latitude").description("위도")
                                         )
                                         .responseFields()
                                         .requestSchema(
@@ -96,7 +101,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("storageList: 요청 회원의 창고 목록 조회")
+    @DisplayName("요청 회원의 창고 목록 조회")
     void storageList() throws Exception {
         // when
         Storage testStorage1 = Storage.builder().id(1L).name("창고1").imgUrl("imgUrl")
@@ -118,7 +123,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
                         .get("http://localhost:8080/api/storage")
-                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
@@ -157,7 +162,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("storageNearbyList: 근처 창고 조회")
+    @DisplayName("좌표 및 반경을 기준으로 창고 조회 (거리 순 정렬 및 페이징 처리)")
     void storageNearbyTest() throws Exception {
         // given
         String centerLongitude ="126.0";
@@ -184,10 +189,10 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         Storage testStorage1 = Storage.builder().id(1L).name("test1").location(testLocation1).address("address1").build();
         Storage testStorage2 = Storage.builder().id(2L).name("test2").location(testLocation2).address("address2").build();
-        StorageNearbyDto storageNearbyDto1 = new StorageNearbyDto(testStorage1, geomUtil.calculateDistance(center, testLocation1));
-        StorageNearbyDto storageNearbyDto2 = new StorageNearbyDto(testStorage2, geomUtil.calculateDistance(center, testLocation2));
+        StorageNearbyInfo storageNearbyInfo1 = new StorageNearbyInfo(testStorage1, geomUtil.calculateDistance(center, testLocation1));
+        StorageNearbyInfo storageNearbyInfo2 = new StorageNearbyInfo(testStorage2, geomUtil.calculateDistance(center, testLocation2));
 
-        List<StorageNearbyDto> content = new ArrayList<>(Arrays.asList(storageNearbyDto1, storageNearbyDto2));
+        List<StorageNearbyInfo> content = new ArrayList<>(Arrays.asList(storageNearbyInfo1, storageNearbyInfo2));
 
         BDDMockito.given(geomUtilMock.createPoint(anyDouble(), anyDouble())).willReturn(center);
         BDDMockito.given(storageServiceMock.countStorageNearby(any(Point.class), anyInt())).willReturn(2);
@@ -204,6 +209,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                         .queryParam("rad", String.valueOf(rad))
                         .queryParam("limit", String.valueOf(limit))
                         .queryParam("page", String.valueOf(page))
+                        .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
@@ -254,5 +260,86 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 Schema.schema("근처 창고 조회 결과")
                                         ).build()
                         )));
+    }
+
+    @Test
+    @Tag("api")
+    @DisplayName("창고 정보 수정")
+    void modifyStorageInfoTest() throws Exception {
+        // given
+        Storage testStorage = Storage.builder().id(1L).name("창고1").imgUrl("imgUrl")
+                .description("집").address("강남")
+                .location(geomUtil.createPoint(12.12, 34.34))
+                .build();
+
+        ModifyStorageInfoRequestDto requestDto = ModifyStorageInfoRequestDto.builder().name("변경된 이름").description("창고 정보 변경").imgUrl("변경 url").build();
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                RestDocumentationRequestBuilders
+                        .patch("http://localhost:8080/api/storage/{storageId}", testStorage.getId())
+                        .header("Authorization", "엑세스 토큰")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        );
+
+        // then
+        verify(storageServiceMock, times(1)).modifyStorageInfo(any(ModifyStorageInfoRequestDto.class), anyLong(), anyLong());
+
+        resultActions.andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+
+        // RestDocs
+        resultActions.andDo(
+                restDocs.document(
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("창고")
+                                        .requestFields(
+                                                fieldWithPath("name").description("창고 이름"),
+                                                fieldWithPath("imgUrl").description("창고 이미지 url"),
+                                                fieldWithPath("description").description("창고 소개")
+                                        )
+                                        .requestSchema(
+                                                Schema.schema("창고 수정 dto")
+                                        )
+                                        .build()
+                        )
+                )
+        );
+    }
+
+    @Test
+    @Tag("api")
+    @DisplayName("창고 삭제")
+    void deleteStorageTest() throws Exception {
+        // given
+        Storage storage = Storage.builder().id(1L).name("창고1").imgUrl("imgUrl")
+                .description("집").address("강남")
+                .location(geomUtil.createPoint(12.12, 34.34))
+                .build();
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                RestDocumentationRequestBuilders
+                        .delete("http://localhost:8080/api/storage/{storageId}", storage.getId())
+                        .header("Authorization", "엑세스 토큰")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        );
+
+        // then
+        verify(storageServiceMock, times(1)).deleteStorage(anyLong(), anyLong());
+
+        // RestDocs
+         resultActions.andDo(restDocs.document(
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("창고")
+                                        .build()
+                        )
+                )
+        );
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StorageNearbyListResponseDto {
-    private List<StorageNearbyDto> content;
+    private List<StorageNearbyInfo> content;
     private int page;
     private int size;
     private int totalCount;
