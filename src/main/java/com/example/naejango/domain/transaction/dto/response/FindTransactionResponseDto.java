@@ -17,6 +17,8 @@ public class FindTransactionResponseDto {
 
     private int amount;
 
+    private String status;
+
     private String traderName;
 
     private String itemName;
@@ -27,6 +29,7 @@ public class FindTransactionResponseDto {
         this.id = transaction.getId();
         this.date = transaction.getDate().toString();
         this.amount = transaction.getAmount();
+        this.status = transaction.getStatus().toString();
         this.traderName = transaction.getTrader().getUserProfile().getNickname();
         this.itemName = transaction.getItem().getName();
         this.itemId = transaction.getItem().getId();
