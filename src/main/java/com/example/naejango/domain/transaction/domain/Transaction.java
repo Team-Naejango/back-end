@@ -44,10 +44,10 @@ public class Transaction {
     private Item item;
 
     public void waitTransaction(){
-        this.status = TransactionStatus.WAITING;
+        this.status = TransactionStatus.REMITTANCE_COMPLETION;
     }
 
     public void completeTransaction(){
-        this.status = TransactionStatus.COMPLETION;
+        this.status = TransactionStatus.TRANSACTION_COMPLETION;
     }
 }

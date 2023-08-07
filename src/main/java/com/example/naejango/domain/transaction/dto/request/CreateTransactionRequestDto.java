@@ -30,7 +30,7 @@ public class CreateTransactionRequestDto {
         return Transaction.builder()
                 .date(LocalDateTime.parse(date, formatter))
                 .amount(amount)
-                .status(TransactionStatus.APPOINTMENT)
+                .status(TransactionStatus.TRANSACTION_APPOINTMENT)
                 .user(user)
                 .trader(trader)
                 .item(item)

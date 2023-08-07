@@ -29,4 +29,8 @@ public class Account {
     public void chargeBalance(int amount) {
         this.balance += amount;
     }
+
+    public void deductBalance(int amount) {
+        this.balance -= amount;
+    }
 }

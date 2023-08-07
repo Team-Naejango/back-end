@@ -17,7 +17,7 @@ public class FindTransactionResponseDto {
 
     private int amount;
 
-    private String status;
+    private String status; // 구매 or 판매
 
     private String traderName;
 

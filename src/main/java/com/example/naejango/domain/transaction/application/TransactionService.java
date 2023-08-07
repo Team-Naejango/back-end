@@ -1,5 +1,7 @@
 package com.example.naejango.domain.transaction.application;
 
+import com.example.naejango.domain.account.domain.Account;
+import com.example.naejango.domain.account.repository.AccountRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.transaction.domain.Transaction;
@@ -26,6 +28,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final AccountRepository accountRepository;
 
     /** 거래 내역 조회 */
     public List<FindTransactionResponseDto> findTransaction(Long userId){
@@ -39,7 +42,7 @@ public class TransactionService {
         return findTransactionResponseDtoList;
     }
 
-    /** 거래 요청 등록 */
+    /** 거래 예약 등록 */
     @Transactional
     public CreateTransactionResponseDto createTransaction(Long userId, CreateTransactionRequestDto createTransactionRequestDto){
         User user = userRepository.findById(userId)
@@ -56,16 +59,20 @@ public class TransactionService {
         return new CreateTransactionResponseDto(savedTransaction);
     }
 
-    /** 거래 완료 대기로 수정 */
+    /** 송금 완료로 수정 */
     @Transactional
     public void waitTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
 
-        if (!Objects.equals(transaction.getUser().getId(), userId)) {
+        if (!Objects.equals(transaction.getTrader().getId(), userId)) {
             throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
         }
 
+        Account userAccount = accountRepository.findByUserId(transaction.getUser().getId());
+        Account traderAccount = accountRepository.findByUserId(userId);
+        userAccount.chargeBalance(transaction.getAmount());
+        traderAccount.deductBalance(transaction.getAmount());
         transaction.waitTransaction();
     }
 
