@@ -30,7 +30,7 @@ public class TransactionController {
         return ResponseEntity.ok().body(findTransactionResponseDtoList);
     }
 
-    /** 거래 요청 등록 */
+    /** 거래 예약 등록 */
     @PostMapping("")
     public ResponseEntity<CreateTransactionResponseDto> createTransaction(Authentication authentication, @RequestBody CreateTransactionRequestDto createTransactionRequestDto){
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
@@ -39,8 +39,17 @@ public class TransactionController {
         return ResponseEntity.created(URI.create("/api/transaction/"+createTransactionResponseDto.getId())).body(createTransactionResponseDto);
     }
 
+    /** 송금 완료 요청 */
+    @PatchMapping("/remittance/{transactionId}")
+    public ResponseEntity<BaseResponseDto> waitTransaction(Authentication authentication, @PathVariable Long transactionId){
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        transactionService.waitTransaction(userId, transactionId);
+
+        return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
+    }
+
     /** 거래 완료 요청 */
-    @PatchMapping("/{transactionId}")
+    @PatchMapping("/completion/{transactionId}")
     public ResponseEntity<BaseResponseDto> completeTransaction(Authentication authentication, @PathVariable Long transactionId){
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         transactionService.completeTransaction(userId, transactionId);

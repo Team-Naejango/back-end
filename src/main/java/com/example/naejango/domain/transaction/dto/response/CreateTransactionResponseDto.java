@@ -29,7 +29,7 @@ public class CreateTransactionResponseDto {
         this.id = transaction.getId();
         this.date = transaction.getDate().toString();
         this.amount = transaction.getAmount();
-        this.status = transaction.getStatus();
+        this.status = transaction.getStatus().toString() ;
         this.userId = transaction.getUser().getId();
         this.traderId = transaction.getTrader().getId();
         this.itemId = transaction.getItem().getId();

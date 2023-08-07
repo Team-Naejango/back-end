@@ -38,6 +38,7 @@ public class FollowService {
 
 
     /** 창고 팔로우 등록 */
+    @Transactional
     public void addFollow(Long userId, Long storageId){
         // 이미 팔로우 등록 되어있는지 체크, DB에 존재하면 true return
         boolean existCheck = followRepository.existsByUserIdAndStorageId(userId, storageId);
@@ -61,6 +62,7 @@ public class FollowService {
 
 
     /** 창고 팔로우 해제 */
+    @Transactional
     public void deleteFollow(Long userId, Long storageId){
         Follow follow = followRepository.findByUserIdAndStorageId(userId, storageId);
         if (follow == null) {

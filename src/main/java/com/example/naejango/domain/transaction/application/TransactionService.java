@@ -1,5 +1,7 @@
 package com.example.naejango.domain.transaction.application;
 
+import com.example.naejango.domain.account.domain.Account;
+import com.example.naejango.domain.account.repository.AccountRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.transaction.domain.Transaction;
@@ -26,20 +28,22 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final AccountRepository accountRepository;
 
     /** 거래 내역 조회 */
     public List<FindTransactionResponseDto> findTransaction(Long userId){
-        List<Transaction> transactionList = transactionRepository.findByUserId(userId);
+        List<Transaction> transactionList = transactionRepository.findByUserIdOrTraderId(userId, userId);
 
         List<FindTransactionResponseDto> findTransactionResponseDtoList = new ArrayList<>();
         for (Transaction transaction : transactionList) {
-            findTransactionResponseDtoList.add(new FindTransactionResponseDto(transaction));
+            findTransactionResponseDtoList.add(new FindTransactionResponseDto(transaction, userId));
         }
 
         return findTransactionResponseDtoList;
     }
 
-    /** 거래 요청 등록 */
+    /** 거래 예약 등록 */
+    @Transactional
     public CreateTransactionResponseDto createTransaction(Long userId, CreateTransactionRequestDto createTransactionRequestDto){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -55,7 +59,25 @@ public class TransactionService {
         return new CreateTransactionResponseDto(savedTransaction);
     }
 
-    /** 거래 완료 요청 */
+    /** 송금 완료로 수정 */
+    @Transactional
+    public void waitTransaction(Long userId, Long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
+
+        if (!Objects.equals(transaction.getTrader().getId(), userId)) {
+            throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
+        }
+
+        Account userAccount = accountRepository.findByUserId(transaction.getUser().getId());
+        Account traderAccount = accountRepository.findByUserId(userId);
+        userAccount.chargeBalance(transaction.getAmount());
+        traderAccount.deductBalance(transaction.getAmount());
+        transaction.waitTransaction();
+    }
+
+    /** 거래 완료로 수정 */
+    @Transactional
     public void completeTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
@@ -68,6 +90,7 @@ public class TransactionService {
     }
 
     /** 거래 취소 */
+    @Transactional
     public void deleteTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));

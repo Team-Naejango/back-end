@@ -1,5 +1,6 @@
 package com.example.naejango.domain.user.api;
 
+import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
@@ -25,6 +26,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final AccountService accountService;
     private final CommonDtoHandler commonDtoHandler;
 
     @PostMapping("/profile")
@@ -33,6 +35,7 @@ public class UserController {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         UserProfile userProfile = new UserProfile(requestDto);
         userService.createUserProfile(userProfile, userId);
+        accountService.createAccount(userId);
         return ResponseEntity.ok().body(null);
     }
 

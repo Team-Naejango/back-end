@@ -2,6 +2,7 @@ package com.example.naejango.domain.transaction.dto.request;
 
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.transaction.domain.Transaction;
+import com.example.naejango.domain.transaction.domain.TransactionStatus;
 import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +30,7 @@ public class CreateTransactionRequestDto {
         return Transaction.builder()
                 .date(LocalDateTime.parse(date, formatter))
                 .amount(amount)
-                .status("waiting")
+                .status(TransactionStatus.TRANSACTION_APPOINTMENT)
                 .user(user)
                 .trader(trader)
                 .item(item)
