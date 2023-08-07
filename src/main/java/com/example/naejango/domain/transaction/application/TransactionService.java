@@ -32,11 +32,11 @@ public class TransactionService {
 
     /** 거래 내역 조회 */
     public List<FindTransactionResponseDto> findTransaction(Long userId){
-        List<Transaction> transactionList = transactionRepository.findByUserId(userId);
+        List<Transaction> transactionList = transactionRepository.findByUserIdOrTraderId(userId, userId);
 
         List<FindTransactionResponseDto> findTransactionResponseDtoList = new ArrayList<>();
         for (Transaction transaction : transactionList) {
-            findTransactionResponseDtoList.add(new FindTransactionResponseDto(transaction));
+            findTransactionResponseDtoList.add(new FindTransactionResponseDto(transaction, userId));
         }
 
         return findTransactionResponseDtoList;
