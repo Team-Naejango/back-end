@@ -78,6 +78,7 @@ public class UserService {
 
     private String getRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
+        if(cookies == null) return null;
         return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
                 .map(Cookie::getValue)
                 .findAny()
