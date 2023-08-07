@@ -30,7 +30,8 @@ public class UserController {
     private final CommonDtoHandler commonDtoHandler;
 
     @PostMapping("/profile")
-    public ResponseEntity<Void> createUserProfile(@RequestBody CreateUserProfileRequestDto requestDto, Authentication authentication) {
+    public ResponseEntity<Void> createUserProfile(@RequestBody @Valid CreateUserProfileRequestDto requestDto,
+                                                  Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         UserProfile userProfile = new UserProfile(requestDto);
         userService.createUserProfile(userProfile, userId);

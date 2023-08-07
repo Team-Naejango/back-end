@@ -7,10 +7,12 @@ public enum ErrorCode {
     STORAGE_NOT_EXIST(HttpStatus.BAD_REQUEST, "창고가 등록되어있지 않습니다."),
 
     /** 401 UNAUTHORIZED : 인증되지 않은 사용자 */
-
+    INVALID_TOKEN_ACCESS(HttpStatus.UNAUTHORIZED, "액세스 토큰 복호화에 실패하였습니다."),
 
     /** 403 FORBIDDEN : 사용자가 콘텐츠에 접근할 권리를 가지고 있지 않음 */
-    INVALID_TOKEN_ACCESS(HttpStatus.FORBIDDEN, "액세스 토큰 복호화에 실패하였습니다."),
+
+    UNAUTHORIZED_MODIFICATION_REQUEST(HttpStatus.FORBIDDEN, "수정 권한이 없습니다."),
+    UNAUTHORIZED_DELETE_REQUEST(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다."),
 
     /** 404 NOT_FOUND : 리소스를 찾을 수 없음 */
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User를 찾을 수 없습니다."),

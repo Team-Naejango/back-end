@@ -3,6 +3,7 @@ package com.example.naejango.domain.storage.domain;
 import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.item.domain.ItemStorage;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
+import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
@@ -61,4 +62,11 @@ public class Storage extends TimeAuditingEntity implements Serializable {
         this.location = location;
         this.itemStorages = new ArrayList<>();
     }
+
+    public void modify(ModifyStorageInfoRequestDto requestDto) {
+        this.description = requestDto.getDescription();
+        this.name = requestDto.getName();
+        this.imgUrl = requestDto.getImgUrl();
+    }
+
 }

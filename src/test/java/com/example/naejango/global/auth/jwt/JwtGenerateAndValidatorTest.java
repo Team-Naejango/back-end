@@ -4,7 +4,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -45,7 +44,6 @@ class JwtGenerateAndValidatorTest {
     }
 
     @Test
-    @Disabled("Github Actions Runner 환경에서 실패: 원인 분석중")
     @DisplayName("decodeJwt: 토큰 복호화 테스트")
     void decodeJwt(){
         // given
@@ -70,7 +68,6 @@ class JwtGenerateAndValidatorTest {
     }
 
     @Test
-    @Disabled("Github Actions Runner 환경에서 실패: 원인 분석중")
     @DisplayName("validateAccessToken: 유효한 access 토큰 검증")
     public void validateAccessTokenTest() {
         // given

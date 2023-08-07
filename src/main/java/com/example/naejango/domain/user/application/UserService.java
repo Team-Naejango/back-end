@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 
 @Service
 @Transactional(readOnly = true)
@@ -76,16 +77,11 @@ public class UserService {
     }
 
     private String getRefreshToken(HttpServletRequest request) {
-        String refreshToken = null;
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie != null && cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE)) {
-                    refreshToken = cookie.getValue();
-                }
-            }
-        }
-        return refreshToken;
+        return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
+                .map(Cookie::getValue)
+                .findAny()
+                .orElseGet(null);
     }
 
     public User findUser(Long userId) {
