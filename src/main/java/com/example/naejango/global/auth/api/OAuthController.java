@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.dto.GuestTokenResponse;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -25,7 +24,7 @@ import java.time.ZoneOffset;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class OauthController {
+public class OAuthController {
 
     private final UserService userService;
     private final UserRepository userRepository;
@@ -54,7 +53,7 @@ public class OauthController {
      * */
 
     @GetMapping("/guest")
-    public ResponseEntity<GuestTokenResponse> guest(HttpServletResponse response, Authentication authentication) {
+    public ResponseEntity<Void> guest(HttpServletResponse response, Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         if (userId != null) return ResponseEntity.ok().body(null);
         User guest = userRepository.findByUserKey("Guest").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -72,11 +71,17 @@ public class OauthController {
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         userService.refreshSignature(guest.getId(), refreshToken);
-        response.addCookie(new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE, refreshToken));
+        Cookie refreshTokenCookie = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+        Cookie accessTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
 
-        GuestTokenResponse tokenResponse = GuestTokenResponse.builder().AccessToken(accessToken).build();
+        response.addCookie(refreshTokenCookie);
+        response.addCookie(accessTokenCookie);
 
-        return ResponseEntity.ok().body(tokenResponse);
+        return ResponseEntity.ok().build();
     }
 
 

@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
@@ -49,7 +50,7 @@ public class JwtValidator {
                 Long userId = decodedRefreshToken.getClaim("userId").asLong();
                 User user = userRepository.findById(userId)
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-                if (isVerifiedSignature(decodedRefreshToken, user)) {
+                if (isVerifiedSignature(decodedRefreshToken, user) || user.getRole() == Role.GUEST) {
                     validateResponse.setValidToken(true);
                     validateResponse.setUserId(userId);
                 } else {

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -71,6 +72,8 @@ public class JwtAuthenticator {
     private void reissueAccessToken(HttpServletResponse response, Long userId) {
         String reissuedAccessToken = jwtGenerator.generateAccessToken(userId);
         Cookie accessTokenCookie = new Cookie("AccessToken", reissuedAccessToken);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
     }
 
@@ -81,8 +84,8 @@ public class JwtAuthenticator {
      * exception : jwtToken을 지니고 있는데 해당 회원이 없는 경우
      */
     private void authenticate (Long userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
         PrincipalDetails principalDetails = new PrincipalDetails(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 principalDetails,
@@ -109,16 +112,11 @@ public class JwtAuthenticator {
      * refresh cookie 가 없는 경우 null 을 반환
      */
     private String getRefreshToken(HttpServletRequest request) {
-        String refreshTokenCookie = null;
         Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE)) {
-                    refreshTokenCookie = cookie.getValue();
-                }
-            }
-        }
-        return refreshTokenCookie;
+        return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
+                .map(Cookie::getValue)
+                .findAny()
+                .orElseGet(null);
     }
 
 }

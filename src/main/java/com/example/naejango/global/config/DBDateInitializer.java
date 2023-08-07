@@ -29,12 +29,12 @@ public class DBDateInitializer implements ApplicationRunner {
      */
     private void addGuestUser() {
         User guest = User.builder().userKey("Guest")
-                .role(Role.USER)
+                .role(Role.GUEST)
                 .password("").build();
 
         UserProfile guestProfile = UserProfile.builder()
                 .nickname("Guest")
-                .phoneNumber("")
+                .phoneNumber("01012345678")
                 .gender(Gender.Male)
                 .birth("20230701")
                 .intro("서비스 둘러보기용 회원입니다.")

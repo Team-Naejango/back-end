@@ -1,6 +1,5 @@
 package com.example.naejango.global.config;
 
-import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.global.auth.filter.JwtAuthenticationFilter;
 import com.example.naejango.global.auth.handler.AccessDeniedHandlerImpl;
 import com.example.naejango.global.auth.handler.OAuthLoginSuccessHandler;
@@ -26,6 +25,12 @@ public class SecurityConfig {
     private final JwtAuthenticator jwtAuthenticator;
     private final CorsConfig corsConfig;
 
+    private final String USER = "USER";
+    private final String ADMIN = "ADMIN";
+    private final String GUEST = "GUEST";
+    private final String TEMPORAL = "TEMPORAL";
+    private final String loginPage = "/localtest";
+
     @Bean
     public AuthenticationManager authenticationManager(){
         return new ProviderManager(new DaoAuthenticationProvider());
@@ -33,7 +38,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf().disable()
                 .formLogin().disable()
@@ -46,15 +50,13 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/user/profile")
-                .hasAnyRole(Role.TEMPORAL.toString(), Role.ADMIN.toString())
-                .antMatchers("/api/user/**")
-                .hasAnyRole(Role.USER.toString(), Role.ADMIN.toString())
-                .antMatchers("/api/admin/**")
-                .hasRole(Role.ADMIN.toString())
+                .hasAnyRole(TEMPORAL, ADMIN)
+                .antMatchers("/api/**")
+                .hasAnyRole(USER, ADMIN, GUEST)
                 .anyRequest().permitAll()
                 .and()
                 .oauth2Login()
-                .loginPage("/localtest")
+                .loginPage(loginPage)
                 .userInfoEndpoint()
                 .userService(principalOauth2UserService)
                 .and()
