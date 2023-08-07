@@ -2,6 +2,7 @@ package com.example.naejango.domain.user.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.Gender;
@@ -40,6 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest extends RestDocsSupportTest {
     @MockBean
     UserService userServiceMock;
+    @MockBean
+    AccountService accountServiceMock;
     @MockBean
     CommonDtoHandler commonDtoHandlerMock;
 
