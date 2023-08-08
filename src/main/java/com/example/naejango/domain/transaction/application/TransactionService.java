@@ -112,7 +112,7 @@ public class TransactionService {
         return new ModifyTransactionResponseDto(savedTransaction);
     }
 
-    /** 거래 취소 */
+    /** 거래 삭제 */
     @Transactional
     public void deleteTransaction(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)

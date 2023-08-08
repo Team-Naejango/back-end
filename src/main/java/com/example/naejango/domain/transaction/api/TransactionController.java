@@ -68,7 +68,7 @@ public class TransactionController {
         return ResponseEntity.ok().body(modifyTransactionResponseDto);
     }
 
-    /** 거래 취소 */
+    /** 거래 삭제 */
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<BaseResponseDto> deleteTransaction(Authentication authentication, @PathVariable Long transactionId) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
