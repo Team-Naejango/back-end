@@ -31,10 +31,11 @@ public class FindTransactionResponseDto {
         this.amount = transaction.getAmount();
         if (transaction.getUser().getId().equals(userId)) {
             this.status = "판매";
+            this.traderName = transaction.getTrader().getUserProfile().getNickname();
         } else if (transaction.getTrader().getId().equals(userId)) {
             this.status = "구매";
+            this.traderName = transaction.getUser().getUserProfile().getNickname();
         }
-        this.traderName = transaction.getTrader().getUserProfile().getNickname();
         this.itemName = transaction.getItem().getName();
         this.itemId = transaction.getItem().getId();
     }
