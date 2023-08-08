@@ -122,6 +122,10 @@ public class TransactionService {
             throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
         }
 
+        // 거래 상태가 예약 인지 체크
+        if (!transaction.getStatus().equals(TransactionStatus.TRANSACTION_APPOINTMENT)) {
+            throw new CustomException(ErrorCode.TRANSACTION_NOT_DELETE);
+        }
         transactionRepository.delete(transaction);
     }
 }
