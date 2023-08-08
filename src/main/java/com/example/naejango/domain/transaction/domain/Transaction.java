@@ -50,4 +50,9 @@ public class Transaction {
     public void completeTransaction(){
         this.status = TransactionStatus.TRANSACTION_COMPLETION;
     }
+
+    public void modifyTransaction(LocalDateTime date, int amount) {
+        this.date = date;
+        this.amount = amount;
+    }
 }

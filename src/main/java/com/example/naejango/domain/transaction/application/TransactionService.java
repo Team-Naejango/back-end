@@ -5,9 +5,12 @@ import com.example.naejango.domain.account.repository.AccountRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.transaction.domain.Transaction;
+import com.example.naejango.domain.transaction.domain.TransactionStatus;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionRequestDto;
+import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
+import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
 import com.example.naejango.domain.transaction.repository.TransactionRepository;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
@@ -87,6 +90,26 @@ public class TransactionService {
         }
 
         transaction.completeTransaction();
+    }
+
+    /** 거래 정보 수정(거래일시, 거래 금액) 거래 예약 상태에서만 가능 */
+    @Transactional
+    public ModifyTransactionResponseDto modifyTransaction(Long userId, Long transactionId, ModifyTransactionRequestDto modifyTransactionRequestDto) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
+
+        if (!Objects.equals(transaction.getUser().getId(), userId)) { // 요청 보낸 유저와 거래를 등록한 유저가 같은지 확인
+            throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
+        }
+
+        // 거래 상태가 예약 인지 체크
+        if (!transaction.getStatus().equals(TransactionStatus.TRANSACTION_APPOINTMENT)) {
+            throw new CustomException(ErrorCode.TRANSACTION_NOT_MODIFICATION);
+        }
+        modifyTransactionRequestDto.toEntity(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        return new ModifyTransactionResponseDto(savedTransaction);
     }
 
     /** 거래 취소 */

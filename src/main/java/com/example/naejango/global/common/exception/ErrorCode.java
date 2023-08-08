@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     /** 400 BAD_REQUEST : 잘못된 요청 */
     STORAGE_NOT_EXIST(HttpStatus.BAD_REQUEST, "창고가 등록되어있지 않습니다."),
+    TRANSACTION_NOT_MODIFICATION(HttpStatus.BAD_REQUEST, "수정 할 수 없는 정보입니다."),
 
     /** 401 UNAUTHORIZED : 인증되지 않은 사용자 */
     INVALID_TOKEN_ACCESS(HttpStatus.UNAUTHORIZED, "액세스 토큰 복호화에 실패하였습니다."),

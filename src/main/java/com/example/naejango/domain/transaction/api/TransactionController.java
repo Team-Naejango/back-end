@@ -2,8 +2,10 @@ package com.example.naejango.domain.transaction.api;
 
 import com.example.naejango.domain.transaction.application.TransactionService;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionRequestDto;
+import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
+import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,15 @@ public class TransactionController {
         transactionService.completeTransaction(userId, transactionId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
+    }
+
+    /** 거래 정보 수정(거래일시, 거래 금액) 거래 예약 상태에서만 가능 */
+    @PatchMapping("/{transactionId}")
+    public ResponseEntity<ModifyTransactionResponseDto> modifyTransaction(Authentication authentication, @PathVariable Long transactionId, @RequestBody ModifyTransactionRequestDto modifyTransactionRequestDto) {
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        ModifyTransactionResponseDto modifyTransactionResponseDto = transactionService.modifyTransaction(userId, transactionId, modifyTransactionRequestDto);
+
+        return ResponseEntity.ok().body(modifyTransactionResponseDto);
     }
 
     /** 거래 취소 */
