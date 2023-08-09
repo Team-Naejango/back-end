@@ -25,6 +25,7 @@ public class SecurityConfig {
     private final JwtAuthenticator jwtAuthenticator;
     private final CorsConfig corsConfig;
 
+    // 상수 관리를 별도로 진행할지 검토 예정
     private final String USER = "USER";
     private final String ADMIN = "ADMIN";
     private final String GUEST = "GUEST";
@@ -49,6 +50,8 @@ public class SecurityConfig {
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/api/auth/guest")
+                .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/profile")
                 .hasAnyRole(TEMPORAL, ADMIN)
                 .antMatchers("/api/**")
