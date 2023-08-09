@@ -117,7 +117,7 @@ public class JwtAuthenticator {
         return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
                 .map(Cookie::getValue)
                 .findAny()
-                .orElseGet(null);
+                .orElse(null);
     }
 
 }
