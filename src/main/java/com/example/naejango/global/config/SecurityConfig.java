@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final String ADMIN = "ADMIN";
     private final String GUEST = "GUEST";
     private final String TEMPORAL = "TEMPORAL";
-    private final String loginPage = "/localtest";
+    private final String loginPage = "/api/auth/localtest";
 
     @Bean
     public AuthenticationManager authenticationManager(){
@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/auth/guest")
+                .antMatchers("/api/auth/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/profile")
                 .hasAnyRole(TEMPORAL, ADMIN)

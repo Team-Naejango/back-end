@@ -26,7 +26,8 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        System.out.println("login");
         Arrays.stream(request.getCookies())
                 .filter(cookie -> cookie.getName().equals("RefreshToken"))
                 .findAny()
@@ -34,6 +35,8 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                         cookie -> {},
                         () -> generateJWT(authentication, response)
                 );
+
+        response.sendRedirect(redirectUrl);
     }
 
     private void generateJWT(Authentication authentication, HttpServletResponse response) {
@@ -50,12 +53,5 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         refreshTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
-
-
-        try {
-            response.sendRedirect(redirectUrl);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
