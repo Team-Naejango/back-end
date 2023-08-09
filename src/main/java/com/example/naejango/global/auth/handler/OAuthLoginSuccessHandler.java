@@ -23,6 +23,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserService userService;
     private final JwtGenerator jwtGenerator;
     private final CommonDtoHandler commonDtoHandler;
+    private final String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -47,8 +48,10 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         accessTokenCookie.setPath("/");
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
 
-        String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
+
         try {
             response.sendRedirect(redirectUrl);
         } catch (IOException e) {
