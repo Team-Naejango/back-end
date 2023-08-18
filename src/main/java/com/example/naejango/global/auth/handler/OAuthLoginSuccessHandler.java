@@ -24,12 +24,15 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtGenerator jwtGenerator;
     private final CommonDtoHandler commonDtoHandler;
     private final String redirectUrl = "http://localhost:3000/oauth/kakaoCallback";
-    private final String localFrontDomain = "http://localhost:3000";
-    private final String FrontDomain = "https://d1ad0vl3i2dudp.cloudfront.net";
 
+
+    /**
+     * OAuth 로그인 처리가 성공적으로 수행되어 Authentication 객체가 만들어 진 경우 실행되는 메서드.
+     *  - 만약 RefreshToken 기존에 이미 있는 경우에는 해당 로그인 절차를 무시
+     *  - RefreshToken 이 없는 경우에만 RefreshToken 을 발급
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        System.out.println("login");
         Arrays.stream(request.getCookies())
                 .filter(cookie -> cookie.getName().equals("RefreshToken"))
                 .findAny()
@@ -37,7 +40,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                         cookie -> {},
                         () -> generateJWT(authentication, response)
                 );
-
         response.sendRedirect(redirectUrl);
     }
 
@@ -48,15 +50,13 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         userService.refreshSignature(userId, refreshToken);
 
         Cookie accessTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
-        Cookie refreshTokenCookie1 = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
-        Cookie refreshTokenCookie2 = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+        Cookie refreshTokenCookie = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
         accessTokenCookie.setHttpOnly(false); // 자바스크립트 접근 허용
-        refreshTokenCookie1.setHttpOnly(true);
-        refreshTokenCookie1.setPath(localFrontDomain);
-        refreshTokenCookie2.setHttpOnly(true);
-        refreshTokenCookie2.setPath(FrontDomain);
+        refreshTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
+        refreshTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie1);
-        response.addCookie(refreshTokenCookie2);
+        response.addCookie(refreshTokenCookie);
     }
+
 }

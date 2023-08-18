@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
@@ -22,53 +21,43 @@ public class JwtValidator {
     private final UserRepository userRepository;
 
     public ValidateTokenResponseDto validateAccessToken(String accessToken) {
-        ValidateTokenResponseDto validateResponse = new ValidateTokenResponseDto();
-
-        // AccessToken 의 유효성 검증
-        if (accessToken != null) {
-            DecodedJWT decodedAccessToken = decodeJwt(accessToken);
-            if (isExpiredToken(decodedAccessToken)) {
-                validateResponse.setValidToken(false);
-            } else {
-                validateResponse.setValidToken(true);
-                validateResponse.setUserId(decodedAccessToken.getClaim("userId").asLong());
-            }
-        } else {
-            validateResponse.setValidToken(false);
+        if (accessToken == null) {
+            return new ValidateTokenResponseDto(null, false);
         }
-        return validateResponse;
+        DecodedJWT decodedAccessToken = decodeJwt(accessToken);
+        if (isExpiredToken(decodedAccessToken)) {
+            return new ValidateTokenResponseDto(null, false);
+        }
+        return new ValidateTokenResponseDto(decodedAccessToken.getClaim("userId").asLong(), true);
     }
 
     public ValidateTokenResponseDto validateRefreshToken(String refreshToken) {
-        ValidateTokenResponseDto validateResponse = new ValidateTokenResponseDto();
-
-        if (refreshToken != null) {
-            DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
-            if(isExpiredToken(decodedRefreshToken)) {
-                validateResponse.setValidToken(false);
-            } else {
-                Long userId = decodedRefreshToken.getClaim("userId").asLong();
-                User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-                if (isVerifiedSignature(decodedRefreshToken, user) || user.getRole() == Role.GUEST) {
-                    validateResponse.setValidToken(true);
-                    validateResponse.setUserId(userId);
-                } else {
-                    validateResponse.setValidToken(false);
-                }
-            }
-        } else {
-            validateResponse.setValidToken(false);
+        if (refreshToken == null) {
+            return new ValidateTokenResponseDto(null, false);
         }
 
-        return validateResponse;
+        DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
+
+        if(isExpiredToken(decodedRefreshToken)) {
+            return new ValidateTokenResponseDto(null, false);
+        }
+
+        Long userId = decodedRefreshToken.getClaim("userId").asLong();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!isVerifiedSignature(decodedRefreshToken, user)) {
+            return new ValidateTokenResponseDto(null, false);
+        }
+
+        return new ValidateTokenResponseDto(userId, true);
     }
 
     public DecodedJWT decodeJwt(String token){
         try {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token);
         } catch (JWTVerificationException | IllegalArgumentException e) {
-            // Token이 있으나 복호화 실패
+            // Token 이 있으나 복호화 실패
             throw new CustomException(ErrorCode.INVALID_TOKEN_ACCESS);
         }
     }
@@ -78,8 +67,10 @@ public class JwtValidator {
         return exp.isBefore(Instant.now());
     }
 
-    public boolean isVerifiedSignature(DecodedJWT decodedJWT, User user) {
-        return user.getSignature() == null || user.getSignature().equals(decodedJWT.getSignature());
+    public boolean isVerifiedSignature(DecodedJWT decodedRefreshToken, User user) {
+        if(user.getSignature() == null) return false;
+        if(!user.getSignature().equals(decodedRefreshToken.getSignature())) return false;
+        return true;
     }
 
 }

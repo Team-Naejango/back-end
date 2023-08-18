@@ -4,11 +4,15 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
     /** 400 BAD_REQUEST : 잘못된 요청 */
+
+    ALREADY_LOGGED_IN(HttpStatus.BAD_REQUEST, "이미 로그인 된 회원입니다."),
     STORAGE_NOT_EXIST(HttpStatus.BAD_REQUEST, "창고가 등록되어있지 않습니다."),
     TRANSACTION_NOT_MODIFICATION(HttpStatus.BAD_REQUEST, "수정 할 수 없는 거래입니다."),
     TRANSACTION_NOT_DELETE(HttpStatus.BAD_REQUEST, "삭제 할 수 없는 거래입니다."),
 
     /** 401 UNAUTHORIZED : 인증되지 않은 사용자 */
+
+    NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "로그인 되어 있지 않은 상태입니다."),
     INVALID_TOKEN_ACCESS(HttpStatus.UNAUTHORIZED, "액세스 토큰 복호화에 실패하였습니다."),
 
     /** 403 FORBIDDEN : 사용자가 콘텐츠에 접근할 권리를 가지고 있지 않음 */
