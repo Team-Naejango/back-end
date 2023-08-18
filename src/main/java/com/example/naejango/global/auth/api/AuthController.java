@@ -32,7 +32,6 @@ public class AuthController {
     private final UserService userService;
     private final CommonDtoHandler commonDtoHandler;
 
-
     /**
      * 현재 가지고 있는 RefreshToken 쿠키(및 AccessToken 쿠키)를 만료시키고
      * User 객체의 Signature 도 null로 설정
@@ -45,12 +44,14 @@ public class AuthController {
         Arrays.stream(request.getCookies()).forEach(cookie -> {
             if(cookie.getName().equals("RefreshToken")) {
                 cookie.setPath("/");
+                cookie.setSecure(true);
                 cookie.setHttpOnly(true);
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
             }
             if (cookie.getName().equals("AccessToken")) {
                 cookie.setPath("/");
+                cookie.setSecure(true);
                 cookie.setHttpOnly(false);
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
@@ -91,6 +92,10 @@ public class AuthController {
         Cookie accessTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
         accessTokenCookie.setHttpOnly(false);
         refreshTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);
+        refreshTokenCookie.setSecure(true);
+        accessTokenCookie.setDomain("naejango.site");
+        refreshTokenCookie.setDomain("naejango.site");
         refreshTokenCookie.setPath("/");
         accessTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);

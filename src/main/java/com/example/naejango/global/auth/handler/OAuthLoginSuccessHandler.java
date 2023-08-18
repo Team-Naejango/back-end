@@ -53,6 +53,10 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         Cookie refreshTokenCookie = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
         accessTokenCookie.setHttpOnly(false); // 자바스크립트 접근 허용
         refreshTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);
+        refreshTokenCookie.setSecure(true);
+        accessTokenCookie.setDomain("naejango.site");
+        refreshTokenCookie.setDomain("naejango.site");
         accessTokenCookie.setPath("/");
         refreshTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
