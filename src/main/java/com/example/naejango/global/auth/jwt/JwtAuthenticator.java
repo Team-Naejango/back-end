@@ -35,12 +35,11 @@ public class JwtAuthenticator {
      */
     public void jwtAuthenticate(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = this.getAccessToken(request);
+        String refreshToken = this.getRefreshToken(request);
 
-        // access token 이 있는 경우
         if (accessToken != null) {
             // access token 유효성 검증 수행
             ValidateTokenResponseDto ValidateAccessTokenResponseDto = jwtValidator.validateAccessToken(accessToken);
-            // access token 이 유효한 경우
             if (ValidateAccessTokenResponseDto.isValidToken()) {
                 // Authenticate 진행
                 authenticate(ValidateAccessTokenResponseDto.getUserId());
@@ -48,12 +47,9 @@ public class JwtAuthenticator {
             }
         }
 
-        String refreshToken = this.getRefreshToken(request);
-        // access token 은 없고 refresh token 이 있는 경우
         if (refreshToken != null) {
             // refresh token 유효성 검증 수행
             ValidateTokenResponseDto refreshValidateTokenResponseDto = jwtValidator.validateRefreshToken(refreshToken);
-            // refresh token 이 유효한 경우
             if (refreshValidateTokenResponseDto.isValidToken()) {
                 // access token 을 재발행하여 cookie 로 응답
                 reissueAccessToken(response, refreshValidateTokenResponseDto.getUserId());
@@ -61,7 +57,6 @@ public class JwtAuthenticator {
                 authenticate(refreshValidateTokenResponseDto.getUserId());
             }
         }
-
     }
 
     /**
@@ -72,7 +67,7 @@ public class JwtAuthenticator {
     private void reissueAccessToken(HttpServletResponse response, Long userId) {
         String reissuedAccessToken = jwtGenerator.generateAccessToken(userId);
         Cookie accessTokenCookie = new Cookie("AccessToken", reissuedAccessToken);
-        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setHttpOnly(false);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
     }

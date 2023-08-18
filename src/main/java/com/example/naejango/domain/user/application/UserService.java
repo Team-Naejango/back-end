@@ -2,6 +2,7 @@ package com.example.naejango.domain.user.application;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -43,6 +45,28 @@ public class UserService {
     }
 
     @Transactional
+    public Long createGuest() {
+        String uuid = UUID.randomUUID().toString();
+
+        User guest = User.builder().userKey("Guest"+uuid)
+                .role(Role.GUEST)
+                .password("").build();
+
+        UserProfile guestProfile = UserProfile.builder()
+                .nickname("Guest")
+                .phoneNumber("01012345678")
+                .gender(Gender.Male)
+                .birth("20230701")
+                .intro("서비스 둘러보기용 회원입니다.")
+                .imgUrl("").build();
+
+        userRepository.save(guest);
+        createUserProfile(guestProfile, guest.getId());
+
+        return guest.getId();
+    }
+
+    @Transactional
     public void createUserProfile(UserProfile userProfile, Long userId) {
         userProfileRepository.save(userProfile);
         User persistenceUser = findUser(userId);
@@ -61,6 +85,12 @@ public class UserService {
     public void refreshSignature(Long userId, String refreshToken){
         User persistenceUser = findUser(userId);
         persistenceUser.refreshSignature(JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(refreshToken).getSignature());
+    }
+
+    @Transactional
+    public void deleteSignature(Long userId) {
+        User persistenceUser = findUser(userId);
+        persistenceUser.refreshSignature(null);
     }
 
     @Transactional
