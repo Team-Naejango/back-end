@@ -2,6 +2,7 @@ package com.example.naejango.global.config;
 
 import com.example.naejango.global.auth.filter.JwtAuthenticationFilter;
 import com.example.naejango.global.auth.handler.AccessDeniedHandlerImpl;
+import com.example.naejango.global.auth.handler.OAuthLoginFailureHandler;
 import com.example.naejango.global.auth.handler.OAuthLoginSuccessHandler;
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;
 import com.example.naejango.global.auth.principal.PrincipalOAuth2UserService;
@@ -16,21 +17,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static com.example.naejango.domain.user.domain.Role.*;
+
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final PrincipalOAuth2UserService principalOauth2UserService;
-    private final OAuthLoginSuccessHandler oauthLoginSuccessHandler;
+    private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
+    private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
     private final AccessDeniedHandlerImpl accessDeniedHandler;
     private final JwtAuthenticator jwtAuthenticator;
     private final CorsConfig corsConfig;
-
-    // 상수 관리를 별도로 진행할지 검토 예정
-    private final String USER = "USER";
-    private final String ADMIN = "ADMIN";
-    private final String GUEST = "GUEST";
-    private final String TEMPORAL = "TEMPORAL";
-    private final String loginPage = "/api/auth/localtest";
 
     @Bean
     public AuthenticationManager authenticationManager(){
@@ -53,17 +50,17 @@ public class SecurityConfig {
                 .antMatchers("/api/auth/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/profile")
-                .hasAnyRole(TEMPORAL, ADMIN)
+                .hasAnyRole(TEMPORAL.toString(), ADMIN.toString())
                 .antMatchers("/api/**")
-                .hasAnyRole(USER, ADMIN, GUEST)
+                .hasAnyRole(USER.toString(), ADMIN.toString(), GUEST.toString())
                 .anyRequest().permitAll()
                 .and()
                 .oauth2Login()
-                .loginPage(loginPage)
                 .userInfoEndpoint()
                 .userService(principalOauth2UserService)
                 .and()
-                .successHandler(oauthLoginSuccessHandler);
+                .successHandler(oAuthLoginSuccessHandler)
+                .failureHandler(oAuthLoginFailureHandler);
         return http.build();
     }
 }

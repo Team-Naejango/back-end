@@ -1,10 +1,15 @@
 package com.example.naejango.global.auth.handler;
 
 import com.example.naejango.domain.user.domain.Role;
-import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.auth.dto.ReissueAccessTokenResponseDto;
+import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
+import com.example.naejango.global.auth.principal.PrincipalDetails;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,21 +28,47 @@ import java.io.IOException;
 @Slf4j
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 
-    private final CommonDtoHandler commonDtoHandler;
-
-    private final String loginPage = "/";
-    private final String joinPage = "/"; // 임시
+    private final ObjectMapper objectMapper;
+    private final AccessTokenReissuer accessTokenReissuer;
 
     /**
-     * 권한이 없는 요청은 전부 Custom 403 페이지로 redirect
+     * 권한이 없는 요청에 대한 처리
+     * 기본적으로 UNAUTHORIZED 에러코드를 반환합니다.
+     *
      */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = commonDtoHandler.userFromAuthentication(authentication);
-        // 로그인 되지 않은 회원의 접근
-        if (user == null) response.sendRedirect(loginPage);
-        // Temporal 회원의 접근
-        if (user.getRole() == Role.TEMPORAL) response.sendRedirect(joinPage);
+        String reissuedAccessToken = accessTokenReissuer.reissueAccessToken(request);
+
+        if(authentication == null && reissuedAccessToken == null) {
+            throw new CustomException(ErrorCode.NOT_LOGGED_IN);
+        }
+
+        if (authentication == null && reissuedAccessToken != null) {
+            var responseBody = new ReissueAccessTokenResponseDto(ErrorCode.ACCESSTOKEN_EXPIRED, reissuedAccessToken);
+            generateResponse(responseBody, response);
+            return;
+        }
+
+        if (authentication != null && isTemporalUser(authentication)) {
+            throw new CustomException(ErrorCode.SIGNUP_INCOMPLETE);
+        }
+
+        throw new CustomException(ErrorCode.UNAUTHORIZED);
     }
+
+    private void generateResponse(ReissueAccessTokenResponseDto responseDto, HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(responseDto));
+    }
+
+    private boolean isTemporalUser(Authentication authentication) {
+        return ((PrincipalDetails) authentication.getPrincipal()).getRole().equals(Role.TEMPORAL);
+    }
+
+
+
 }

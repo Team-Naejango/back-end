@@ -3,6 +3,7 @@ package com.example.naejango.global.auth.api;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.application.UserService;
+import com.example.naejango.global.auth.jwt.JwtCookieSetter;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
@@ -31,6 +31,7 @@ public class AuthController {
 
     private final UserService userService;
     private final CommonDtoHandler commonDtoHandler;
+    private final JwtCookieSetter jwtCookieSetter;
 
     /**
      * 현재 가지고 있는 RefreshToken 쿠키(및 AccessToken 쿠키)를 만료시키고
@@ -43,18 +44,10 @@ public class AuthController {
 
         Arrays.stream(request.getCookies()).forEach(cookie -> {
             if(cookie.getName().equals("RefreshToken")) {
-                cookie.setPath("/");
-                cookie.setSecure(true);
-                cookie.setHttpOnly(true);
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
+                jwtCookieSetter.deleteRefreshTokenCookie(cookie, response);
             }
             if (cookie.getName().equals("AccessToken")) {
-                cookie.setPath("/");
-                cookie.setSecure(true);
-                cookie.setHttpOnly(false);
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
+                jwtCookieSetter.deleteAccessTokenCookie(cookie, response);
             }
         });
 
@@ -88,18 +81,9 @@ public class AuthController {
 
         userService.refreshSignature(guestId, refreshToken);
 
-        Cookie refreshTokenCookie = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
-        Cookie accessTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
-        accessTokenCookie.setHttpOnly(false);
-        refreshTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(true);
-        refreshTokenCookie.setSecure(true);
-        accessTokenCookie.setDomain("naejango.site");
-        refreshTokenCookie.setDomain("naejango.site");
-        refreshTokenCookie.setPath("/");
-        accessTokenCookie.setPath("/");
-        response.addCookie(refreshTokenCookie);
-        response.addCookie(accessTokenCookie);
+        jwtCookieSetter.addAccessTokenCookie(accessToken, response);
+        jwtCookieSetter.addRefreshTokenCookie(refreshToken, response);
+
         return ResponseEntity.ok().build();
     }
 
