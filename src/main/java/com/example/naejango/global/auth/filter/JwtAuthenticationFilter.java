@@ -1,7 +1,6 @@
 package com.example.naejango.global.auth.filter;
 
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -16,7 +15,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final JwtAuthenticator jwtAuthenticator;
 
-    @Autowired
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtAuthenticator jwtAuthenticator) {
         super(authenticationManager);
         this.jwtAuthenticator = jwtAuthenticator;
@@ -30,7 +28,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        jwtAuthenticator.jwtAuthenticate(request, response);
+        jwtAuthenticator.authenticateWithAccessToken(request);
         chain.doFilter(request, response);
     }
 }
