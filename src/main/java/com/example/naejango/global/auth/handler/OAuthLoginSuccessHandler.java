@@ -24,7 +24,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final CommonDtoHandler commonDtoHandler;
     private final JwtCookieSetter jwtCookieSetter;
     private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
-    private String localRedirectUrl = "http://localhost:3000/oauth/kakaoCallback";
+    private final String localRedirectUrl = "http://localhost:3000/oauth/kakaoCallback";
 
     /**
      * OAuth 로그인 처리가 성공적으로 수행되어 Authentication 객체가 만들어 진 경우 실행되는 메서드.
@@ -32,19 +32,31 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
      *  - RefreshToken 이 없는 경우에만 RefreshToken 을 발급
      */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Arrays.stream(request.getCookies())
                 .filter(cookie -> cookie.getName().equals("RefreshToken"))
                 .findAny()
                 .ifPresentOrElse(
-                        cookie -> {},
-                        () -> generateAndSetTokenCookies(authentication, response)
+                        cookie -> {
+                            try {
+                                response.sendRedirect(localRedirectUrl);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        },
+                        () -> {
+                            try {
+                                generateAndSetTokenCookies(authentication, response);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                 );
 
-        response.sendRedirect(localRedirectUrl);
+
     }
 
-    private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) {
+    private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) throws IOException {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
 
         String accessToken = jwtGenerator.generateAccessToken(userId);
@@ -54,9 +66,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         jwtCookieSetter.addAccessTokenCookie(accessToken, response);
         jwtCookieSetter.addRefreshTokenCookie(refreshToken, response);
 
-        localRedirectUrl += ("?accesstoken=" + accessToken); // 로컬 개발환경을 위한 url
+        response.sendRedirect(localRedirectUrl + "?accesstoken=" + accessToken);
     }
 }
-
-
-
