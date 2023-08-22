@@ -65,7 +65,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .post("http://localhost:8080/api/user/profile")
+                        .post("/api/user/profile")
                         .header("Authorization", "access 토큰")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +124,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .get("http://localhost:8080/api/user/profile")
+                        .get("/api/user/profile")
                         .header("Authorization", "access token")
         );
 
@@ -189,7 +189,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .patch("http://localhost:8080/api/user/profile")
+                        .patch("/api/user/profile")
                         .header("Authorization", "access token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
@@ -239,7 +239,7 @@ class UserControllerTest extends RestDocsSupportTest {
     void deleteUserTest() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .delete("http://localhost:8080/api/user")
+                        .delete("/api/user")
                         .header("Authorization", "access 토큰")
                         .cookie(new Cookie("Refresh_Token_Cookie", "Refresh Token"))
         );

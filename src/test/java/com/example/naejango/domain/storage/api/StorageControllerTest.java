@@ -62,7 +62,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .post("http://localhost:8080/api/storage")
+                        .post("/api/storage")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
@@ -122,7 +122,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .get("http://localhost:8080/api/storage")
+                        .get("/api/storage")
                         .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
@@ -202,7 +202,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .get("http://localhost:8080/api/storage/nearby")
+                        .get("/api/storage/nearby")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .queryParam("lon", centerLongitude)
                         .queryParam("lat", centerLatitude)
@@ -277,7 +277,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .patch("http://localhost:8080/api/storage/{storageId}", testStorage.getId())
+                        .patch("/api/storage/{storageId}", testStorage.getId())
                         .header("Authorization", "엑세스 토큰")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
@@ -324,7 +324,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
-                        .delete("http://localhost:8080/api/storage/{storageId}", storage.getId())
+                        .delete("/api/storage/{storageId}", storage.getId())
                         .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
