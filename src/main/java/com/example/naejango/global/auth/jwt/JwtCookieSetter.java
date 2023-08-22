@@ -10,6 +10,20 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 public class JwtCookieSetter {
 
+    private void setAccessTokenCookie(Cookie accessTokenCookie) {
+        accessTokenCookie.setHttpOnly(false);
+//        accessTokenCookie.setSecure(true);
+//        accessTokenCookie.setDomain("naejango.site");
+        accessTokenCookie.setPath("/");
+    }
+
+    private void setRefreshTokenCookie(Cookie refreshTokenCookie) {
+        refreshTokenCookie.setHttpOnly(true);
+//        refreshTokenCookie.setSecure(true);
+//        refreshTokenCookie.setDomain("naejango.site");
+        refreshTokenCookie.setPath("/");
+    }
+
     public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
         Cookie refreshTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
         setRefreshTokenCookie(refreshTokenCookie);
@@ -33,17 +47,5 @@ public class JwtCookieSetter {
         response.addCookie(refreshTokenCookie);
     }
 
-    private void setRefreshTokenCookie(Cookie refreshTokenCookie) {
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setDomain("naejango.site");
-        refreshTokenCookie.setPath("/");
-    }
 
-    private void setAccessTokenCookie(Cookie accessTokenCookie) {
-        accessTokenCookie.setHttpOnly(false);
-        accessTokenCookie.setSecure(true);
-        accessTokenCookie.setDomain("naejango.site");
-        accessTokenCookie.setPath("/");
-    }
 }

@@ -39,10 +39,8 @@ public class AuthController {
      */
     @GetMapping("/logout")
     public ResponseEntity<Void> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        userService.deleteSignature(userId);
-
         Arrays.stream(request.getCookies()).forEach(cookie -> {
+            System.out.println("쿠키삭제");
             if(cookie.getName().equals("RefreshToken")) {
                 jwtCookieSetter.deleteRefreshTokenCookie(cookie, response);
             }
@@ -50,7 +48,8 @@ public class AuthController {
                 jwtCookieSetter.deleteAccessTokenCookie(cookie, response);
             }
         });
-
+        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        userService.deleteSignature(userId);
         return ResponseEntity.ok().body(null);
     }
 
