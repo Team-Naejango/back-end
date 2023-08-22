@@ -116,7 +116,7 @@ def serverUrl = properties.getProperty('server-url')
 
 // openapi3 설정
 openapi3 {
-	servers = [{url = "http://localhost:8080"}, {url = serverUrl}]
+	servers = [{url = serverUrl}, {url = "http://localhost:8080"}]
 	title = "Restdocs-Swagger API Documentation"
 	description = "Spring REST Docs with SwaggerUI"
 	version = "0.0.1"
