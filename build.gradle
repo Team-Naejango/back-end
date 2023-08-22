@@ -124,14 +124,31 @@ openapi3 {
 	outputDirectory = "${project.buildDir}/api-spec"
 }
 
-tasks.register('copyApiSpec', Copy){
+tasks.register('setSecuritySchemes'){
 	dependsOn 'openapi3'
+
+	doFirst{
+		File file = new File("${project.buildDir}/api-spec/openapi3.yaml")
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))
+		writer.write("  securitySchemes:\n" +
+				"    bearerAuth:\n" +
+				"      type: http\n" +
+				"      scheme: bearer\n" +
+				"      bearerFormat: JWT\n" +
+				"security:\n" +
+				"  - bearerAuth: []")
+		writer.close()
+	}
+}
+
+tasks.register('copyApiSpec', Copy){
+	dependsOn 'setSecuritySchemes'
 
 	from "build/api-spec"
 	into "build/resources/main/static/docs/"
 }
 
-// bootJar 실행 전, copySwaggerUI 를 실행하도록 설정
+// bootJar 실행 전, copyApiSpec 을 실행하도록 설정
 tasks.withType(BootJar) {
 	dependsOn 'copyApiSpec'
 }
