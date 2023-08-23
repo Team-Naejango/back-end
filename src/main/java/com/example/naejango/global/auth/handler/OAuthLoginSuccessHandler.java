@@ -1,6 +1,7 @@
 package com.example.naejango.global.auth.handler;
 
 import com.example.naejango.domain.user.application.UserService;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.auth.jwt.JwtCookieSetter;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
@@ -39,7 +40,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                 .ifPresentOrElse(
                         cookie -> {
                             try {
-                                response.sendRedirect(localRedirectUrl);
+                                response.sendRedirect(localRedirectUrl + "?loginStatus=already_logged_in");
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
@@ -52,20 +53,21 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                             }
                         }
                 );
-
-
     }
 
     private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) throws IOException {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        String redirection = localRedirectUrl;
+        User user = commonDtoHandler.userFromAuthentication(authentication);
 
-        String accessToken = jwtGenerator.generateAccessToken(userId);
-        String refreshToken = jwtGenerator.generateRefreshToken(userId);
-        userService.refreshSignature(userId, refreshToken);
+        redirection += "?loginStatus=" + user.getRole().name();
+        String accessToken = jwtGenerator.generateAccessToken(user.getId());
+        String refreshToken = jwtGenerator.generateRefreshToken(user.getId());
+        userService.refreshSignature(user.getId(), refreshToken);
 
         jwtCookieSetter.addAccessTokenCookie(accessToken, response);
         jwtCookieSetter.addRefreshTokenCookie(refreshToken, response);
+        redirection += "&accessToken" + accessToken;
 
-        response.sendRedirect(localRedirectUrl + "?accesstoken=" + accessToken);
+        response.sendRedirect(redirection);
     }
 }
