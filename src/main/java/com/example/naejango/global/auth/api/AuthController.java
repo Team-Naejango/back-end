@@ -3,10 +3,13 @@ package com.example.naejango.global.auth.api;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.global.auth.jwt.JwtCookieSetter;
+import com.example.naejango.global.auth.dto.response.GuestLoginResponse;
+import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.exception.TokenException;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 
 
 @RestController
@@ -31,35 +33,39 @@ public class AuthController {
 
     private final UserService userService;
     private final CommonDtoHandler commonDtoHandler;
-    private final JwtCookieSetter jwtCookieSetter;
+    private final JwtCookieHandler jwtCookieHandler;
+    private final AccessTokenReissuer accessTokenReissuer;
 
     /**
      * 현재 가지고 있는 RefreshToken 쿠키(및 AccessToken 쿠키)를 만료시키고
-     * User 객체의 Signature 도 null로 설정
+     * User 객체의 Signature 도 null로 설정합니다.
      */
     @GetMapping("/logout")
-    public ResponseEntity<Void> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
-        Arrays.stream(request.getCookies()).forEach(cookie -> {
-            System.out.println("쿠키삭제");
-            if(cookie.getName().equals("RefreshToken")) {
-                jwtCookieSetter.deleteRefreshTokenCookie(cookie, response);
-            }
-            if (cookie.getName().equals("AccessToken")) {
-                jwtCookieSetter.deleteAccessTokenCookie(cookie, response);
-            }
-        });
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        userService.deleteSignature(userId);
-        return ResponseEntity.ok().body(null);
-    }
+    public ResponseEntity<LogoutResponseDto> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
+        jwtCookieHandler.deleteAccessTokenCookie(request, response);
+        jwtCookieHandler.deleteRefreshTokenCookie(request, response);
 
+        if(authentication != null){
+            Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+            userService.deleteSignature(userId);
+        }
+
+        return ResponseEntity.ok().body(new LogoutResponseDto("Jwt 가 정상 삭제되었습니다."));
+    }
 
     /**
      * 둘러보기 회원 (게스트) 용 jwt 발급 api
-     * jwt 가 이미 있는 경우, 로그인이 되어있다고 판단하여 예외 반환
+     * RefreshToken 이 이미 있는 경우 AccessToken 토큰을 재발급 합니다.
      */
     @GetMapping("/guest")
-    public ResponseEntity<Void> guest(HttpServletResponse response, Authentication authentication) {
+    public ResponseEntity<GuestLoginResponse> guest(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        if (jwtCookieHandler.checkRefreshCookieDuplication(request)){
+            jwtCookieHandler.deleteAccessTokenCookie(request, response);
+            String reissueAccessToken = accessTokenReissuer.reissueAccessToken(request);
+            jwtCookieHandler.addAccessTokenCookie(reissueAccessToken, response);
+            throw new TokenException(ErrorCode.TOKEN_ALREADY_EXIST, reissueAccessToken);
+        }
+
         if (authentication != null) {
             throw new CustomException(ErrorCode.ALREADY_LOGGED_IN);
         }
@@ -79,11 +85,10 @@ public class AuthController {
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         userService.refreshSignature(guestId, refreshToken);
+        jwtCookieHandler.addAccessTokenCookie(accessToken, response);
+        jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
 
-        jwtCookieSetter.addAccessTokenCookie(accessToken, response);
-        jwtCookieSetter.addRefreshTokenCookie(refreshToken, response);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(new GuestLoginResponse("게스트용 토큰이 발급되었습니다.", accessToken));
     }
 
     /**
