@@ -4,6 +4,8 @@ import com.example.naejango.domain.account.domain.Account;
 import com.example.naejango.domain.account.repository.AccountRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
+import com.example.naejango.domain.notification.domain.NotificationType;
+import com.example.naejango.domain.notification.dto.request.NotificationRequestDto;
 import com.example.naejango.domain.transaction.domain.Transaction;
 import com.example.naejango.domain.transaction.domain.TransactionStatus;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionRequestDto;
@@ -17,6 +19,7 @@ import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final AccountRepository accountRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 거래 내역 조회 */
     public List<FindTransactionResponseDto> findTransaction(Long userId){
@@ -59,6 +63,8 @@ public class TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
+        // url 부분은 수정 해야함
+        eventPublisher.publishEvent(new NotificationRequestDto(trader, NotificationType.TRANSACTION, "거래 요청 알림", ""));
         return new CreateTransactionResponseDto(savedTransaction);
     }
 
