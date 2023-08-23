@@ -66,7 +66,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         jwtCookieSetter.addAccessTokenCookie(accessToken, response);
         jwtCookieSetter.addRefreshTokenCookie(refreshToken, response);
-        redirection += "&accessToken" + accessToken;
+        redirection += "&accessToken=" + accessToken;
 
         response.sendRedirect(redirection);
     }
