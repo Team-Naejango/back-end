@@ -27,7 +27,7 @@ public class HealthCheck {
         try {
             Connection connection = dataSource.getConnection();
             if (connection != null) {
-                return "<h1>DB 연결 성공<h1>" +
+                return "<h1>DB 연결 성공</h1>" +
                         "DBtype = " + dataSourceProperties.getDriverClassName() + "</br>" +
                         "url = " + dataSourceProperties.getUrl();
 
