@@ -68,7 +68,7 @@ class UserRepositoryTest {
 
         UserProfile testUserProfile = UserProfile.builder()
                 .birth("")
-                .gender(Gender.Male)
+                .gender(Gender.MALE)
                 .phoneNumber("010-0000-0000")
                 .nickname("Nick")
                 .build();
@@ -127,7 +127,7 @@ class UserRepositoryTest {
         // given
         UserProfile testUserProfile = UserProfile.builder()
                 .birth("")
-                .gender(Gender.Male)
+                .gender(Gender.MALE)
                 .phoneNumber("010-0000-0000")
                 .nickname("Nick")
                 .build();

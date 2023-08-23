@@ -10,10 +10,10 @@ import java.util.Arrays;
 public enum Gender {
 
     @JsonProperty("남")
-    Male("남"),
+    MALE("남"),
 
     @JsonProperty("여")
-    Female("여"),
+    FEMALE("여"),
     ;
 
     private final String gender;

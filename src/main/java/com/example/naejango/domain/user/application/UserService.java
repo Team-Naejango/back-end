@@ -55,7 +55,7 @@ public class UserService {
         UserProfile guestProfile = UserProfile.builder()
                 .nickname("Guest")
                 .phoneNumber("01012345678")
-                .gender(Gender.Male)
+                .gender(Gender.MALE)
                 .birth("20230701")
                 .intro("서비스 둘러보기용 회원입니다.")
                 .imgUrl("").build();

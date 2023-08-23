@@ -58,7 +58,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 .imgUrl("이미지 링크")
                 .phoneNumber("01094862225")
                 .intro("소개글")
-                .gender(Gender.Male)
+                .gender(Gender.MALE)
                 .build();
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
@@ -116,7 +116,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 .imgUrl("이미지 링크")
                 .phoneNumber("전화번호")
                 .intro("소개글")
-                .gender(Gender.Male)
+                .gender(Gender.MALE)
                 .build();
 
         BDDMockito.given(userServiceMock.findUser(any(Long.class)))
@@ -176,7 +176,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 .imgUrl("이미지 링크")
                 .phoneNumber("01012345678")
                 .intro("소개글")
-                .gender(Gender.Male)
+                .gender(Gender.MALE)
                 .build();
 
         var requestDto = ModifyUserProfileRequestDto.builder()
