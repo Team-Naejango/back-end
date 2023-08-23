@@ -25,9 +25,9 @@ public class JwtCookieSetter {
     }
 
     public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
-        Cookie refreshTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
-        setRefreshTokenCookie(refreshTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        Cookie accessTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
+        setAccessTokenCookie(accessTokenCookie);
+        response.addCookie(accessTokenCookie);
     }
 
     public void addRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
