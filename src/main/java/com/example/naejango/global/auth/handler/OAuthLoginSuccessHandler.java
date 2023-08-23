@@ -2,7 +2,7 @@ package com.example.naejango.global.auth.handler;
 
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.global.auth.jwt.JwtCookieSetter;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserService userService;
     private final JwtGenerator jwtGenerator;
     private final CommonDtoHandler commonDtoHandler;
-    private final JwtCookieSetter jwtCookieSetter;
+    private final JwtCookieHandler jwtCookieHandler;
     private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
     private final String localRedirectUrl = "http://localhost:3000/oauth/kakaoCallback";
 
@@ -64,8 +64,8 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtGenerator.generateRefreshToken(user.getId());
         userService.refreshSignature(user.getId(), refreshToken);
 
-        jwtCookieSetter.addAccessTokenCookie(accessToken, response);
-        jwtCookieSetter.addRefreshTokenCookie(refreshToken, response);
+        jwtCookieHandler.addAccessTokenCookie(accessToken, response);
+        jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
         redirection += "&accessToken=" + accessToken;
 
         response.sendRedirect(redirection);

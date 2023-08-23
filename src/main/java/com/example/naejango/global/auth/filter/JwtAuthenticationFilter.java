@@ -31,4 +31,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         jwtAuthenticator.authenticateWithAccessToken(request);
         chain.doFilter(request, response);
     }
+
+
 }

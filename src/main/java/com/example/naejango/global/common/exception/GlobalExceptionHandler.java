@@ -18,4 +18,9 @@ public class GlobalExceptionHandler {
         return ValidationResponse.toResponseEntity(e);
     }
 
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<TokenErrorResponse> TokenExceptionHandler(TokenException exception) {
+        return TokenErrorResponse.toResponseEntity(exception.getErrorCode(), exception.getReissuedAccessToken());
+    }
+
 }
