@@ -27,7 +27,6 @@ import java.util.List;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @WebMvcTest(TransactionController.class)
@@ -77,9 +76,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("거래")
                                     .description("거래 내역 조회")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .responseFields(
                                             fieldWithPath("[].id").description("거래 ID"),
                                             fieldWithPath("[].date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
@@ -158,9 +154,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             "거래 등록 시 응답의 status는 생성된 직후 이므로 항상 TRANSACTION_APPOINTMENT\n\n" +
                                             "date는 포맷 잘 맞춰서 string 값으로 설정"
                                     )
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .requestFields(
                                             fieldWithPath("date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
                                             fieldWithPath("amount").description("거래 금액"),
@@ -217,9 +210,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                     .tag("거래")
                                     .summary("송금 완료 요청")
                                     .description("송금 완료 요청은 구매자 입장에서만 가능")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("transactionId").description("거래 ID")
                                     )
@@ -268,9 +258,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                     .tag("거래")
                                     .summary("거래 완료 요청")
                                     .description("거래 완료 요청은 판매자 입장에서만 가능")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("transactionId").description("거래 ID")
                                     )
@@ -336,9 +323,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                     .summary("거래 정보 수정")
                                     .description("거래 정보 수정은 등록한 판매자 입장의 유저만 가능\n\n" +
                                             "거래 정보 수정은 거래 예약 상태에서만 가능 (송금 완료 이후 수정 불가)")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("transactionId").description("거래 ID")
                                     )
@@ -392,9 +376,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                     .summary("거래 삭제")
                                     .description("거래 삭제는 등록한 판매자 입장의 유저만 가능\n\n" +
                                             "거래 삭제는 거래 예약 상태에서만 가능 (송금 완료 이후 수정 불가)")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("transactionId").description("거래 ID")
                                     )

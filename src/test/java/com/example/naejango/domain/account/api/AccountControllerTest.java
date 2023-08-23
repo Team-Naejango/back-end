@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @WebMvcTest(AccountController.class)
@@ -67,9 +66,6 @@ class AccountControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("계좌")
                                     .description("계좌 금액 충전")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .requestFields(
                                             fieldWithPath("amount").description("충전 금액")
                                     )

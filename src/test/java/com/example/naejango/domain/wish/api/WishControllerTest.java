@@ -24,7 +24,6 @@ import java.util.List;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @WebMvcTest(WishController.class)
@@ -75,9 +74,6 @@ class WishControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("관심")
                                     .description("관심 목록 조회")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .responseFields(
                                             fieldWithPath("[].id").description("아이템 ID"),
                                             fieldWithPath("[].name").description("아이템 이름"),
@@ -126,9 +122,6 @@ class WishControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("관심")
                                     .description("관심 등록")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
@@ -176,9 +169,6 @@ class WishControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("관심")
                                     .description("관심 해제")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("itemId").description("아이템 ID")
                                     )

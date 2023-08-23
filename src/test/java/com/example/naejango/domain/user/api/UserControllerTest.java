@@ -20,7 +20,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.headers.HeaderDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
@@ -84,9 +83,6 @@ class UserControllerTest extends RestDocsSupportTest {
                                 ResourceSnippetParameters.builder()
                                         .tag("회원")
                                         .description("유저프로필 생성 하여 요청한 유저 엔티티에 할당")
-                                        .requestHeaders(
-                                                HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
-                                        )
                                         .requestFields(
                                                 fieldWithPath("birth").description("생년월일"),
                                                 fieldWithPath("nickname").description("닉네임"),
@@ -144,9 +140,6 @@ class UserControllerTest extends RestDocsSupportTest {
                                 ResourceSnippetParameters.builder()
                                         .tag("회원")
                                         .description("요청하는 유저의 프로필 조회")
-                                        .requestHeaders(
-                                                HeaderDocumentation.headerWithName("Authorization").description("access token")
-                                        )
                                         .requestFields()
                                         .responseFields(
                                                 fieldWithPath("birth").description("생년월일"),
@@ -211,9 +204,6 @@ class UserControllerTest extends RestDocsSupportTest {
                                 ResourceSnippetParameters.builder()
                                         .tag("회원")
                                         .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
-                                        .requestHeaders(
-                                                HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
-                                        )
                                         .requestFields()
                                         .responseFields(
                                                 fieldWithPath("birth").description("생년월일"),
@@ -254,9 +244,6 @@ class UserControllerTest extends RestDocsSupportTest {
                                 ResourceSnippetParameters.builder()
                                         .tag("회원")
                                         .description("요청 유저의 User, UserProfile 삭제")
-                                        .requestHeaders(
-                                                HeaderDocumentation.headerWithName("Authorization").description("access 토큰")
-                                        )
                                         .requestFields()
                                         .responseFields()
                                         .build()

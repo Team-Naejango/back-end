@@ -57,7 +57,6 @@ class NotificationControllerTest extends RestDocsSupportTest {
                                 .summary("알림 구독")
                                 .description("알림 구독의 ContentType은 text/event-stream\n\nLast-Event-ID는 필수는 아니지만 헤더에 포함시켜 요청하면 이전에 받지 못한 이벤트가 존재 하는 경우 받지 못한 이벤트 부터 받을 수 있음")
                                 .requestHeaders(
-                                        headerWithName("Authorization").description("JWT"),
                                         headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType"),
                                         headerWithName("Last-Event-ID").description("마지막 event의 ID").optional()
                                 )

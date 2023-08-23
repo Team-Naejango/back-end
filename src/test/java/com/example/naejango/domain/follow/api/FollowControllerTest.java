@@ -23,7 +23,6 @@ import java.util.List;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @WebMvcTest(FollowController.class)
@@ -75,9 +74,6 @@ class FollowControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("팔로우")
                                     .description("팔로우 목록 조회")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .responseFields(
                                             fieldWithPath("[].id").description("창고 ID"),
                                             fieldWithPath("[].name").description("창고 이름"),
@@ -124,9 +120,6 @@ class FollowControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("팔로우")
                                     .description("팔로우 등록")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("storageId").description("창고 ID")
                                     )
@@ -174,9 +167,6 @@ class FollowControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("팔로우")
                                     .description("팔로우 해제")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("storageId").description("창고 ID")
                                     )

@@ -103,9 +103,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("아이템")
                                     .description("아이템 생성")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .responseHeaders(
                                             headerWithName("Location").description("생성된 아이템 URI")
                                     )
@@ -323,9 +320,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("아이템")
                                     .description("아이템 정보 수정")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
@@ -392,9 +386,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                             ResourceSnippetParameters.builder()
                                     .tag("아이템")
                                     .description("아이템 창고 등록 수정")
-                                    .requestHeaders(
-                                            headerWithName("Authorization").description("JWT")
-                                    )
                                     .pathParameters(
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
