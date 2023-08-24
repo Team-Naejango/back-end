@@ -85,7 +85,6 @@ public class AuthController {
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         userService.refreshSignature(guestId, refreshToken);
-        jwtCookieHandler.addAccessTokenCookie(accessToken, response);
         jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
 
         return ResponseEntity.ok().body(new GuestLoginResponse("게스트용 토큰이 발급되었습니다.", accessToken));

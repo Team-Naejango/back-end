@@ -13,30 +13,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtCookieHandler {
 
-    private void setAccessTokenCookie(Cookie accessTokenCookie) {
-        accessTokenCookie.setHttpOnly(false);
-//        accessTokenCookie.setSecure(true);
-//        accessTokenCookie.setDomain("naejango.site");
-        accessTokenCookie.setPath("/");
+    private String setAccessTokenCookie(String accessToken) {
+        return "AccessToken=" + accessToken + ";   " +
+                "Secure;   " +
+                "Path=/;   " +
+                "SameSite=None";
     }
 
-    private void setRefreshTokenCookie(Cookie refreshTokenCookie) {
-        refreshTokenCookie.setHttpOnly(true);
-//        refreshTokenCookie.setSecure(true);
-//        refreshTokenCookie.setDomain("naejango.site");
-        refreshTokenCookie.setPath("/");
+    private String setRefreshTokenCookie(String refreshToken) {
+        return "RefreshToken=" + refreshToken + ";   " +
+                "Secure;   " +
+                "Path=/;   " +
+                "SameSite=None;   " +
+                "HttpOnly   ";
     }
 
     public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
-        Cookie accessTokenCookie = new Cookie(JwtProperties.ACCESS_TOKEN_COOKIE_NAME, accessToken);
-        setAccessTokenCookie(accessTokenCookie);
-        response.addCookie(accessTokenCookie);
+        String accessTokenCookieHeader = setAccessTokenCookie(accessToken);
+        response.setHeader("Set-Cookie", accessTokenCookieHeader);
     }
 
     public void addRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
-        Cookie refreshTokenCookie = new Cookie(JwtProperties.REFRESH_TOKEN_COOKIE_NAME, refreshToken);
-        setRefreshTokenCookie(refreshTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        String refreshTokenCookieHeader = setRefreshTokenCookie(refreshToken);
+        response.setHeader("Set-Cookie", refreshTokenCookieHeader);
     }
 
     public void deleteRefreshTokenCookie(HttpServletRequest request, HttpServletResponse response) {
@@ -49,21 +48,24 @@ public class JwtCookieHandler {
         if(refreshTokenCookieOpt.isEmpty()) return;
 
         Cookie refreshTokenCookie = refreshTokenCookieOpt.get();
-        setRefreshTokenCookie(refreshTokenCookie);
-        refreshTokenCookie.setMaxAge(0);
-        response.addCookie(refreshTokenCookie);
+        String refreshToken = refreshTokenCookie.getValue();
+        String refreshTokenCookieHeader= setRefreshTokenCookie(refreshToken);
+        response.setHeader("Set-Cookie", refreshTokenCookieHeader+";   Max-Age=0");
     }
     public void deleteAccessTokenCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
+
         if(cookies == null) return;
         Optional<Cookie> accessTokenCookieOpt = Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(JwtProperties.ACCESS_TOKEN_COOKIE_NAME))
                 .findAny();
+
         if(accessTokenCookieOpt.isEmpty()) return;
+
         Cookie accessTokenCookie = accessTokenCookieOpt.get();
-        setRefreshTokenCookie(accessTokenCookie);
-        accessTokenCookie.setMaxAge(0);
-        response.addCookie(accessTokenCookie);
+        String accessToken = accessTokenCookie.getValue();
+        String accessTokenCookieHeader = setAccessTokenCookie(accessToken);
+        response.setHeader("Set-Cookie", accessTokenCookieHeader+";   Max-Age=0");
     }
     public boolean checkRefreshCookieDuplication(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
