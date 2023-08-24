@@ -1,5 +1,6 @@
 package com.example.naejango.domain.user.domain;
 
+import com.example.naejango.domain.chat.domain.ChannelUser;
 import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.storage.domain.Storage;
 import lombok.*;
@@ -38,6 +39,9 @@ public class User extends TimeAuditingEntity {
 
     @OneToMany(mappedBy = "user")
     private List<Storage> storages;
+
+    @OneToMany(mappedBy = "user")
+    private List<ChannelUser> chatUsers;
 
     public void allocateStorage(Storage storage) {
         this.storages.add(storage);

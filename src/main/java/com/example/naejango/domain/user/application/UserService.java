@@ -94,7 +94,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<Void> deleteUser(HttpServletRequest request, Long userId) {
+    public ResponseEntity<Void> deleteUser(HttpServletRequest request, Long userId) throws CustomException {
         String refreshToken = this.getRefreshToken(request);
         if (refreshToken == null || !jwtValidator.validateRefreshToken(refreshToken).isValidToken()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -123,6 +123,10 @@ public class UserService {
     public User findUserWithProfile(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    public UserProfile findUserProfileByUserId(Long userId) {
+        return userRepository.findUserProfileByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
     }
 
 }
