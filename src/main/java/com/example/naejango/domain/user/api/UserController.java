@@ -7,6 +7,7 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
+import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +57,7 @@ public class UserController {
     }
 
     @DeleteMapping("")
-    public ResponseEntity<?> deleteUser(HttpServletRequest request, Authentication authentication) {
+    public ResponseEntity<?> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         return userService.deleteUser(request, userId);
     }
