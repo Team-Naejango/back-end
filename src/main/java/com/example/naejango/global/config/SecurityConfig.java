@@ -67,6 +67,8 @@ public class SecurityConfig {
                 .hasAnyRole(TEMPORAL.toString(), ADMIN.toString())
                 .antMatchers("/api/user/**")
                 .hasAnyRole(ADMIN.toString(), USER.toString(), GUEST.toString())
+                .antMatchers("/api/**")
+                .hasAnyRole(ADMIN.toString(), USER.toString(), GUEST.toString())
                 .antMatchers("/ws/**").permitAll()
                 .anyRequest().permitAll()
                 .and()
