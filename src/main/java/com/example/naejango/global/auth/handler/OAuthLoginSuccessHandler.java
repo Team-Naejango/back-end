@@ -25,7 +25,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final CommonDtoHandler commonDtoHandler;
     private final JwtCookieHandler jwtCookieHandler;
     private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
-    private final String localRedirectUrl = "http://localhost:3000/oauth/kakaoCallback";
+    private final String localRedirectUrl = "https://localhost:3000/oauth/kakaoCallback";
 
     /**
      * OAuth 로그인 처리가 성공적으로 수행되어 Authentication 객체가 만들어 진 경우 실행되는 메서드.
