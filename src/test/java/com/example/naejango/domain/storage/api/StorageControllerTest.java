@@ -201,6 +201,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                 resource(
                         ResourceSnippetParameters.builder()
                                 .tag("창고")
+                                .description("특정 창고의 아이템 목록을 조회")
                                 .pathParameters(
                                         parameterWithName("storageId").description("창고 id")
                                 )
@@ -292,7 +293,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("창고")
-                                        .description("근처 창고 목록 조회")
+                                        .description("특정 좌표를 중심으로 근처 창고 목록 조회")
                                         .requestParameters(
                                                 parameterWithName("lon").description("경도"),
                                                 parameterWithName("lat").description("위도"),
@@ -360,6 +361,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("창고")
+                                        .description("창고 정보 수정")
                                         .requestFields(
                                                 fieldWithPath("name").description("창고 이름"),
                                                 fieldWithPath("imgUrl").description("창고 이미지 url"),
@@ -399,6 +401,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("창고")
+                                        .description("창고 삭제")
                                         .build()
                         )
                 )
