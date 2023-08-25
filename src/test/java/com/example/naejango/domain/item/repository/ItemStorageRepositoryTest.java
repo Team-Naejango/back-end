@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -61,8 +62,8 @@ class ItemStorageRepositoryTest {
         // then
         Storage result1 = storageRepository.findById(storage1.getId()).orElseGet(()->Storage.builder().name("실패").build());
         Storage result2 = storageRepository.findById(storage2.getId()).orElseGet(()->Storage.builder().name("실패").build());
-        List<Item> result3 = itemRepository.findByStorageId(storage1.getId());
-        List<Item> result4 = itemRepository.findByStorageId(storage2.getId());
+        List<Item> result3 = itemRepository.findByStorageId(storage1.getId(), Boolean.TRUE, PageRequest.of(0, 2)).getContent();
+        List<Item> result4 = itemRepository.findByStorageId(storage2.getId(), Boolean.TRUE, PageRequest.of(0, 2)).getContent();
         Assertions.assertEquals(0, result1.getItemStorages().size()); // 참고) 추가 쿼리 발생
         Assertions.assertEquals(result2.getItemStorages().size(), 1); // 참고) 추가 쿼리 발생
         Assertions.assertEquals(result3.size(), 0);
