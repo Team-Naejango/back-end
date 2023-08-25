@@ -1,7 +1,10 @@
 package com.example.naejango.domain.storage.api;
 
+import com.example.naejango.domain.item.application.ItemService;
+import com.example.naejango.domain.item.dto.response.ItemInfoDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.dto.response.MyStorageListResponseDto;
@@ -25,6 +28,7 @@ import java.util.List;
 public class StorageController {
     private final StorageService storageService;
     private final CommonDtoHandler commonDtoHandler;
+    private final ItemService itemService;
     private final GeomUtil geomUtil;
 
     /**
@@ -34,7 +38,6 @@ public class StorageController {
     public ResponseEntity<Void> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto, Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         Long storageId = storageService.createStorage(requestDto, userId);
-
         String storageUri = "/api/storage/" + storageId.toString();
         return ResponseEntity.created(URI.create(storageUri)).body(null);
     }
@@ -49,6 +52,18 @@ public class StorageController {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         List<Storage> storages = storageService.myStorageList(userId);
         return ResponseEntity.ok().body(new MyStorageListResponseDto(storages));
+    }
+
+    /**
+     * 창고에 있는 아이템 조회
+     */
+    @GetMapping("/{storageId}")
+    public ResponseEntity<ItemListResponseDto> ItemList(@PathVariable("storageId") Long storageId,
+                                                        @RequestParam("status") Boolean status,
+                                                        @RequestParam("page") int page,
+                                                        @RequestParam("size") int size) {
+        List<ItemInfoDto> itemList = itemService.findItemList(storageId, status, page, size);
+        return ResponseEntity.ok().body(new ItemListResponseDto(page, size, itemList.size(), itemList));
     }
 
     /**

@@ -3,6 +3,10 @@ package com.example.naejango.domain.storage.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.config.RestDocsSupportTest;
+import com.example.naejango.domain.item.application.ItemService;
+import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.dto.response.ItemInfoDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
@@ -19,22 +23,24 @@ import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StorageController.class)
 class StorageControllerTest extends RestDocsSupportTest {
@@ -44,6 +50,8 @@ class StorageControllerTest extends RestDocsSupportTest {
     private CommonDtoHandler commonDtoHandlerMock;
     @MockBean
     private GeomUtil geomUtilMock;
+    @MockBean
+    private ItemService itemServiceMock;
     private final GeomUtil geomUtil = new GeomUtil();
 
     @Test
@@ -61,8 +69,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .post("/api/storage")
+                post("/api/storage")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
@@ -74,8 +81,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         verify(commonDtoHandlerMock, only()).userIdFromAuthentication(any());
         verify(storageServiceMock, only()).createStorage(any(CreateStorageRequestDto.class), any(Long.class));
         resultActions.andExpect(
-                MockMvcResultMatchers
-                        .status().isCreated());
+                status().isCreated());
 
         // RestDocs
         resultActions.andDo(restDocs.document(
@@ -121,8 +127,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         BDDMockito.given(storageServiceMock.myStorageList(anyLong())).willReturn(storages);
 
         ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .get("/api/storage")
+                get("/api/storage")
                         .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
@@ -131,8 +136,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         verify(commonDtoHandlerMock, only()).userIdFromAuthentication(any());
         verify(storageServiceMock, only()).myStorageList(anyLong());
         resultActions.andExpect(
-                MockMvcResultMatchers
-                        .status().isOk()
+                status().isOk()
         );
 
         // RestDocs
@@ -157,8 +161,70 @@ class StorageControllerTest extends RestDocsSupportTest {
                         )
                 )
         );
-
     }
+
+    @Test
+    @Tag("api")
+    @DisplayName("창고의 아이템 조회")
+    void findItems() throws Exception {
+        // given
+        Storage storage = Storage.builder().id(1L).name("테스트 창고").build();
+        Item item1 = Item.builder().id(2L).status(true).type(ItemType.BUY).name("item1").imgUrl("imgUrl").build();
+        Item item2 = Item.builder().id(3L).status(true).type(ItemType.SELL).name("item2").imgUrl("imgUrl").build();
+        Item item3 = Item.builder().id(4L).status(false).type(ItemType.BUY).name("item3").imgUrl("imgUrl").build();
+        Item item4 = Item.builder().id(5L).status(true).type(ItemType.SELL).name("item4").imgUrl("imgUrl").build();
+        Item item5 = Item.builder().id(6L).status(true).type(ItemType.SELL).name("item5").imgUrl("imgUrl").build();
+        List<Item> itemList = List.of(item1, item2, item3, item4, item5);
+        List<ItemInfoDto> ItemInfoList = itemList.stream().filter(Item::getStatus).map(ItemInfoDto::new).collect(Collectors.toList());
+
+        // when
+        BDDMockito.given(itemServiceMock.findItemList(storage.getId(), true, 0, 10)).willReturn(ItemInfoList);
+
+        // then
+        ResultActions resultActions = mockMvc.perform(
+                get("/api/storage/{storageId}", 1L)
+                        .queryParam("status", "true")
+                        .queryParam("page", "0")
+                        .queryParam("size", "10")
+        );
+
+        // then
+        verify(itemServiceMock, times(1)).findItemList(1L, Boolean.TRUE, 0, 10);
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").value("0"))
+                .andExpect(jsonPath("size").value("10"))
+                .andExpect(jsonPath("result").value("4"));
+
+        // restDocs
+        resultActions.andDo(restDocs.document(
+                resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("창고")
+                                .pathParameters(
+                                        parameterWithName("storageId").description("창고 id")
+                                )
+                                .requestParameters(
+                                        parameterWithName("status").description("아이템의 상태값 (true=거래중, false=거래완료)"),
+                                        parameterWithName("page").description("페이징 처리를 위한 page 파라미터"),
+                                        parameterWithName("size").description("페이징 처리를 위한 size 파라미터")
+                                )
+                                .responseFields(
+                                        fieldWithPath("page").description("요청한 페이지"),
+                                        fieldWithPath("size").description("요청한 사이즈"),
+                                        fieldWithPath("result").description("조회 결과 개수"),
+                                        fieldWithPath("itemList[].itemId").description("아이템 id"),
+                                        fieldWithPath("itemList[].category").description("아이템 카테고리"),
+                                        fieldWithPath("itemList[].name").description("아이템 제목"),
+                                        fieldWithPath("itemList[].imgUrl").description("아이템 이미지 링크")
+                                )
+                                .responseSchema(
+                                        Schema.schema("판매중인 아이템 ")
+                                )
+                                .build()
+                )));
+    }
+
 
     @Test
     @Tag("api")
@@ -201,8 +267,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .get("/api/storage/nearby")
+                get("/api/storage/nearby")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .queryParam("lon", centerLongitude)
                         .queryParam("lat", centerLatitude)
@@ -219,8 +284,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         verify(storageServiceMock, times(1)).storageNearby(center, rad, limit, page);
 
         resultActions.andExpect(
-                MockMvcResultMatchers
-                        .status().isOk()
+                status().isOk()
         );
 
         // RestDocs
@@ -276,8 +340,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .patch("/api/storage/{storageId}", testStorage.getId())
+                patch("/api/storage/{storageId}", testStorage.getId())
                         .header("Authorization", "엑세스 토큰")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
@@ -288,7 +351,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         verify(storageServiceMock, times(1)).modifyStorageInfo(any(ModifyStorageInfoRequestDto.class), anyLong(), anyLong());
 
         resultActions.andExpect(
-                MockMvcResultMatchers.status().isOk()
+                status().isOk()
         );
 
         // RestDocs
@@ -323,8 +386,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .delete("/api/storage/{storageId}", storage.getId())
+                delete("/api/storage/{storageId}", storage.getId())
                         .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
