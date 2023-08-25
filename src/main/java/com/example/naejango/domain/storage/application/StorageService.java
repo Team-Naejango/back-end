@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,9 +60,14 @@ public class StorageService {
 
     @Transactional
     public void deleteStorage(Long storageId, Long userId) {
-        Storage storage = storageRepository.findById(storageId).orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
-        if(!storage.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST);
-        itemStorageRepository.deleteByStorageId(storageId);
-        storageRepository.delete(storage);
+        Storage deleteRequestedStorage = storageRepository.findById(storageId).orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
+        List<Storage> userStorageList = storageRepository.findByUserId(userId);
+
+        Optional<Storage> matchedStorage = userStorageList.stream().filter(storage -> storage.getId().equals(deleteRequestedStorage.getId())).findAny();
+        if(matchedStorage.isEmpty()) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST);
+
+        Storage deleteStorage = matchedStorage.get();
+        itemStorageRepository.deleteByStorageId(deleteStorage.getId());
+        storageRepository.delete(deleteStorage);
     }
 }
