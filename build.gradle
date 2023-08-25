@@ -104,7 +104,13 @@ task copyTestConfig(type: Copy) {
 		into 'src/test/resources'
 	}
 }
-
+task sqlData(type: Copy) {
+	copy {
+		from './submodule-data/sql'
+		include "data.sql"
+		into 'src/main/resources/sql'
+	}
+}
 // plain jar 생성 제외
 jar {
 	enabled = false
