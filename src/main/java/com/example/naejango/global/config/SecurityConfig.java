@@ -17,14 +17,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import java.util.LinkedHashMap;
 
 import static com.example.naejango.domain.user.domain.Role.*;
 
@@ -57,7 +50,7 @@ public class SecurityConfig {
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtAuthenticator))
                 .addFilterAfter(exceptionHandlingFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling()
-                .authenticationEntryPoint(delegatingAuthenticationEntryPoint())
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
@@ -79,19 +72,6 @@ public class SecurityConfig {
                 .successHandler(oAuthLoginSuccessHandler)
                 .failureHandler(oAuthLoginFailureHandler);
         return http.build();
-    }
-
-    /**
-     * Authentication 이 실패하였을 때 다른 Custom EntryPoint 로 Delegating 해주는 Bean 입니다.
-     * 모든 요청(/**) 에 대하여 적용하였습니다.
-     */
-    @Bean
-    public DelegatingAuthenticationEntryPoint delegatingAuthenticationEntryPoint() {
-        LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> entryPoints = new LinkedHashMap<>();
-        entryPoints.put(new AntPathRequestMatcher("/**"), customAuthenticationEntryPoint);
-        DelegatingAuthenticationEntryPoint delegatingEntryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
-        delegatingEntryPoint.setDefaultEntryPoint(new BasicAuthenticationEntryPoint());
-        return delegatingEntryPoint;
     }
 
 }

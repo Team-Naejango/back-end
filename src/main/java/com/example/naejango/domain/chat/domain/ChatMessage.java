@@ -17,6 +17,8 @@ public class ChatMessage {
     @Column(name = "chatmessage_id")
     private Long id;
 
+    private boolean isRead;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "message_id")
     private Message message;
@@ -24,5 +26,9 @@ public class ChatMessage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id")
     private Chat chat;
+
+    public void read() {
+        this.isRead = true;
+    }
 
 }

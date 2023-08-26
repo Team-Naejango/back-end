@@ -1,5 +1,6 @@
 package com.example.naejango.domain.chat.dto;
 
+
 import lombok.*;
 
 @Getter
@@ -7,10 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class SendMessageResponseDto {
+public class SubscribeResponseDto {
 
-    private Long senderId;
+    private Long userId;
     private Long channelId;
-    private String content;
+    private String message;
 
 }
