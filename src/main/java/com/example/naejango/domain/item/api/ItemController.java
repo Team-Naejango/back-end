@@ -40,7 +40,7 @@ public class ItemController {
     }
 
     /** 아이템 정보 수정 */
-    @PutMapping("/{itemId}")
+    @PatchMapping("/{itemId}")
     public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, itemId, modifyItemRequestDto);
@@ -49,7 +49,7 @@ public class ItemController {
     }
 
     /** 아이템 창고 등록 수정 */
-    @PutMapping("/connect/{itemId}")
+    @PatchMapping("/connect/{itemId}")
     public ResponseEntity<BaseResponseDto> connectItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ConnectItemRequestDto connectItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         itemService.connectItem(userId, itemId,connectItemRequestDto);
