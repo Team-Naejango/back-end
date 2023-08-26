@@ -35,4 +35,10 @@ public class AccountService {
         Account account = accountRepository.findByUserId(userId);
         account.chargeBalance(chargeAccountRequestDto.getAmount());
     }
+
+    /** 계좌 잔액 조회 */
+    public int getAccount(Long userId){
+        Account account = accountRepository.findByUserId(userId);
+        return account.getBalance();
+    }
 }

@@ -44,7 +44,8 @@ public class UserController {
     public ResponseEntity<UserProfileResponseDto> userProfile(Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         User user = userService.findUser(userId);
-        UserProfileResponseDto userProfileResponseDto = new UserProfileResponseDto(user.getUserProfile());
+        int balance = accountService.getAccount(userId);
+        UserProfileResponseDto userProfileResponseDto = new UserProfileResponseDto(user.getUserProfile(), balance);
         return ResponseEntity.ok().body(userProfileResponseDto);
     }
 

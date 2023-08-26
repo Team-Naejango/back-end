@@ -15,14 +15,16 @@ public class UserProfileResponseDto {
     private String phoneNumber;
     private Gender gender;
     private String intro;
+    private int balance;
 
     @Builder
-    public UserProfileResponseDto(UserProfile userProfile) {
+    public UserProfileResponseDto(UserProfile userProfile, int balance) {
         this.nickname =  userProfile.getNickname();
         this.imgUrl = userProfile.getImgUrl();
         this.birth = userProfile.getBirth();
         this.phoneNumber = userProfile.getPhoneNumber();
         this.gender = userProfile.getGender();
         this.intro = userProfile.getIntro();
+        this.balance = balance;
     }
 }
