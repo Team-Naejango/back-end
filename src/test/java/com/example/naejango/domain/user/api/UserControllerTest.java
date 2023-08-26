@@ -175,7 +175,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 .build();
 
         var requestDto = ModifyUserProfileRequestDto.builder()
-                .nickname("변경 닉네").intro("변경 소개글").imgUrl("변경 이미지").build();
+                .nickname("변경 닉네임").intro("변경 소개글").imgUrl("변경 이미지").build();
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
@@ -216,7 +216,7 @@ class UserControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("gender").description("성별(male, female)")
                                         )
                                         .requestSchema(
-                                                Schema.schema("UserProfileResponseDto.Get")
+                                                Schema.schema("ModifyUserProfileResponseDto.Get")
                                         )
                                         .build()
                         )
