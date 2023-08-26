@@ -117,7 +117,8 @@ class UserControllerTest extends RestDocsSupportTest {
 
         BDDMockito.given(userServiceMock.findUser(any(Long.class)))
                 .willReturn(User.builder().userProfile(testUserProfile).build());
-
+        BDDMockito.given(accountServiceMock.getAccount(any(Long.class)))
+                .willReturn(any(int.class));
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
                         .get("/api/user/profile")
@@ -147,7 +148,8 @@ class UserControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("imgUrl").description("이미지 링크"),
                                                 fieldWithPath("phoneNumber").description("전화번호"),
                                                 fieldWithPath("intro").description("소개글"),
-                                                fieldWithPath("gender").description("성별(남/여)")
+                                                fieldWithPath("gender").description("성별(남/여)"),
+                                                fieldWithPath("balance").description("계좌 잔고")
                                         )
                                         .requestSchema(
                                                 Schema.schema("UserProfileResponseDto.Get")
