@@ -22,4 +22,8 @@ public class Message extends TimeAuditingEntity {
 
     @OneToMany(mappedBy = "message")
     private List<ChatMessage> chatMessage;
+
+    @ManyToOne
+    @JoinColumn(name = "channel_id")
+    private Channel channel;
 }

@@ -1,7 +1,7 @@
 package com.example.naejango.global.auth.filter;
 
 import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorResponse;
+import com.example.naejango.global.common.exception.FilterErrorResponse;
 import com.example.naejango.global.common.exception.TokenErrorResponse;
 import com.example.naejango.global.common.exception.TokenException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,19 +23,18 @@ public class ExceptionHandlingFilter implements Filter {
     /**
      * Security filter 내부의 Exception 을 핸들링 해주기 위한 필터입니다.
      * Filter 또는 interceptor 내부에서 던져진 예외의 경우
-     * @RestControllerAdvice 로 지정된 Exception handler 에 도달하지 않아서
+     * RestControllerAdvice 로 지정된 Exception handler 에 도달하지 않아서
      * 아래와 같이 직접 핸들링 하였습니다.
      */
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
             chain.doFilter(request, response);
         } catch (CustomException customException) {
-           handleException (httpResponse, ErrorResponse.toResponseEntity(customException.getErrorCode()));
+           handleException (httpResponse, FilterErrorResponse.toResponseEntity(customException.getErrorCode()));
         } catch (TokenException tokenException) {
-            handleException(httpResponse, TokenErrorResponse.toResponseEntity(tokenException.getErrorCode(), tokenException.getReissuedAccessToken()));
+            handleException(httpResponse, TokenErrorResponse.toFilterResponseEntity(tokenException.getErrorCode(), tokenException.getReissuedAccessToken()));
         } catch (ServletException e) {
             throw new RuntimeException(e);
         }

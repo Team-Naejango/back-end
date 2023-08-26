@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TokenException.class)
     public ResponseEntity<TokenErrorResponse> TokenExceptionHandler(TokenException exception) {
-        return TokenErrorResponse.toResponseEntity(exception.getErrorCode(), exception.getReissuedAccessToken());
+        return TokenErrorResponse.toHttpResponseEntity(exception.getErrorCode(), exception.getReissuedAccessToken());
     }
 
 }

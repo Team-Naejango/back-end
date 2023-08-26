@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TokenException extends RuntimeException {
+public class WebSocketException extends RuntimeException {
     private ErrorCode errorCode;
-    private String reissuedAccessToken;
 }

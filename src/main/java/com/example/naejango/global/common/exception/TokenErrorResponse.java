@@ -12,15 +12,26 @@ public class TokenErrorResponse {
     private final String message;
     private final String reissuedAccessToken;
 
-    public static ResponseEntity<TokenErrorResponse> toResponseEntity(ErrorCode errorCode, String accessToken) {
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(TokenErrorResponse.builder()
-                        .status(errorCode.getHttpStatusCode())
-                        .error(errorCode.getHttpStatusErrorName())
-                        .message(errorCode.getMessage())
-                        .reissuedAccessToken(accessToken)
-                        .build());
+    public static ResponseEntity<TokenErrorResponse> toHttpResponseEntity(ErrorCode errorCode, String accessToken) {
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                        .body(
+                                TokenErrorResponse.builder()
+                                        .status(errorCode.getHttpStatusCode())
+                                        .error(errorCode.getHttpStatusErrorName())
+                                        .message(errorCode.getMessage())
+                                        .reissuedAccessToken(accessToken)
+                                        .build()
+                        );
+
+    }
+
+    public static TokenErrorResponse toFilterResponseEntity(ErrorCode errorCode, String accessToken) {
+        return TokenErrorResponse.builder()
+                    .status(errorCode.getHttpStatusCode())
+                    .error(errorCode.getHttpStatusErrorName())
+                    .message(errorCode.getMessage())
+                    .reissuedAccessToken(accessToken)
+                    .build();
     }
 
 }

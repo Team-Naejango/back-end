@@ -16,6 +16,7 @@ public class CorsConfig {
 
         config.setAllowCredentials(true); // cross origin 으로부터 인증을 위한 쿠키 정보를 받을지 여부
         config.addAllowedOrigin("https://localhost:3000");
+        config.addAllowedOrigin("http://localhost:5500");
         config.addAllowedHeader("*"); // Access-Control-Request-Headers
         config.addAllowedMethod("*"); // Access-Control-Request-Method
 

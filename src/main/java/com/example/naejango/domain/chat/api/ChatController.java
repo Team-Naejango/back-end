@@ -5,7 +5,6 @@ import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.response.MyChatroomListResponseDto;
 import com.example.naejango.domain.chat.dto.response.StartPrivateChatResponseDto;
 import com.example.naejango.domain.chat.repository.ChatRepository;
-import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

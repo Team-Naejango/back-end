@@ -25,14 +25,8 @@ public class JwtAuthenticator {
      * jwt 검증을 시도하고 그 결과에 따라 authentication 객체를 생성해주는 메서드
      * access token 이 유효한 경우 authentication 생성
      */
-    public void authenticateWithAccessToken(HttpServletRequest request) {
-        String accessToken = getAccessToken(request);
-
-        if (accessToken == null) {
-            return;
-        }
-
-        ValidateTokenResponseDto validateResult = jwtValidator.validateAccessToken(accessToken);
+    public void authenticateRequest(HttpServletRequest request) {
+        ValidateTokenResponseDto validateResult = jwtValidator.validateTokenInRequest(request);
         if (validateResult.isValidToken()){
             authenticate(validateResult.getUserId());
         }
@@ -54,18 +48,6 @@ public class JwtAuthenticator {
                 principalDetails.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    /**
-     * HttpServletRequest 에서 access token 을 가져오는 메서드
-     * Header 에 access token 이 없거나 유효하지 않은 형태인 경우 null 을 반환
-     */
-    private String getAccessToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader(JwtProperties.ACCESS_TOKEN_HEADER);
-        if (authorizationHeader != null && authorizationHeader.startsWith(JwtProperties.ACCESS_TOKEN_PREFIX)) {
-            return authorizationHeader.replace(JwtProperties.ACCESS_TOKEN_PREFIX, "");
-        }
-        return null;
     }
 
 }

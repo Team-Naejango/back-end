@@ -1,6 +1,5 @@
 package com.example.naejango.domain.chat.application;
 
-import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.ChatMessage;
 import com.example.naejango.domain.chat.domain.Message;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
@@ -10,33 +9,31 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class MessageService {
-    @PersistenceContext
-    private EntityManager em;
     private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
     private final ChatMessageRepository chatMessageRepository;
 
     @Transactional
-    public Message publishMessage(Long channelId, Long senderId, String content) {
-        chatRepository.updateLastMessageByChannelId(channelId, content);
-
+    public void publishMessage(Long channelId, Long senderId, String content, Set<Long> subscriberIds) {
+        // 메세지를 저장합니다.
         Message sentMessage = Message.builder().senderId(senderId).content(content).build();
         messageRepository.save(sentMessage);
 
-        chatRepository.findChatIdByChannelId(channelId).forEach(chatId -> {
-            Chat chat = em.getReference(Chat.class, chatId);
-            ChatMessage chatMessage = ChatMessage.builder().message(sentMessage).chat(chat).build();
+        // 메세지를 채팅방에 할당 합니다.
+        // 채널에 구독되어 있는 모든 chatId를 찾아 옵니다.
+        chatRepository.findChatByChannelId(channelId).forEach(chat -> {
+            ChatMessage chatMessage = ChatMessage.builder().isRead(false).message(sentMessage).chat(chat).build();
+            if(subscriberIds.contains(chat.getOwnerId())) chatMessage.read();
             chatMessageRepository.save(chatMessage);
-            sentMessage.getChatMessage().add(chatMessage);
         });
 
-        return sentMessage;
+        // 각각의 Chat 에 마지막 메세지를 업데이트 합니다.
+        chatRepository.updateLastMessageByChannelId(channelId, content);
     }
 
 }

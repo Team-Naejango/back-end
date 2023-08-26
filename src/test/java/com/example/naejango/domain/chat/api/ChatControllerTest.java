@@ -82,25 +82,6 @@ class ChatControllerTest extends RestDocsSupportTest {
                 .andExpect(
                         content().json(objectMapper.writeValueAsString(new StartPrivateChatResponseDto(channel.getId(), chat1.getId())))
                 );
-
-        resultActions.andDo(restDocs.document(
-                resource(
-                        ResourceSnippetParameters.builder()
-                                .tag("채팅")
-                                .description("특정 회원에 대하여 채팅 채널 id 및 채팅 id 를 반환합니다.")
-                                .requestHeaders(
-                                        headerWithName("Authorization").description("엑세스 토큰")
-                                )
-                                .pathParameters(
-                                        parameterWithName("receiverId").description("상대방 id")
-                                )
-                                .responseFields(
-                                        fieldWithPath("channelId").description("채팅 채널 id"),
-                                        fieldWithPath("chatId").description("내 채팅방 id")
-                                )
-                                .build()
-                )
-        ));
     }
 
     @Test
@@ -142,7 +123,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                 resource(
                         ResourceSnippetParameters.builder()
                                 .tag("채팅")
-                                .description("특정 회원에 대하여 채팅 채널 id 및 채팅 id 를 반환합니다.")
+                                .summary("특정 회원에 대하여 일대일 채팅의 채널 id 및 채팅 id 를 반환합니다.")
                                 .pathParameters(
                                         parameterWithName("receiverId").description("상대방 id")
                                 )
@@ -169,9 +150,9 @@ class ChatControllerTest extends RestDocsSupportTest {
         Chat chat3 = Chat.builder().id(4L).title("빨무3:3").channelId(7L)
                 .lastMessage("ㅎㅇ").ownerId(user.getId()).type(ChatType.GROUP).build();
 
-        ChatInfoDto chatInfo1 = new ChatInfoDto(chat1);
-        ChatInfoDto chatInfo2 = new ChatInfoDto(chat2);
-        ChatInfoDto chatInfo3 = new ChatInfoDto(chat3);
+        ChatInfoDto chatInfo1 = new ChatInfoDto(chat1, 1);
+        ChatInfoDto chatInfo2 = new ChatInfoDto(chat2, 2);
+        ChatInfoDto chatInfo3 = new ChatInfoDto(chat3,3);
 
 
         // when
@@ -204,7 +185,9 @@ class ChatControllerTest extends RestDocsSupportTest {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("채팅")
-                                        .description("채팅방 목록을 가져옵니다.")
+                                        .summary("채팅방 목록을 가져옵니다.")
+                                        .description("채팅방의 간략한 정보가 담긴 목록을 가지고 옵니다.\n\n" +
+                                                "채팅방 목록을 시현하기 위한 모든 정보가 담겨있습니다.\n\n")
                                         .responseFields(
                                                 fieldWithPath("ownerId").description("채팅 주인"),
                                                 fieldWithPath("chatInfoList[].chatId").description("채팅 Id"),
@@ -212,6 +195,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("chatInfoList[].title").description("제목"),
                                                 fieldWithPath("chatInfoList[].type").description("채팅 타입(개인, 그룹)"),
                                                 fieldWithPath("chatInfoList[].lastMessage").description("마지막 대화 내용"),
+                                                fieldWithPath("chatInfoList[].unreadMessages").description("안읽은 메세지 수"),
                                                 fieldWithPath("chatInfoList[].lastChatAt").description("마지막 대화 시각")
                                         )
                                         .responseSchema(
