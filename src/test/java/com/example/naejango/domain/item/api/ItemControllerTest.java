@@ -305,7 +305,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .put("/api/item/{itemId}", itemId)
+                    .patch("/api/item/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
@@ -371,7 +371,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .put("/api/item/connect/{itemId}", itemId)
+                    .patch("/api/item/connect/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
