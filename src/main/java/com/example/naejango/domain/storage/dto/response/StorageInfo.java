@@ -1,6 +1,7 @@
 package com.example.naejango.domain.storage.dto.response;
 
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.Coord;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class StorageInfo {
     private String imgUrl;
     private String description;
     private String address;
+    private Coord coord;
 
     public StorageInfo(Storage storage) {
         this.id = storage.getId();
@@ -21,5 +23,6 @@ public class StorageInfo {
         this.imgUrl = storage.getImgUrl();
         this.description = storage.getDescription();
         this.address = storage.getAddress();
+        this.coord = new Coord(storage.getLocation().getX(), storage.getLocation().getY());
     }
 }
