@@ -52,7 +52,7 @@ public class ItemController {
     @PatchMapping("/connect/{itemId}")
     public ResponseEntity<BaseResponseDto> connectItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ConnectItemRequestDto connectItemRequestDto) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        itemService.connectItem(userId, itemId,connectItemRequestDto);
+        itemService.connectItem(userId, itemId, connectItemRequestDto);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
     }
