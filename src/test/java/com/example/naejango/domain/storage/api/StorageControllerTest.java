@@ -152,6 +152,9 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("storageList[].imgUrl").description("창고 이미지 링크"),
                                                 fieldWithPath("storageList[].description").description("창고 소개"),
                                                 fieldWithPath("storageList[].address").description("창고 주소"),
+                                                fieldWithPath("storageList[].coord").description("창고 좌표"),
+                                                fieldWithPath("storageList[].coord.longitude").description("경도"),
+                                                fieldWithPath("storageList[].coord.latitude").description("위도"),
                                                 fieldWithPath("count").type(JsonFieldType.NUMBER).description("보유 창고 개수")
                                         )
                                         .responseSchema(
