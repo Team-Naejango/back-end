@@ -6,6 +6,7 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
+import com.example.naejango.domain.user.dto.response.ModifyUserProfileResponseDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
@@ -50,11 +51,11 @@ public class UserController {
     }
 
     @PatchMapping("/profile")
-    public ResponseEntity<UserProfileResponseDto> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto modifyUserProfileRequestDto, Authentication authentication) {
+    public ResponseEntity<ModifyUserProfileResponseDto> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto modifyUserProfileRequestDto, Authentication authentication) {
         Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
         userService.modifyUserProfile(modifyUserProfileRequestDto, userId);
         User user = userService.findUser(userId);
-        return ResponseEntity.ok().body(new UserProfileResponseDto(user.getUserProfile()));
+        return ResponseEntity.ok().body(new ModifyUserProfileResponseDto(user.getUserProfile()));
     }
 
     @DeleteMapping("")
