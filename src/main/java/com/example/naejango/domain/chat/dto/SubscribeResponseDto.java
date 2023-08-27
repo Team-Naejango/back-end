@@ -11,7 +11,7 @@ import lombok.*;
 public class SubscribeResponseDto {
 
     private Long userId;
-    private Long channelId;
+    private Long subscribingChannelId;
     private String message;
 
 }
