@@ -1,7 +1,7 @@
-package com.example.naejango.domain.item.dto.response;
+package com.example.naejango.domain.storage.dto;
 
-import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemType;
 import lombok.*;
 
 @Getter
@@ -11,13 +11,15 @@ import lombok.*;
 @ToString
 public class ItemInfoDto {
     private Long itemId;
-    private Category category;
+    private String category;
+    private ItemType type;
     private String name;
     private String imgUrl;
 
-    public ItemInfoDto(Item item) {
+    public ItemInfoDto(Item item, String category) {
         this.itemId = item.getId();
-        this.category = item.getCategory();
+        this.category = category;
+        this.type = item.getType();
         this.name = item.getName();
         this.imgUrl = item.getImgUrl();
     }
