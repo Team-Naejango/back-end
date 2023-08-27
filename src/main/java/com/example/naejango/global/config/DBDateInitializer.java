@@ -1,136 +1,139 @@
 package com.example.naejango.global.config;
 
-import com.example.naejango.domain.chat.domain.*;
-import com.example.naejango.domain.chat.repository.*;
-import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.item.domain.Category;
+import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemStorage;
+import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.repository.CategoryRepository;
+import com.example.naejango.domain.item.repository.ItemRepository;
+import com.example.naejango.domain.item.repository.ItemStorageRepository;
+import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
+import com.example.naejango.global.common.handler.GeomUtil;
+import com.example.naejango.global.common.handler.RandomDataGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
-@Profile("WEBSOCKET-DB-SETUP")
+@ConditionalOnProperty(name = "initialize-db", havingValue = "true")
 @RequiredArgsConstructor
-public class DBDateInitializer implements ApplicationRunner{
+public class DBDateInitializer implements ApplicationRunner {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
-    private final ChatRepository chatRepository;
-    private final MessageRepository messageRepository;
-    private final ChatMessageRepository chatMessageRepository;
-    private final ChannelRepository channelRepository;
-    private final ChannelUserRepository channelUserRepository;
+    private final CategoryRepository categoryRepository;
+    private final StorageRepository storageRepository;
     private final TransactionTemplate transactionTemplate;
+    private final ItemRepository itemRepository;
+    private final ItemStorageRepository itemStorageRepository;
+    private final GeomUtil geomUtil;
+    private final RandomDataGenerateUtil randomUtil;
+
+    private List<Long> userIdList = new ArrayList<>();
+    private List<Integer> catIdList = new ArrayList<>();
+
     @PersistenceContext EntityManager em;
 
     @Override
     public void run(ApplicationArguments args) {
-        setup();
+        createBasicUser(10);
+        createCategory();
+        createStorageAndItem(10);
     }
 
     @Transactional
-    public void setup() {
+    void createBasicUser(int n) {
         transactionTemplate.execute(status -> {
-            // 테스트 유저 3명 등록
-            User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
-            User testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
-            User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
+            for (int i = 0; i < n; i++) {
+                    // 유저 생성
+                    User testUser = User.builder().role(Role.USER).userKey(UUID.randomUUID().toString()).password("").build();
+                    userRepository.save(testUser);
+                    userIdList.add(testUser.getId());
 
-            userRepository.save(testUser1);
-            userRepository.save(testUser2);
-            userRepository.save(testUser3);
+                    // 유저 프로필 생성
+                    UserProfile userProfile = UserProfile.builder().nickname(randomUtil.getRandomNickname())
+                            .imgUrl(randomUtil.getRandomImageUrl()).birth(randomUtil.getRandomBirth())
+                            .gender(randomUtil.getRandomGender())
+                            .phoneNumber("01012345678").intro("테스트 회원입니다.").build();
 
-            UserProfile userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19910617").gender(Gender.MALE).phoneNumber("01094862225").build();
-            UserProfile userProfile2 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-            UserProfile userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01023454534").build();
+                    userProfileRepository.save(userProfile);
 
-            userProfileRepository.save(userProfile1);
-            userProfileRepository.save(userProfile2);
-            userProfileRepository.save(userProfile3);
-
-            testUser1.createUserProfile(userProfile1);
-            testUser2.createUserProfile(userProfile2);
-            testUser3.createUserProfile(userProfile3);
-
-            // 채팅 채널 생성
-            Channel channel1 = new Channel();
-            Channel channel2 = new Channel();
-
-            channelRepository.save(channel1);
-            channelRepository.save(channel2);
-
-            // 채널에 유저를 등록합니다.
-            ChannelUser channelUser1 = ChannelUser.builder().channel(channel1).user(testUser1).build();
-            ChannelUser channelUser2 = ChannelUser.builder().channel(channel1).user(testUser2).build();
-            ChannelUser channelUser3 = ChannelUser.builder().channel(channel2).user(testUser2).build();
-            ChannelUser channelUser4 = ChannelUser.builder().channel(channel2).user(testUser3).build();
-
-            channelUserRepository.save(channelUser1);
-            channelUserRepository.save(channelUser2);
-            channelUserRepository.save(channelUser3);
-            channelUserRepository.save(channelUser4);
-
-            // 채팅 생성
-            // 채팅 채널 1 = chat1, chat2
-            // 채팅 채널 2 = chat3, chat4
-            Chat chat1 = Chat.builder().ownerId(testUser1.getId())
-                    .title(testUser2.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
-
-            Chat chat2 = Chat.builder().ownerId(testUser2.getId())
-                    .title(testUser1.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
-
-            Chat chat3 = Chat.builder().ownerId(testUser2.getId())
-                    .title(testUser3.getUserProfile().getNickname())
-                    .channelId(channel2.getId()).type(ChatType.PRIVATE).build();
-
-            Chat chat4 = Chat.builder().ownerId(testUser3.getId())
-                    .title(testUser2.getUserProfile().getNickname())
-                    .channelId(channel2.getId()).type(ChatType.PRIVATE).build();
-
-            chatRepository.save(chat1);
-            chatRepository.save(chat2);
-            chatRepository.save(chat3);
-            chatRepository.save(chat4);
-
-
-            // Message 생성
-            Message msg1 = Message.builder().content("메세지1").senderId(testUser2.getId()).build();
-            Message msg2 = Message.builder().content("메세지2").senderId(testUser2.getId()).build();
-            messageRepository.save(msg1);
-            messageRepository.save(msg2);
-
-
-            // Chat - Message 연결
-            ChatMessage chatMessage1 = ChatMessage.builder().message(msg1).isRead(true).chat(chat1).build();
-            ChatMessage chatMessage2 = ChatMessage.builder().message(msg1).isRead(true).chat(chat2).build();
-            ChatMessage chatMessage3 = ChatMessage.builder().message(msg2).isRead(true).chat(chat3).build();
-            ChatMessage chatMessage4 = ChatMessage.builder().message(msg2).isRead(true).chat(chat4).build();
-
-            chatMessageRepository.save(chatMessage1);
-            chatMessageRepository.save(chatMessage2);
-            chatMessageRepository.save(chatMessage3);
-            chatMessageRepository.save(chatMessage4);
-
-            chat1.updateLastMessage(msg1.getContent());
-            chat2.updateLastMessage(msg1.getContent());
-            chat3.updateLastMessage(msg2.getContent());
-            chat4.updateLastMessage(msg2.getContent());
-
-            em.flush();
+                    // 유저 프로필 연결
+                    testUser.createUserProfile(userProfile);
+            }
             return null;
         });
     }
 
+    @Transactional
+    void createCategory() {
+        Category cat1 = Category.builder().name("생필품").build();
+        Category cat2 = Category.builder().name("의류").build();
+        Category cat3 = Category.builder().name("가구").build();
+        Category cat4 = Category.builder().name("디지털기기").build();
+        categoryRepository.save(cat1);
+        categoryRepository.save(cat2);
+        categoryRepository.save(cat3);
+        categoryRepository.save(cat4);
+        catIdList.add(cat1.getId());
+        catIdList.add(cat2.getId());
+        catIdList.add(cat3.getId());
+        catIdList.add(cat4.getId());
+    }
+
+    @Transactional
+    void createStorageAndItem(int itemN) {
+        transactionTemplate.execute(status -> {
+            for (Long useId : userIdList) {
+                User testUser = em.getReference(User.class, useId);
+
+                for (int j = 0; j < randomUtil.getRandomInt(4); j++) {
+                    Storage testStorage = Storage.builder().name(randomUtil.getRandomStorageName())
+                            .location(geomUtil.getRandomPointInGangnam())
+                            .user(testUser)
+                            .description("테스트 창고 입니다.")
+                            .imgUrl(randomUtil.getRandomImageUrl())
+                            .address("서울시 강남구")
+                            .build();
+                    storageRepository.save(testStorage);
+
+                    for (int k = 0; k < randomUtil.getRandomInt(itemN); k++) {
+                        Category category = em.getReference(Category.class, catIdList.get(randomUtil.getRandomInt(4)));
+                        String randomItemName = randomUtil.getRandomItemName();
+                        ItemType randomItemType = randomUtil.getRandomItemType();
+                        Item testItem = Item.builder().category(category)
+                                .type(randomUtil.getRandomItemType())
+                                .user(testUser)
+                                .status(randomUtil.getRandomBoolean())
+                                .name(randomItemName)
+                                .description(randomUtil.getItemDescription(randomItemName, randomItemType))
+                                .imgUrl("")
+                                .user(testUser)
+                                .viewCount(randomUtil.getRandomInt(100)).build();
+                        itemRepository.save(testItem);
+
+                        ItemStorage itemStorage = ItemStorage.builder().item(testItem).storage(testStorage).build();
+                        itemStorageRepository.save(itemStorage);
+                    }
+
+                }
+            }
+            return null;
+        });
+    }
 }
