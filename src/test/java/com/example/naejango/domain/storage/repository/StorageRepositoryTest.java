@@ -2,7 +2,7 @@ package com.example.naejango.domain.storage.repository;
 
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyInfo;
+import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
@@ -22,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
@@ -172,10 +172,10 @@ class StorageRepositoryTest {
         }
 
         // when
-        List<StorageNearbyInfo> storageNearbyInfo = storageRepository.findStorageNearby(center, 2000, 10, 5);
+        List<StorageNearbyInfoDto> storageNearbyInfo = storageRepository.findStorageNearby(center, 2000, 1, 10);
 
         // then
-        assertThat(storageNearbyInfo.size()).isEqualTo(5);
+        assertThat(storageNearbyInfo.size()).isEqualTo(10);
         assertThat(storageNearbyInfo.get(0).getName()).isEqualTo("Test11");
         assertThat(storageNearbyInfo.get(0).getCoord()).isEqualTo(new Coord(126.0 + 0.00001*11, 37.0 + 0.00001*11));
     }
