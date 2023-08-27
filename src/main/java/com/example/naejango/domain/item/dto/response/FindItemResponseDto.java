@@ -30,6 +30,6 @@ public class FindItemResponseDto {
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
         this.type = item.getType();
-        this.category = item.getCategory().toString();
+        this.category = item.getCategory().getName();
     }
 }
