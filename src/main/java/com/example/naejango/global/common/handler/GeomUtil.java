@@ -5,9 +5,13 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
+
 @Component
 public class GeomUtil {
-    private final double EARTH_RADIUS_METERS = 6371000.0;
+    private static final double EARTH_RADIUS_METERS = 6371000.0;
+    private final Random random = new Random();
+
     private final GeometryFactory factory = new GeometryFactory();
 
     public Point createPoint(double longitude, double latitude) {
@@ -34,4 +38,16 @@ public class GeomUtil {
 
         return EARTH_RADIUS_METERS * c;
     }
+
+    public Point getRandomPointInGangnam() {
+        final double MIN_LATITUDE = 37.473824;
+        final double MAX_LATITUDE = 37.517071;
+        final double MIN_LONGITUDE = 127.014418;
+        final double MAX_LONGITUDE = 127.060426;
+
+        double randomLatitude = MIN_LATITUDE + (MAX_LATITUDE - MIN_LATITUDE) * random.nextDouble();
+        double randomLongitude = MIN_LONGITUDE + (MAX_LONGITUDE - MIN_LONGITUDE) * random.nextDouble();
+        return createPoint(randomLongitude, randomLatitude);
+    }
+
 }
