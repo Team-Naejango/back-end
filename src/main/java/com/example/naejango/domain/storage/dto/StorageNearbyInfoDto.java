@@ -1,7 +1,6 @@
-package com.example.naejango.domain.storage.dto.response;
+package com.example.naejango.domain.storage.dto;
 
 import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.storage.dto.Coord;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -9,7 +8,7 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class StorageNearbyInfo {
+public class StorageNearbyInfoDto {
     private Long id;
     private String name;
     private String imgUrl;
@@ -17,7 +16,7 @@ public class StorageNearbyInfo {
     private String address;
     private Coord coord;
     private int distance;
-    public StorageNearbyInfo(Storage storage, double distance) {
+    public StorageNearbyInfoDto(Storage storage, double distance) {
         id = storage.getId();
         name = storage.getName();
         imgUrl = storage.getImgUrl();

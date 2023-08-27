@@ -14,7 +14,7 @@ public interface StorageRepository extends JpaRepository<Storage, Long>, Storage
     /**
      * 회원 id를 기준으로 조회
      */
-    @Query("select s from Storage s where s.user.id = :userId")
+    @Query("select s from Storage s where s.user.id = :userId ORDER BY s.createdDate ASC")
     List<Storage> findByUserId(@Param("userId") Long userId);
 
     /**

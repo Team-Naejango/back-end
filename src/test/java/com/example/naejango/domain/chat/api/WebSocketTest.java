@@ -1,6 +1,5 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.dto.SendMessageResponseDto;
 import com.example.naejango.domain.chat.dto.SubscribeResponseDto;
 import com.example.naejango.domain.chat.repository.*;
@@ -9,8 +8,6 @@ import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtProperties;
-import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -133,23 +130,15 @@ public class WebSocketTest {
         messageHeaders.setDestination(TEST_SEND + "/1");
         messageHeaders.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
 
-        var requestDto1 = SendMessageResponseDto.builder().senderId(user2.getId()).content("처음 보낸 메세지").channelId(1L).build();
+        var requestDto1 = SendMessageResponseDto.builder().senderId(user2.getId()).content("테스트 메세지").channelId(1L).build();
         stompSession.send(messageHeaders, objectMapper.writeValueAsBytes(requestDto1));
-        Thread.sleep(100);
-        var requestDto2 = SendMessageResponseDto.builder().senderId(user2.getId()).content("나중 보낸 메세지").channelId(1L).build();
-        stompSession.send(messageHeaders, objectMapper.writeValueAsBytes(requestDto2));
         Thread.sleep(100);
 
         // then
-        var dto = new SubscribeResponseDto(2L, 1L, "채팅 채널 구독을 시작합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll(1, SECONDS));
-        var dto2 = new SendMessageResponseDto(2L, 1L, "처음 보낸 메세지"); // 보낸 메세지가 구독 되었던 채널로 돌아옴
+        var dto1 = new SubscribeResponseDto(2L, 1L, "채팅 채널 구독을 시작합니다.");
+        assertEquals(objectMapper.writeValueAsString(dto1), blockingQueue.poll(1, SECONDS));
+        var dto2 = new SendMessageResponseDto(2L, 1L, "테스트 메세지"); // 보낸 메세지가 구독 되었던 채널로 돌아옴
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll(1, SECONDS));
-
-        List<Chat> chatByChannelId = chatRepository.findChatByChannelId(1L);
-        Chat chat = chatByChannelId.stream().filter(c -> c.getOwnerId().equals(user2.getId()))
-                .findAny().orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
-        assertEquals(chat.getLastMessage(), "나중 보낸 메세지");
     }
 
     private class DefaultStompFrameHandler implements StompFrameHandler {

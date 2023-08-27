@@ -1,10 +1,12 @@
 package com.example.naejango.domain.storage.application;
 
+import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.ItemStorageRepository;
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.ItemInfoDto;
+import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyInfo;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
@@ -13,6 +15,8 @@ import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.handler.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,7 @@ import java.util.Optional;
 public class StorageService {
     private final StorageRepository storageRepository;
     private final UserService userService;
+    private final ItemRepository itemRepository;
     private final GeomUtil geomUtil;
     private final ItemStorageRepository itemStorageRepository;
 
@@ -38,13 +43,17 @@ public class StorageService {
         return storage.getId();
     }
 
+    public List<ItemInfoDto> findItemList(Long storageId, Boolean status, int page, int size) {
+        Page<ItemInfoDto> items = itemRepository.findByStorageId(storageId, status, PageRequest.of(page, size));
+        return items.getContent();
+    }
+
     public List<Storage> myStorageList(Long userId) {
         return storageRepository.findByUserId(userId);
     }
 
-    public List<StorageNearbyInfo> storageNearby(Point center, int radius, int limit, int page) {
-        int offset = limit * (page - 1);
-        return storageRepository.findStorageNearby(center, radius, offset, limit);
+    public List<StorageNearbyInfoDto> storageNearby(Point center, int radius, int page, int size) {
+        return storageRepository.findStorageNearby(center, radius, page, size);
     }
 
     public int countStorageNearby(Point center, int radius) {

@@ -4,15 +4,16 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.application.ItemService;
+import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.dto.response.ItemInfoDto;
+import com.example.naejango.domain.storage.dto.ItemInfoDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyInfo;
+import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -49,9 +50,9 @@ class StorageControllerTest extends RestDocsSupportTest {
     @MockBean
     private CommonDtoHandler commonDtoHandlerMock;
     @MockBean
-    private GeomUtil geomUtilMock;
+    private ItemService itemService;
     @MockBean
-    private ItemService itemServiceMock;
+    private GeomUtil geomUtilMock;
     private final GeomUtil geomUtil = new GeomUtil();
 
     @Test
@@ -177,11 +178,13 @@ class StorageControllerTest extends RestDocsSupportTest {
         Item item3 = Item.builder().id(4L).status(false).type(ItemType.BUY).name("item3").imgUrl("imgUrl").build();
         Item item4 = Item.builder().id(5L).status(true).type(ItemType.SELL).name("item4").imgUrl("imgUrl").build();
         Item item5 = Item.builder().id(6L).status(true).type(ItemType.SELL).name("item5").imgUrl("imgUrl").build();
+        Category category = Category.builder().id(7).name("생필품").build();
         List<Item> itemList = List.of(item1, item2, item3, item4, item5);
-        List<ItemInfoDto> ItemInfoList = itemList.stream().filter(Item::getStatus).map(ItemInfoDto::new).collect(Collectors.toList());
+        List<ItemInfoDto> ItemInfoList = itemList.stream().filter(Item::getStatus)
+                .map(item -> new ItemInfoDto(item, category.getName())).collect(Collectors.toList());
 
         // when
-        BDDMockito.given(itemServiceMock.findItemList(storage.getId(), true, 0, 10)).willReturn(ItemInfoList);
+        BDDMockito.given(storageServiceMock.findItemList(storage.getId(), true, 0, 10)).willReturn(ItemInfoList);
 
         // then
         ResultActions resultActions = mockMvc.perform(
@@ -192,7 +195,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         );
 
         // then
-        verify(itemServiceMock, times(1)).findItemList(1L, Boolean.TRUE, 0, 10);
+        verify(storageServiceMock, times(1)).findItemList(1L, Boolean.TRUE, 0, 10);
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").value("0"))
@@ -210,20 +213,21 @@ class StorageControllerTest extends RestDocsSupportTest {
                                 )
                                 .requestParameters(
                                         parameterWithName("status").description("아이템의 상태값 (true=거래중, false=거래완료)"),
-                                        parameterWithName("page").description("페이징 처리를 위한 page 파라미터"),
-                                        parameterWithName("size").description("페이징 처리를 위한 size 파라미터")
+                                        parameterWithName("page").description("요청 페이지(0부터 시작)"),
+                                        parameterWithName("size").description("페이지 당 결과물 수")
                                 )
                                 .responseFields(
                                         fieldWithPath("page").description("요청한 페이지"),
-                                        fieldWithPath("size").description("요청한 사이즈"),
+                                        fieldWithPath("size").description("페이지당 결과물 수"),
                                         fieldWithPath("result").description("조회 결과 개수"),
                                         fieldWithPath("itemList[].itemId").description("아이템 id"),
                                         fieldWithPath("itemList[].category").description("아이템 카테고리"),
+                                        fieldWithPath("itemList[].type").description("아이템 타입(BUY / SELL)"),
                                         fieldWithPath("itemList[].name").description("아이템 제목"),
                                         fieldWithPath("itemList[].imgUrl").description("아이템 이미지 링크")
                                 )
                                 .responseSchema(
-                                        Schema.schema("판매중인 아이템 ")
+                                        Schema.schema("아이템 조회 응답")
                                 )
                                 .build()
                 )));
@@ -232,7 +236,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
     @Test
     @Tag("api")
-    @DisplayName("좌표 및 반경을 기준으로 창고 조회 (거리 순 정렬 및 페이징 처리)")
+    @DisplayName("좌표 및 반경을 기준으로 창고 조회")
     void storageNearbyTest() throws Exception {
         // given
         String centerLongitude ="126.0";
@@ -242,8 +246,8 @@ class StorageControllerTest extends RestDocsSupportTest {
         Point center = geomUtil.createPoint(centerLon, centerLat);
 
         int rad = 1000;
-        int limit = 10;
-        int page = 1;
+        int page = 0;
+        int size = 10;
 
         String longitude1 ="126.00001";
         String latitude1 = "37.00001";
@@ -259,12 +263,12 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         Storage testStorage1 = Storage.builder().id(1L).name("test1").location(testLocation1).address("address1").build();
         Storage testStorage2 = Storage.builder().id(2L).name("test2").location(testLocation2).address("address2").build();
-        StorageNearbyInfo storageNearbyInfo1 = new StorageNearbyInfo(testStorage1, geomUtil.calculateDistance(center, testLocation1));
-        StorageNearbyInfo storageNearbyInfo2 = new StorageNearbyInfo(testStorage2, geomUtil.calculateDistance(center, testLocation2));
+        StorageNearbyInfoDto storageNearbyInfo1 = new StorageNearbyInfoDto(testStorage1, geomUtil.calculateDistance(center, testLocation1));
+        StorageNearbyInfoDto storageNearbyInfo2 = new StorageNearbyInfoDto(testStorage2, geomUtil.calculateDistance(center, testLocation2));
 
-        List<StorageNearbyInfo> content = new ArrayList<>(Arrays.asList(storageNearbyInfo1, storageNearbyInfo2));
+        List<StorageNearbyInfoDto> content = new ArrayList<>(Arrays.asList(storageNearbyInfo1, storageNearbyInfo2));
 
-        BDDMockito.given(geomUtilMock.createPoint(anyDouble(), anyDouble())).willReturn(center);
+        BDDMockito.given(geomUtilMock.createPoint(centerLon, centerLat)).willReturn(center);
         BDDMockito.given(storageServiceMock.countStorageNearby(any(Point.class), anyInt())).willReturn(2);
         BDDMockito.given(storageServiceMock.storageNearby(any(Point.class), anyInt(), anyInt(), anyInt())).willReturn(content);
         BDDMockito.given(geomUtilMock.calculateDistance(any(Point.class), any(Point.class))).willReturn(0);
@@ -276,8 +280,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                         .queryParam("lon", centerLongitude)
                         .queryParam("lat", centerLatitude)
                         .queryParam("rad", String.valueOf(rad))
-                        .queryParam("limit", String.valueOf(limit))
                         .queryParam("page", String.valueOf(page))
+                        .queryParam("size", String.valueOf(size))
                         .header("Authorization", "엑세스 토큰")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
@@ -285,7 +289,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         // then
         verify(geomUtilMock, times(1)).createPoint(126.0, 37.0);
         verify(storageServiceMock, times(1)).countStorageNearby(center, rad);
-        verify(storageServiceMock, times(1)).storageNearby(center, rad, limit, page);
+        verify(storageServiceMock, times(1)).storageNearby(center, rad, page, size);
 
         resultActions.andExpect(
                 status().isOk()
@@ -301,8 +305,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 parameterWithName("lon").description("경도"),
                                                 parameterWithName("lat").description("위도"),
                                                 parameterWithName("rad").description("반경"),
-                                                parameterWithName("limit").description("페이지 당 조회 창고 수"),
-                                                parameterWithName("page").description("요청 페이지"),
+                                                parameterWithName("page").description("요청 페이지(0부터 시작)"),
+                                                parameterWithName("size").description("페이지 당 결과물"),
                                                 parameterWithName("_csrf").ignored()
                                         )
                                         .responseFields(

@@ -1,14 +1,14 @@
 package com.example.naejango.domain.storage.api;
 
-import com.example.naejango.domain.item.application.ItemService;
-import com.example.naejango.domain.item.dto.response.ItemInfoDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.ItemInfoDto;
+import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
+import com.example.naejango.domain.storage.dto.request.FindStorageNearbyRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
 import com.example.naejango.domain.storage.dto.response.MyStorageListResponseDto;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyInfo;
 import com.example.naejango.domain.storage.dto.response.StorageNearbyListResponseDto;
 import com.example.naejango.global.common.handler.CommonDtoHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
@@ -28,7 +28,6 @@ import java.util.List;
 public class StorageController {
     private final StorageService storageService;
     private final CommonDtoHandler commonDtoHandler;
-    private final ItemService itemService;
     private final GeomUtil geomUtil;
 
     /**
@@ -44,8 +43,7 @@ public class StorageController {
 
     /**
      * 나의 창고 리스트 조회
-     *
-     * @return StorageInfo (id, name, imgUrl, address)
+     * @return StorageInfoDto (id, name, imgUrl, address)
      */
     @GetMapping("")
     public ResponseEntity<MyStorageListResponseDto> myStorageList(Authentication authentication) {
@@ -62,31 +60,20 @@ public class StorageController {
                                                         @RequestParam("status") Boolean status,
                                                         @RequestParam("page") int page,
                                                         @RequestParam("size") int size) {
-        List<ItemInfoDto> itemList = itemService.findItemList(storageId, status, page, size);
+        List<ItemInfoDto> itemList = storageService.findItemList(storageId, status, page, size);
         return ResponseEntity.ok().body(new ItemListResponseDto(page, size, itemList.size(), itemList));
     }
 
     /**
      * 좌표 및 반경을 기준으로 창고 조회
-     *
-     * @param longitude 경도
-     * @param latitude  위도
-     * @param radius    반경
-     * @param limit     한 페이지에 나타낼 결과 수
-     * @param page      요청 페이지
      */
     @GetMapping("/nearby")
     public ResponseEntity<StorageNearbyListResponseDto> storageNearbyList
-    (@RequestParam("lon") double longitude,
-     @RequestParam("lat") double latitude,
-     @RequestParam("rad") int radius,
-     @RequestParam("limit") int limit,
-     @RequestParam("page") int page) {
-        Point center = geomUtil.createPoint(longitude, latitude);
-        int totalCount = storageService.countStorageNearby(center, radius);
-        int totalPage = (totalCount - 1) % limit + 1;
-        List<StorageNearbyInfo> content = storageService.storageNearby(center, radius, limit, page);
-        var response = new StorageNearbyListResponseDto(content, page, content.size(), totalCount, totalPage);
+    (@Valid @ModelAttribute FindStorageNearbyRequestDto requestDto) {
+        Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
+        int totalCount = storageService.countStorageNearby(center, requestDto.getRad());
+        List<StorageNearbyInfoDto> content = storageService.storageNearby(center, requestDto.getRad(), requestDto.getPage(), requestDto.getSize());
+        var response = new StorageNearbyListResponseDto(requestDto.getPage(), requestDto.getSize(), totalCount, content);
         return ResponseEntity.ok().body(response);
     }
 

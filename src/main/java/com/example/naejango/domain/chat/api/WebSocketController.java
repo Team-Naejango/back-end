@@ -46,7 +46,7 @@ public class WebSocketController {
     public SubscribeResponseDto subscribeChannel(@DestinationVariable("channelId") Long channelId, SimpMessageHeaderAccessor headerAccessor) {
         Long requestUserId = Long.valueOf((String) Objects.requireNonNull(headerAccessor.getHeader("userId")));
         topicSubscribers.computeIfAbsent(channelId, k -> new HashSet<>()).add(requestUserId);
-        return SubscribeResponseDto.builder().userId(requestUserId).message("채팅 채널 구독을 시작합니다.").channelId(channelId).build();
+        return SubscribeResponseDto.builder().userId(requestUserId).message("채팅 채널 구독을 시작합니다.").subscribingChannelId(channelId).build();
     }
 
 

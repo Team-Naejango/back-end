@@ -8,7 +8,6 @@ import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
-import com.example.naejango.domain.item.dto.response.ItemInfoDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -20,14 +19,11 @@ import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -70,13 +66,6 @@ public class ItemService {
 
         return new FindItemResponseDto(item);
     }
-
-    public List<ItemInfoDto> findItemList(Long storageId, Boolean status, int page, int size) {
-        Page<Item> items = itemRepository.findByStorageId(storageId, status, PageRequest.of(page, size));
-        return items.getContent().stream().map(ItemInfoDto::new).collect(Collectors.toList());
-    }
-
-
 
     /** 아이템 정보 수정 */
     @Transactional

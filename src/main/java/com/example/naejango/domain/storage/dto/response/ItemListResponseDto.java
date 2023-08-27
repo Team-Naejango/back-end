@@ -1,6 +1,6 @@
 package com.example.naejango.domain.storage.dto.response;
 
-import com.example.naejango.domain.item.dto.response.ItemInfoDto;
+import com.example.naejango.domain.storage.dto.ItemInfoDto;
 import lombok.*;
 
 import java.util.List;
