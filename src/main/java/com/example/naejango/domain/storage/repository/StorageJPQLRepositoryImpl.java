@@ -23,7 +23,9 @@ public class StorageJPQLRepositoryImpl implements StorageJPQLRepository {
     public List<StorageNearbyInfoDto> findStorageNearby(Point point, int radius, int page, int size) {
         return em.createQuery("SELECT NEW com.example.naejango.domain.storage.dto.StorageNearbyInfoDto" +
                         "(s, ROUND(CAST(st_distancesphere(:point, s.location) AS double)) AS distance) " +
-                        "FROM Storage s WHERE ST_DWithin(:point, s.location, :radius, FALSE) = TRUE ORDER BY distance ASC")
+                        "FROM Storage s " +
+                        "WHERE ST_DWithin(:point, s.location, :radius, FALSE) = TRUE " +
+                        "ORDER BY distance ASC", StorageNearbyInfoDto.class)
                 .setParameter("point", point)
                 .setParameter("radius", radius)
                 .setFirstResult(page * size)
