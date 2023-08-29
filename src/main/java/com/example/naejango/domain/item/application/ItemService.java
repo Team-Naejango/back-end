@@ -108,8 +108,7 @@ public class ItemService {
     }
 
     /** 아이템과 창고 연결 */
-    @Transactional
-    public void connectItemToStorage(Long userId, Item item, List<Long> storageIdList) {
+    private void connectItemToStorage(Long userId, Item item, List<Long> storageIdList) {
         List<Storage> storageList = storageRepository.findByUserId(userId); // 현재 유저의 창고 목록
         if (storageList.isEmpty()) {
             throw new CustomException(ErrorCode.STORAGE_NOT_EXIST);
