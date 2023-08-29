@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.auth.dto.response.GuestLoginResponse;
+import com.example.naejango.global.auth.dto.response.ReissueAccessTokenResponseDto;
 import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtProperties;
@@ -50,8 +51,21 @@ public class AuthController {
             userService.deleteSignature(userId);
         }
 
-        return ResponseEntity.ok().body(new LogoutResponseDto("Jwt 가 정상 삭제되었습니다."));
+        return ResponseEntity.ok().body(new LogoutResponseDto("토큰이 정상 삭제되었습니다."));
     }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<ReissueAccessTokenResponseDto> refreshAccessToken(HttpServletRequest request) {
+        String reissueAccessToken = accessTokenReissuer.reissueAccessToken(request);
+
+        if (reissueAccessToken == null) {
+            throw new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE);
+        }
+
+        return ResponseEntity.ok().body(new ReissueAccessTokenResponseDto(ErrorCode.ACCESS_TOKEN_REISSUE, reissueAccessToken));
+    }
+
+
 
     /**
      * 둘러보기 회원 (게스트) 용 jwt 발급 api

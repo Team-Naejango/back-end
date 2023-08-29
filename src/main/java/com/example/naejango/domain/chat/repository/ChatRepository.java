@@ -34,14 +34,10 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("UPDATE Chat c SET c.lastMessage = :msg WHERE c.channelId = :channelId")
     void updateLastMessageByChannelId(@Param("channelId") Long channelId, @Param("msg") String msg);
 
-    @Query("SELECT u FROM Channel cnl JOIN cnl.channelUsers cu JOIN cu.user u WHERE cnl.id = :channelId")
-    List<User> findUserByChannelId(@Param("channelId") Long channelId);
-
     int countByChannelIdAndOwnerId(Long channelId, Long ownerId);
     int countByIdAndOwnerId(Long chatId, Long ownerId);
 
-    List<Chat> findChatByChannelId(Long channelId);
-
-    Optional<Chat> findChatById(Long chatId);
+    @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId")
+    List<Chat> findChatByChannelId(@Param("channelId") Long channelId);
 
 }

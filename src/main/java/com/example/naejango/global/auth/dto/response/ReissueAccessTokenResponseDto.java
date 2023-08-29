@@ -1,4 +1,4 @@
-package com.example.naejango.global.auth.dto;
+package com.example.naejango.global.auth.dto.response;
 
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.AllArgsConstructor;
