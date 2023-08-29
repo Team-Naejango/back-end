@@ -6,14 +6,15 @@ public enum ErrorCode {
     /** 400 BAD_REQUEST : 잘못된 요청 */
     ALREADY_LOGGED_IN(HttpStatus.BAD_REQUEST, "이미 로그인 된 회원입니다."),
     STORAGE_NOT_EXIST(HttpStatus.BAD_REQUEST, "창고가 등록되어있지 않습니다."),
+    UNIDENTIFIED_DESTINATION(HttpStatus.BAD_REQUEST, "채널 지정이 잘못되었습니다."),
     TRANSACTION_NOT_MODIFICATION(HttpStatus.BAD_REQUEST, "수정 할 수 없는 거래입니다."),
     TRANSACTION_NOT_DELETE(HttpStatus.BAD_REQUEST, "삭제 할 수 없는 거래입니다."),
-    FORGED_REQUEST(HttpStatus.BAD_REQUEST, "토큰이 유효하지 않습니다."),
+    REISSUE_TOKEN_FAILURE(HttpStatus.BAD_REQUEST, "토큰 발급에 실패했습니다."),
 
     /** 401 UNAUTHORIZED : 권한 없음 */
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "회원에게 요청 권한이 없습니다."),
     NOT_AUTHENTICATED(HttpStatus.UNAUTHORIZED, "로그인 되어 있지 않은 상태입니다."),
-    TOKEN_DECRYPTION_FAILURE(HttpStatus.UNAUTHORIZED, "액세스 토큰 복호화에 실패하였습니다."),
+    TOKEN_DECRYPTION_FAILURE(HttpStatus.UNAUTHORIZED, "액세스화 토큰 복호화에 실패하였습니다."),
     NOT_LOGGED_IN(HttpStatus.UNAUTHORIZED, "로그인이 필요한 요청입니다. 엑세스 토큰 및 리프레시 토큰을 찾을 수 없습니다."),
     ACCESS_TOKEN_REISSUE(HttpStatus.UNAUTHORIZED, "엑세스 토큰을 재발급 합니다."),
     ACCESS_TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "엑세스 토큰을 찾을 수 없거나, 만료된 엑세스 토큰입니다."),
@@ -22,14 +23,14 @@ public enum ErrorCode {
     UNAUTHORIZED_MODIFICATION_REQUEST(HttpStatus.FORBIDDEN, "수정 권한이 없습니다."),
     UNAUTHORIZED_DELETE_REQUEST(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다."),
     UNAUTHORIZED_SUBSCRIBE_REQUEST(HttpStatus.FORBIDDEN, "채팅 채널 입장 권한이 없습니다."),
-    UNAUTHORIZED_SEND_MESSAGE_REQUEST(HttpStatus.FORBIDDEN, "채팅 채널 입장 권한이 없습니다."),
+    UNAUTHORIZED_SEND_MESSAGE_REQUEST(HttpStatus.FORBIDDEN, "해당 채팅 채널에 메세지를 보낼 권한이 없습니다."),
     SIGNUP_INCOMPLETE(HttpStatus.FORBIDDEN, "회원가입 절차가 완료되지 않은 회원입니다."),
 
     /** 404 NOT_FOUND : 리소스를 찾을 수 없음 */
     MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메세지를 찾을 수 없습니다."),
-    CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, " 해당하는 정보의 채팅을 찾을 수 없습니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User를 찾을 수 없습니다."),
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
     USERPROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 프로필을 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User 를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Category를 찾을 수 없습니다."),
     STORAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Storage를 찾을 수 없습니다."),
     ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Item을 찾을 수 없습니다."),
@@ -38,6 +39,7 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Transaction을 찾을 수 없습니다."),
 
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
+    SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 채팅이 진행중인 채팅이 있습니다."),
     TOKEN_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 리프레시 토큰을 가지고 있습니다. 엑세스 토큰을 재발급 합니다."),
     WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다."),
     FOLLOW_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 팔로우 등록 되어있습니다.")
