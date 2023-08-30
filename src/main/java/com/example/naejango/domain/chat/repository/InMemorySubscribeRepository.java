@@ -16,6 +16,8 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
 
     /** subscriptionId 가 어떤 channel 을 가르키는지 저장합니다. */
     private final ConcurrentHashMap<String, Long> subscriptionIdInfo = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, String> sessionMap = new ConcurrentHashMap<>();
+
 
     @Override
     public Set<Long> findSubscribeChannelIdByUserId(Long userId) {
@@ -33,13 +35,27 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     }
 
     @Override
+    public Optional<String> findSessionIdByUserId(Long userId) {
+        return Optional.ofNullable(sessionMap.get(userId));
+    }
+
+    @Override
+    public void registerSessionId(String sessionId, Long userId) {
+        sessionMap.put(userId, sessionId);
+    }
+
+    @Override
+    public void deleteSessionInfo(Long userId) {
+        sessionMap.remove(userId);
+    }
+
+    @Override
     public void startPublishingToUser(Long userId, Long channelId) {
         Set<Long> usersId = subscribersInfo.get(channelId);
         if (usersId == null) {
             subscribersInfo.put(channelId, new HashSet<>(Collections.singletonList(userId)));
         }
         else usersId.add(userId);
-        System.out.println("user 확인 : " + subscribersInfo.get(channelId));
     }
 
     @Override
@@ -49,7 +65,6 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
             subscribingChannelsInfo.put(userId, new HashSet<>(Collections.singletonList(channelId)));
         }
         else channelsId.add(channelId);
-        System.out.println("channel 확인 : " + subscribingChannelsInfo.get(userId));
     }
 
     @Override
