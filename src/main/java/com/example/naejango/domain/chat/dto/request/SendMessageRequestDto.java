@@ -1,16 +1,13 @@
-package com.example.naejango.domain.chat.dto;
+package com.example.naejango.domain.chat.dto.request;
 
 import lombok.*;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString
-public class SendMessageResponseDto {
-
+@Builder
+public class SendMessageRequestDto {
     private Long senderId;
-    private Long channelId;
     private String content;
-
 }

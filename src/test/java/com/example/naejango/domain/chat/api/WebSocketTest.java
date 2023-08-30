@@ -1,6 +1,6 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.dto.SubscribeResponseDto;
+import com.example.naejango.domain.chat.dto.response.SubscribeResponseDto;
 import com.example.naejango.domain.chat.dto.response.UnsubscribeResponseDto;
 import com.example.naejango.domain.chat.repository.*;
 import com.example.naejango.domain.user.domain.User;
