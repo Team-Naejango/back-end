@@ -3,7 +3,7 @@ package com.example.naejango.domain.notification.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.notification.application.NotificationService;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,7 +26,7 @@ class NotificationControllerTest extends RestDocsSupportTest {
     NotificationService notificationService;
 
     @MockBean
-    CommonDtoHandler commonDtoHandler;
+    AuthenticationHandler authenticationHandler;
 
     @Test
     @Tag("api")
@@ -34,7 +34,7 @@ class NotificationControllerTest extends RestDocsSupportTest {
     void 알림_구독_요청() throws Exception {
         // given
         Long userId = 1L;
-        BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+        BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                 .willReturn(userId);
         BDDMockito.given(notificationService.subscribe(any(), any()))
                 .willReturn(new SseEmitter());

@@ -2,10 +2,10 @@ package com.example.naejango.domain.chat.api;
 
 import com.example.naejango.domain.chat.application.ChatService;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
-import com.example.naejango.domain.chat.dto.response.MyChatroomListResponseDto;
+import com.example.naejango.domain.chat.dto.response.MyChatListResponseDto;
 import com.example.naejango.domain.chat.dto.response.StartPrivateChatResponseDto;
 import com.example.naejango.domain.chat.repository.ChatRepository;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +23,7 @@ public class ChatController {
 
     private final ChatRepository chatRepository;
     private final ChatService chatService;
-    private final CommonDtoHandler commonDtoHandler;
+    private final AuthenticationHandler authenticationHandler;
 
 
     /**
@@ -34,7 +34,7 @@ public class ChatController {
     @GetMapping("/private/{otherUserId}")
     public ResponseEntity<StartPrivateChatResponseDto> startPrivateChat(@PathVariable("otherUserId") Long otherUserId,
                                                                         Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         Optional<StartPrivateChatResponseDto> result = chatRepository.findPrivateChannelBetweenUsers(userId, otherUserId);
         if (result.isPresent()) {
             return ResponseEntity.ok().body(result.get());
@@ -51,12 +51,12 @@ public class ChatController {
      * (private chatroom 의 title 은 조회한 회원에 따라 다르게 노출이 되어야 하므로, nickname 을 포함하여 반환합니다.)
      */
     @GetMapping("")
-    public ResponseEntity<MyChatroomListResponseDto> myChatroomList(@RequestParam("page") int page,
-                                                                    @RequestParam("size") int size,
-                                                                    Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
-        Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChatTime(userId, PageRequest.of(page, size));
-        return ResponseEntity.ok().body(new MyChatroomListResponseDto(userId, result.getContent()));
+    public ResponseEntity<MyChatListResponseDto> myChatroomList(@RequestParam("page") int page,
+                                                                @RequestParam("size") int size,
+                                                                Authentication authentication) {
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(userId, PageRequest.of(page, size));
+        return ResponseEntity.ok().body(new MyChatListResponseDto(userId, result.getContent()));
     }
 
 }

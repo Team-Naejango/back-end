@@ -5,7 +5,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.account.dto.request.ChargeAccountRequestDto;
 import com.example.naejango.domain.config.RestDocsSupportTest;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,7 +27,7 @@ class AccountControllerTest extends RestDocsSupportTest {
     @MockBean
     AccountService accountService;
     @MockBean
-    CommonDtoHandler commonDtoHandler;
+    AuthenticationHandler authenticationHandler;
 
     @Nested
     @Order(1)
@@ -46,7 +46,7 @@ class AccountControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(chargeAccountRequestDto);
 
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
 
             // when

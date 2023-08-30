@@ -11,7 +11,7 @@ import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.TokenException;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ import java.time.ZoneOffset;
 public class AuthController {
 
     private final UserService userService;
-    private final CommonDtoHandler commonDtoHandler;
+    private final AuthenticationHandler authenticationHandler;
     private final JwtCookieHandler jwtCookieHandler;
     private final AccessTokenReissuer accessTokenReissuer;
 
@@ -47,7 +47,7 @@ public class AuthController {
         jwtCookieHandler.deleteRefreshTokenCookie(request, response);
 
         if(authentication != null){
-            Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+            Long userId = authenticationHandler.userIdFromAuthentication(authentication);
             userService.deleteSignature(userId);
         }
 

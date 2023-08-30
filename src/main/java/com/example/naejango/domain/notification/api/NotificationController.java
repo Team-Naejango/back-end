@@ -1,7 +1,7 @@
 package com.example.naejango.domain.notification.api;
 
 import com.example.naejango.domain.notification.application.NotificationService;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -15,13 +15,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequiredArgsConstructor
 public class NotificationController {
-    private final CommonDtoHandler commonDtoHandler;
+    private final AuthenticationHandler authenticationHandler;
     private final NotificationService notificationService;
 
     /** 알림 구독 요청 */
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(Authentication authentication, @RequestHeader(value="Last-Event-ID", required = false, defaultValue = "") String lastEventId ){
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
 
         return notificationService.subscribe(userId, lastEventId);
     }
