@@ -158,7 +158,7 @@ class ChatRepositoryTest {
 
             // when
             Optional<StartPrivateChatResponseDto> result = chatRepository.findPrivateChannelBetweenUsers(owner.getId(), theOther.getId());
-            Page<ChatInfoDto> chat = chatRepository.findChatByOwnerIdOrderByLastChatTime(owner.getId(), PageRequest.of(0, 1));
+            Page<ChatInfoDto> chat = chatRepository.findChatByOwnerIdOrderByLastChat(owner.getId(), PageRequest.of(0, 1));
             Long channelId = chat.getContent().get(0).getChannelId();
 
             // then
@@ -192,7 +192,7 @@ class ChatRepositoryTest {
             User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
             // when
-            Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChatTime(user2.getId(), PageRequest.of(0, 5));
+            Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(user2.getId(), PageRequest.of(0, 5));
 
             // then
             assertEquals(2, result.getTotalElements());
@@ -208,7 +208,7 @@ class ChatRepositoryTest {
             User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
             // when
-            Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChatTime(user2.getId(), PageRequest.of(0, 5));
+            Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(user2.getId(), PageRequest.of(0, 5));
 
             // then
             assertEquals(2, result.getTotalElements());

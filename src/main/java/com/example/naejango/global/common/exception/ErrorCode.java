@@ -39,7 +39,7 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Transaction을 찾을 수 없습니다."),
 
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
-    SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 채팅이 진행중인 채팅이 있습니다."),
+    SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 진행중인 채팅이 있습니다."),
     TOKEN_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 리프레시 토큰을 가지고 있습니다. 엑세스 토큰을 재발급 합니다."),
     WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다."),
     FOLLOW_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 팔로우 등록 되어있습니다.")

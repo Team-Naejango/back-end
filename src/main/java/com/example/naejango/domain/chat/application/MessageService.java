@@ -25,9 +25,10 @@ public class MessageService {
         messageRepository.save(sentMessage);
 
         // 메세지를 채팅방에 할당 합니다.
-        // 채널에 구독되어 있는 모든 chatId를 찾아 옵니다.
+        // 채널에 연결되어 있는 모든 chatId를 찾아 옵니다.
         chatRepository.findChatByChannelId(channelId).forEach(chat -> {
             ChatMessage chatMessage = ChatMessage.builder().isRead(false).message(sentMessage).chat(chat).build();
+            // 현재 구독중(보고 있는)인 유저의 경우 읽음 처리를 합니다.
             if(subscriberIds.contains(chat.getOwnerId())) chatMessage.read();
             chatMessageRepository.save(chatMessage);
         });
