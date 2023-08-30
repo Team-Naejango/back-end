@@ -14,7 +14,7 @@ import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -48,7 +48,7 @@ class StorageControllerTest extends RestDocsSupportTest {
     @MockBean
     private StorageService storageServiceMock;
     @MockBean
-    private CommonDtoHandler commonDtoHandlerMock;
+    private AuthenticationHandler authenticationHandlerMock;
     @MockBean
     private ItemService itemService;
     @MockBean
@@ -79,7 +79,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         );
 
         // then
-        verify(commonDtoHandlerMock, only()).userIdFromAuthentication(any());
+        verify(authenticationHandlerMock, only()).userIdFromAuthentication(any());
         verify(storageServiceMock, only()).createStorage(any(CreateStorageRequestDto.class), any(Long.class));
         resultActions.andExpect(
                 status().isCreated());
@@ -134,7 +134,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         );
 
         // then
-        verify(commonDtoHandlerMock, only()).userIdFromAuthentication(any());
+        verify(authenticationHandlerMock, only()).userIdFromAuthentication(any());
         verify(storageServiceMock, only()).myStorageList(anyLong());
         resultActions.andExpect(
                 status().isOk()

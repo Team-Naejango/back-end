@@ -10,7 +10,7 @@ import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestD
 import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
 import com.example.naejango.domain.storage.dto.response.MyStorageListResponseDto;
 import com.example.naejango.domain.storage.dto.response.StorageNearbyListResponseDto;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import com.example.naejango.global.common.handler.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
@@ -27,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StorageController {
     private final StorageService storageService;
-    private final CommonDtoHandler commonDtoHandler;
+    private final AuthenticationHandler authenticationHandler;
     private final GeomUtil geomUtil;
 
     /**
@@ -35,7 +35,7 @@ public class StorageController {
      */
     @PostMapping("")
     public ResponseEntity<Void> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto, Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         Long storageId = storageService.createStorage(requestDto, userId);
         String storageUri = "/api/storage/" + storageId.toString();
         return ResponseEntity.created(URI.create(storageUri)).body(null);
@@ -47,7 +47,7 @@ public class StorageController {
      */
     @GetMapping("")
     public ResponseEntity<MyStorageListResponseDto> myStorageList(Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         List<Storage> storages = storageService.myStorageList(userId);
         return ResponseEntity.ok().body(new MyStorageListResponseDto(storages));
     }
@@ -83,7 +83,7 @@ public class StorageController {
     @PatchMapping("/{storageId}")
     public ResponseEntity<Void> modifyStorageInfo(@RequestBody @Valid ModifyStorageInfoRequestDto requestDto,
                                                   @PathVariable Long storageId, Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         storageService.modifyStorageInfo(requestDto, storageId, userId);
         return ResponseEntity.ok().build();
     }
@@ -94,7 +94,7 @@ public class StorageController {
      */
     @DeleteMapping("/{storageId}")
     public ResponseEntity<Void> deleteStorage(@PathVariable Long storageId, Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         storageService.deleteStorage(storageId, userId);
         return ResponseEntity.ok().build();
     }

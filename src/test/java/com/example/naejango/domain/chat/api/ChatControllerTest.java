@@ -12,7 +12,7 @@ import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class ChatControllerTest extends RestDocsSupportTest {
     @MockBean
     private ChatService chatServiceMock;
     @MockBean
-    private CommonDtoHandler commonDtoHandlerMock;
+    private AuthenticationHandler authenticationHandlerMock;
 
     @Test
     @Tag("api")
@@ -58,7 +58,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         Chat chat1 = Chat.builder().id(4L).type(ChatType.PRIVATE).ownerId(sender.getId()).build();
         Chat chat2 = Chat.builder().id(5L).type(ChatType.PRIVATE).ownerId(receiver.getId()).build();
 
-        BDDMockito.given(commonDtoHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
+        BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
         BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
                 .willReturn(Optional.of(new StartPrivateChatResponseDto(channel.getId(), chat1.getId())));
 
@@ -74,7 +74,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         // then
-        verify(commonDtoHandlerMock, times(1)).userIdFromAuthentication(any());
+        verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
         verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
         verify(chatServiceMock, never()).createPrivateChat(anyLong(), anyLong());
 
@@ -98,7 +98,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         Chat chat1 = Chat.builder().id(4L).type(ChatType.PRIVATE).ownerId(sender.getId()).build();
         Chat chat2 = Chat.builder().id(5L).type(ChatType.PRIVATE).ownerId(receiver.getId()).build();
 
-        BDDMockito.given(commonDtoHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
+        BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
         BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
                 .willReturn(Optional.empty());
         BDDMockito.given(chatServiceMock.createPrivateChat(sender.getId(), receiver.getId()))
@@ -112,7 +112,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         // then
-        verify(commonDtoHandlerMock, times(1)).userIdFromAuthentication(any());
+        verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
         verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
         verify(chatServiceMock, times(1)).createPrivateChat(sender.getId(), receiver.getId());
 
@@ -156,8 +156,8 @@ class ChatControllerTest extends RestDocsSupportTest {
 
 
         // when
-        BDDMockito.given(commonDtoHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
-        BDDMockito.given(chatRepositoryMock.findChatByOwnerIdOrderByLastChatTime(user.getId(), PageRequest.of(0, 10)))
+        BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+        BDDMockito.given(chatRepositoryMock.findChatByOwnerIdOrderByLastChat(user.getId(), PageRequest.of(0, 10)))
                 .willReturn(new PageImpl<>(List.of(chatInfo3, chatInfo2, chatInfo1)));
 
         ResultActions resultActions = mockMvc.perform(
@@ -170,8 +170,8 @@ class ChatControllerTest extends RestDocsSupportTest {
 
 
         // then
-        verify(commonDtoHandlerMock, times(1)).userIdFromAuthentication(any());
-        verify(chatRepositoryMock, times(1)).findChatByOwnerIdOrderByLastChatTime(user.getId(), PageRequest.of(0, 10));
+        verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+        verify(chatRepositoryMock, times(1)).findChatByOwnerIdOrderByLastChat(user.getId(), PageRequest.of(0, 10));
 
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("ownerId").value(1L))

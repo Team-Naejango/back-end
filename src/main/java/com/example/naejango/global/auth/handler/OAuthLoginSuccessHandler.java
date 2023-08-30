@@ -4,7 +4,7 @@ import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -22,7 +22,7 @@ import java.util.Arrays;
 public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserService userService;
     private final JwtGenerator jwtGenerator;
-    private final CommonDtoHandler commonDtoHandler;
+    private final AuthenticationHandler authenticationHandler;
     private final JwtCookieHandler jwtCookieHandler;
     private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
     private final String localRedirectUrl = "https://localhost:3000/oauth/kakaoCallback";
@@ -57,7 +57,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) throws IOException {
         String redirection = localRedirectUrl;
-        User user = commonDtoHandler.userFromAuthentication(authentication);
+        User user = authenticationHandler.userFromAuthentication(authentication);
 
         redirection += "?loginStatus=" + user.getRole().name();
         String accessToken = jwtGenerator.generateAccessToken(user.getId());
