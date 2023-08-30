@@ -56,8 +56,11 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
             return message;
         }
 
-        /* 웹소켓 연결 요청 : handshake 시에 Security Filter 에서 Authentication 객체가 생성되며, 그 이후 요청에서 식별 가능 */
+        /* 웹소켓 연결 요청 : 중복된 사용자가 있는 지 확인 */
         if (accessor.getCommand().equals(StompCommand.CONNECT)) {
+            Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+            if(webSocketService.hasSession(userId)) throw new WebSocketException(ErrorCode.SESSION_ALREADY_EXIST);
+            webSocketService.connect(userId, accessor.getSessionId());
             return message;
         }
 
