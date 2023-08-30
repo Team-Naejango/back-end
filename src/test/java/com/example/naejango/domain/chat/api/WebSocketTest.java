@@ -1,7 +1,8 @@
 package com.example.naejango.domain.chat.api;
 
+import com.example.naejango.domain.chat.dto.request.SendMessageRequestDto;
+import com.example.naejango.domain.chat.dto.response.SendMessageResponseDto;
 import com.example.naejango.domain.chat.dto.response.SubscribeResponseDto;
-import com.example.naejango.domain.chat.dto.response.UnsubscribeResponseDto;
 import com.example.naejango.domain.chat.repository.*;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
@@ -26,6 +27,7 @@ import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
@@ -41,6 +43,7 @@ import java.util.concurrent.TimeoutException;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("ALL")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("Test")
@@ -88,7 +91,16 @@ public class WebSocketTest {
     @Test
     @DisplayName("웹소켓 Endpoint 연결 테스트")
     public void testWebSocketConnection() throws Exception {
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+        // given
+        User user1 = userRepository.findByUserKey("test_1").get();
+        String accessToken = jwtGenerator.generateAccessToken(user1.getId());
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+
+        // when
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+
+        // then
         assertNotNull(stompSession);
         assertTrue(stompSession.isConnected());
     }
@@ -96,13 +108,14 @@ public class WebSocketTest {
     @DisplayName("Info 채널 구독 테스트 ")
     void info() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+        User user1 = userRepository.findByUserKey("test_1").get();
+        String accessToken = jwtGenerator.generateAccessToken(user1.getId());
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
 
         // when
         StompHeaders subscribeHeaders = new StompHeaders();
-        User user1 = userRepository.findByUserKey("test_1").get();
-        String accessToken = jwtGenerator.generateAccessToken(user1.getId());
-        subscribeHeaders.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
         subscribeHeaders.setDestination(INFO_CHANNEL);
         stompSession.subscribe(subscribeHeaders, new DefaultStompFrameHandler());
         Thread.sleep(100);
@@ -113,33 +126,65 @@ public class WebSocketTest {
     }
 
     @Test
-    @DisplayName("채팅 채널 구독 - 구독 취소 테스트")
+    @DisplayName("채팅 채널 구독 테스트")
     void chatChannelSubscribeTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
-
-        // when
-        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         User user1 = userRepository.findByUserKey("test_1").get();
         String accessToken = jwtGenerator.generateAccessToken(user1.getId());
-        System.out.println("accessToken = " + accessToken);
+        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
 
+        // when
         // info 채널 구독
         StompHeaders subscribeInfoHeaders = new StompHeaders();
-        subscribeInfoHeaders.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
         subscribeInfoHeaders.setDestination(INFO_CHANNEL);
         stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
         // 채팅 채널 구독
         StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
         subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/1");
-        StompSession.Subscription subscription = stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
+        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
         Thread.sleep(200);
 
-        // 구독 취소
-        subscription.unsubscribe();
+        // then
+        var dto = new SubscribeResponseDto(1L, null, "소켓 통신 정보를 수신합니다.");
+        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
+        var dto2 = new SubscribeResponseDto(1L, 1L, "채팅 채널 구독을 시작합니다.");
+        assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
+    }
+
+    @Test
+    @DisplayName("메세지 전송 테스트")
+    void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+        // given
+        User user1 = userRepository.findByUserKey("test_1").get();
+        String accessToken = jwtGenerator.generateAccessToken(user1.getId());
+        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+
+        // when
+        // info 채널 구독
+        StompHeaders subscribeInfoHeaders = new StompHeaders();
+        subscribeInfoHeaders.setDestination(INFO_CHANNEL);
+        stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
+        Thread.sleep(100);
+
+        // 채팅 채널 구독
+        StompHeaders subscribeChatHeaders = new StompHeaders();
+        subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/1");
+        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
+        Thread.sleep(100);
+
+        // 채팅 채널 구독
+        StompHeaders sendMessageHeaders = new StompHeaders();
+        sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/1");
+        SendMessageRequestDto requestDto = SendMessageRequestDto.builder().content("메세지 전송").build();
+        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(requestDto));
         Thread.sleep(100);
 
         // then
@@ -147,10 +192,12 @@ public class WebSocketTest {
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
         var dto2 = new SubscribeResponseDto(1L, 1L, "채팅 채널 구독을 시작합니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
-        var dto3 = new UnsubscribeResponseDto(1L, 1L, "채팅 채널 구독이 취소 되었습니다.");
+        var dto3 = new SendMessageResponseDto(1L, 1L, "메세지 전송");
         assertEquals(objectMapper.writeValueAsString(dto3), blockingQueue.poll());
-
     }
+
+
+
 
     private class DefaultStompFrameHandler implements StompFrameHandler {
         @Override

@@ -8,6 +8,5 @@ import lombok.*;
 @ToString
 @Builder
 public class SendMessageRequestDto {
-    private Long senderId;
     private String content;
 }
