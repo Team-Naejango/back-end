@@ -27,7 +27,6 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -162,7 +161,7 @@ class MessageRepositoryTest {
         void test1() {
             // given
             User testUser2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            List<ChatInfoDto> chatInfos = chatRepository.findChatByOwnerIdOrderByLastChatTime(testUser2.getId(), PageRequest.of(0, 3)).getContent();
+            List<ChatInfoDto> chatInfos = chatRepository.findChatByOwnerIdOrderByLastChat(testUser2.getId(), PageRequest.of(0, 3)).getContent();
             Long chatId = chatInfos.get(1).getChatId(); //  chat2 의 id 가 나올 것
 
             // when

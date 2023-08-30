@@ -41,7 +41,7 @@ public class User extends TimeAuditingEntity {
     private List<Storage> storages;
 
     @OneToMany(mappedBy = "user")
-    private List<ChannelUser> chatUsers;
+    private List<ChannelUser> channelUsers;
 
     public void allocateStorage(Storage storage) {
         this.storages.add(storage);
