@@ -1,9 +1,9 @@
 package com.example.naejango.domain.chat.api;
 
 import com.example.naejango.domain.chat.application.MessageService;
-import com.example.naejango.domain.chat.dto.SendMessageRequestDto;
-import com.example.naejango.domain.chat.dto.SendMessageResponseDto;
-import com.example.naejango.domain.chat.dto.SubscribeResponseDto;
+import com.example.naejango.domain.chat.dto.request.SendMessageRequestDto;
+import com.example.naejango.domain.chat.dto.response.SendMessageResponseDto;
+import com.example.naejango.domain.chat.dto.response.SubscribeResponseDto;
 import com.example.naejango.domain.chat.dto.response.UnsubscribeResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;

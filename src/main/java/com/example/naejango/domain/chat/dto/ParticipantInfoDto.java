@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.dto.server;
+package com.example.naejango.domain.chat.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
