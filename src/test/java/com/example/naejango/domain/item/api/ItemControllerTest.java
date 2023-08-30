@@ -420,7 +420,7 @@ class ItemControllerTest extends RestDocsSupportTest {
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class matchingItem {
-        double longitude = 127.0;
+        double longitude = 126.0;
         double latitude = 37.0;
         int radius = 300;
         String itemName = "아이템 이름";
