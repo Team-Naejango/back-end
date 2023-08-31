@@ -8,16 +8,31 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class InMemorySubscribeRepository implements SubscribeRepository {
 
-    /** 채널을 구독하는 userId 의 Set 을 저장합니다. */
+    /* sessionId 로 UserId 저장합니다. */
+    private final ConcurrentHashMap<String, Long> sessionIdUserIdMap = new ConcurrentHashMap<>();
+
+    /* 채널을 구독하는 userId 를 저장합니다. */
     private final ConcurrentHashMap<Long, Set<Long>> subscribersInfo = new ConcurrentHashMap<>();
 
-    /** user 가 구독하는 채팅 channelId 를 저장합니다. */
+    /* user 가 구독하는 채팅 channelId 를 저장합니다. */
     private final ConcurrentHashMap<Long, Set<Long>> subscribingChannelsInfo = new ConcurrentHashMap<>();
 
-    /** subscriptionId 가 어떤 channel 을 가르키는지 저장합니다. */
+    /* subscriptionId 가 어떤 channel 을 가르키는지 저장합니다. */
     private final ConcurrentHashMap<String, Long> subscriptionIdInfo = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, String> sessionMap = new ConcurrentHashMap<>();
 
+    @Override
+    public void saveUserIdBySessionId(Long userId, String sessionId) {
+        sessionIdUserIdMap.put(sessionId, userId);
+    }
+    @Override
+    public Optional<Long> findUserIdBySessionId(String sessionId) {
+        return Optional.ofNullable(sessionIdUserIdMap.get(sessionId));
+    }
+
+    @Override
+    public void deleteSessionId(String sessionId) {
+        sessionIdUserIdMap.remove(sessionId);
+    }
 
     @Override
     public Set<Long> findSubscribeChannelIdByUserId(Long userId) {
@@ -34,20 +49,6 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
         return Optional.ofNullable(subscriptionIdInfo.get(subscriptionId));
     }
 
-    @Override
-    public Optional<String> findSessionIdByUserId(Long userId) {
-        return Optional.ofNullable(sessionMap.get(userId));
-    }
-
-    @Override
-    public void registerSessionId(String sessionId, Long userId) {
-        sessionMap.put(userId, sessionId);
-    }
-
-    @Override
-    public void deleteSessionInfo(Long userId) {
-        sessionMap.remove(userId);
-    }
 
     @Override
     public void startPublishingToUser(Long userId, Long channelId) {
@@ -89,7 +90,7 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     }
 
     @Override
-    public void disconnectUser(Long userId) {
+    public void unsubscribeToAllChannel(Long userId) {
         Set<Long> channelsId = subscribingChannelsInfo.get(userId);
         if (channelsId != null) channelsId.forEach(channelId -> startPublishingToUser(userId, channelId));
         subscribingChannelsInfo.remove(userId);

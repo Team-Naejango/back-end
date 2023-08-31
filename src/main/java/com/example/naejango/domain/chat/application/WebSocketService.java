@@ -4,7 +4,6 @@ import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -13,11 +12,11 @@ public class WebSocketService {
 
     private final SubscribeRepository subscribeRepository;
 
-    public void disconnect(Long userId) {
+    public void disconnect(Long userId, String sessionId) {
         Set<Long> channelIds = subscribeRepository.findSubscribeChannelIdByUserId(userId);
         channelIds.forEach(value -> subscribeRepository.stopPublishingToUser(userId, value));
-        subscribeRepository.deleteSessionInfo(userId);
-        subscribeRepository.disconnectUser(userId);
+        subscribeRepository.unsubscribeToAllChannel(userId);
+        subscribeRepository.deleteSessionId(sessionId);
     }
 
     public void unsubscribe(Long userId, String subscriptionId) {
@@ -38,12 +37,7 @@ public class WebSocketService {
         Set<Long> subscribers = subscribeRepository.findSubscribersByChannelId(channelId);
         return subscribers.contains(userId);
     }
-    public boolean hasSession( Long userId) {
-        Optional<String> registeredSession = subscribeRepository.findSessionIdByUserId(userId);
-        return registeredSession.isPresent();
-    }
-
     public void connect(Long userId, String sessionId) {
-        subscribeRepository.registerSessionId(sessionId, userId);
+        subscribeRepository.saveUserIdBySessionId(userId, sessionId);
     }
 }
