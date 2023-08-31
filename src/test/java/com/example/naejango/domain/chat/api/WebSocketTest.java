@@ -94,48 +94,29 @@ public class WebSocketTest {
         // given
         User user1 = userRepository.findByUserKey("test_1").get();
         String accessToken = jwtGenerator.generateAccessToken(user1.getId());
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+
+        StompHeaders connectHeaders = new StompHeaders();
+        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        System.out.println("accessToken = " + accessToken);
 
         // when
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
 
         // then
         assertNotNull(stompSession);
         assertTrue(stompSession.isConnected());
     }
-    @Test
-    @DisplayName("Info 채널 구독 테스트 ")
-    void info() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
-        // given
-
-        User user2 = userRepository.findByUserKey("test_2").get();
-        String accessToken = jwtGenerator.generateAccessToken(user2.getId());
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
-
-        // when
-        StompHeaders subscribeHeaders = new StompHeaders();
-        subscribeHeaders.setDestination(INFO_CHANNEL);
-        stompSession.subscribe(subscribeHeaders, new DefaultStompFrameHandler());
-        Thread.sleep(100);
-
-        // then
-        var dto = new SubscribeResponseDto(2L, null, "소켓 통신 정보를 수신합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-    }
 
     @Test
-    @DisplayName("채팅 채널 구독 테스트")
+    @DisplayName("Info 채널 및 채팅 채널 구독 테스트")
     void chatChannelSubscribeTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user3 = userRepository.findByUserKey("test_3").get();
-        String accessToken = jwtGenerator.generateAccessToken(user3.getId());
+        User user2 = userRepository.findByUserKey("test_2").get();
+        String accessToken = jwtGenerator.generateAccessToken(user2.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+        StompHeaders connectHeaders = new StompHeaders();
+        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
 
         // when
         // info 채널 구독
@@ -148,7 +129,38 @@ public class WebSocketTest {
         StompHeaders subscribeChatHeaders = new StompHeaders();
         subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/2");
         stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
-        Thread.sleep(200);
+        Thread.sleep(100);
+
+        // then
+        var dto = new SubscribeResponseDto(2L, null, "소켓 통신 정보를 수신합니다.");
+        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
+        var dto2 = new SubscribeResponseDto(2L, 2L, "채팅 채널 구독을 시작합니다.");
+        assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
+    }
+
+    @Test
+    @DisplayName("연결 종료 테스트")
+    void disconnectTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+        // given
+        User user3 = userRepository.findByUserKey("test_3").get();
+        String accessToken = jwtGenerator.generateAccessToken(user3.getId());
+        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
+        StompHeaders connectHeaders = new StompHeaders();
+        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+
+        // when
+        // info 채널 구독
+        StompHeaders subscribeInfoHeaders = new StompHeaders();
+        subscribeInfoHeaders.setDestination(INFO_CHANNEL);
+        stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
+        Thread.sleep(100);
+
+        // 채팅 채널 구독
+        StompHeaders subscribeChatHeaders = new StompHeaders();
+        subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/2");
+        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
+        Thread.sleep(100);
 
         // then
         var dto = new SubscribeResponseDto(3L, null, "소켓 통신 정보를 수신합니다.");
@@ -164,9 +176,9 @@ public class WebSocketTest {
         User user4 = userRepository.findByUserKey("test_4").get();
         String accessToken = jwtGenerator.generateAccessToken(user4.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        headers.add("Authorization", JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, headers, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+        StompHeaders connectHeaders = new StompHeaders();
+        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
 
         // when
         // info 채널 구독
@@ -181,7 +193,7 @@ public class WebSocketTest {
         stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
-        // 채팅 채널 구독
+        // 메세지 전송
         StompHeaders sendMessageHeaders = new StompHeaders();
         sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
         SendMessageRequestDto requestDto = SendMessageRequestDto.builder().content("메세지 전송").build();
@@ -196,8 +208,6 @@ public class WebSocketTest {
         var dto3 = new SendMessageResponseDto(4L, 2L, "메세지 전송");
         assertEquals(objectMapper.writeValueAsString(dto3), blockingQueue.poll());
     }
-
-
 
 
     private class DefaultStompFrameHandler implements StompFrameHandler {
