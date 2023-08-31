@@ -10,7 +10,7 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -43,7 +43,7 @@ class UserControllerTest extends RestDocsSupportTest {
     @MockBean
     AccountService accountServiceMock;
     @MockBean
-    CommonDtoHandler commonDtoHandlerMock;
+    AuthenticationHandler authenticationHandlerMock;
 
     @Test
     @Tag("api")

@@ -1,5 +1,6 @@
 package com.example.naejango.domain.chat.config;
 
+import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.WebSocketErrorResponse;
 import com.example.naejango.global.common.exception.WebSocketException;
@@ -34,6 +35,16 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
                 throw new RuntimeException(e);
             }
         }
+        if (cause instanceof CustomException) {
+            CustomException exception = (CustomException) cause;
+            try {
+                return message(exception.getErrorCode());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
         return message(ex.getMessage());
     }
 

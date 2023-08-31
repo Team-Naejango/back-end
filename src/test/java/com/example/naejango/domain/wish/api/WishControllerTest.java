@@ -6,7 +6,7 @@ import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.wish.application.WishService;
 import com.example.naejango.domain.wish.dto.response.FindWishResponseDto;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,7 +32,7 @@ class WishControllerTest extends RestDocsSupportTest {
     @MockBean
     WishService wishService;
     @MockBean
-    CommonDtoHandler commonDtoHandler;
+    AuthenticationHandler authenticationHandler;
 
     @Nested
     @Order(1)
@@ -53,7 +53,7 @@ class WishControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_목록_조회_성공")
         void 관심_목록_조회_성공() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
             BDDMockito.given(wishService.findWish(userId))
                     .willReturn(findWishResponseDtoList);
@@ -103,7 +103,7 @@ class WishControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_등록_성공")
         void 관심_등록_성공() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
 
             // when
@@ -150,7 +150,7 @@ class WishControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_해제_성공")
         void 관심_해제_성공() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
 
             // when

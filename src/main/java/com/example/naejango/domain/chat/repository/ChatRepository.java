@@ -3,7 +3,6 @@ package com.example.naejango.domain.chat.repository;
 import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.response.StartPrivateChatResponseDto;
-import com.example.naejango.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,7 +27,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("SELECT new com.example.naejango.domain.chat.dto.ChatInfoDto(c, SUM(CASE WHEN m.isRead = false THEN 1 ELSE 0 END)) " +
             "FROM Chat c JOIN c.messages m WHERE c.ownerId = :ownerId " +
             "GROUP BY c ORDER BY c.lastModifiedDate DESC")
-    Page<ChatInfoDto> findChatByOwnerIdOrderByLastChatTime(@Param("ownerId") Long ownerId, Pageable pageable);
+    Page<ChatInfoDto> findChatByOwnerIdOrderByLastChat(@Param("ownerId") Long ownerId, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Chat c SET c.lastMessage = :msg WHERE c.channelId = :channelId")

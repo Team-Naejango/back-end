@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.dto;
+package com.example.naejango.domain.chat.dto.request;
 
 import lombok.*;
 
@@ -8,6 +8,5 @@ import lombok.*;
 @ToString
 @Builder
 public class SendMessageRequestDto {
-    private Long senderId;
     private String content;
 }

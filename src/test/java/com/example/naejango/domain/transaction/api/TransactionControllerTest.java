@@ -9,7 +9,7 @@ import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequ
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -35,7 +35,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     @MockBean
     TransactionService transactionService;
     @MockBean
-    CommonDtoHandler commonDtoHandler;
+    AuthenticationHandler authenticationHandler;
 
     @Nested
     @Order(1)
@@ -55,7 +55,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
         @DisplayName("거래_내역_조회")
         void 거래_내역_조회() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
             BDDMockito.given(transactionService.findTransaction(userId))
                     .willReturn(findTransactionResponseDtoList);
@@ -126,7 +126,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(createTransactionRequestDto);
 
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
             BDDMockito.given(transactionService.createTransaction(userId, createTransactionRequestDto))
                     .willReturn(createTransactionResponseDto);
@@ -190,7 +190,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
         @DisplayName("송금_완료_요청")
         void 송금_완료_요청() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
 
             // when
@@ -238,7 +238,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
         @DisplayName("거래_완료_요청")
         void 거래_완료_요청() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
 
             // when
@@ -299,7 +299,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(modifyTransactionRequestDto);
 
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
             BDDMockito.given(transactionService.modifyTransaction(any(), any(), any()))
                     .willReturn(modifyTransactionResponseDto);
@@ -355,7 +355,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
         @DisplayName("거래_삭제")
         void 거래_삭제() throws Exception {
             // given
-            BDDMockito.given(commonDtoHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
                     .willReturn(userId);
 
             // when

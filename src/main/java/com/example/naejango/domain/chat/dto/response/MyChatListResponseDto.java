@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MyChatroomListResponseDto {
+public class MyChatListResponseDto {
     private Long ownerId;
     private List<ChatInfoDto> chatInfoList;
 }

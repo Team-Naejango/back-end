@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.dto;
+package com.example.naejango.domain.chat.dto.response;
 
 import lombok.*;
 

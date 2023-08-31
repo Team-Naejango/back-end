@@ -9,7 +9,7 @@ import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.ModifyUserProfileResponseDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.handler.CommonDtoHandler;
+import com.example.naejango.global.common.handler.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,12 +29,12 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService userService;
     private final AccountService accountService;
-    private final CommonDtoHandler commonDtoHandler;
+    private final AuthenticationHandler authenticationHandler;
 
     @PostMapping("/profile")
     public ResponseEntity<Void> createUserProfile(@RequestBody @Valid CreateUserProfileRequestDto requestDto,
                                                   Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         UserProfile userProfile = new UserProfile(requestDto);
         userService.createUserProfile(userProfile, userId);
         accountService.createAccount(userId);
@@ -43,7 +43,7 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserProfileResponseDto> userProfile(Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         User user = userService.findUser(userId);
         int balance = accountService.getAccount(userId);
         UserProfileResponseDto userProfileResponseDto = new UserProfileResponseDto(user.getUserProfile(), balance);
@@ -52,7 +52,7 @@ public class UserController {
 
     @PatchMapping("/profile")
     public ResponseEntity<ModifyUserProfileResponseDto> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto modifyUserProfileRequestDto, Authentication authentication) {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         userService.modifyUserProfile(modifyUserProfileRequestDto, userId);
         User user = userService.findUser(userId);
         return ResponseEntity.ok().body(new ModifyUserProfileResponseDto(user.getUserProfile()));
@@ -60,7 +60,7 @@ public class UserController {
 
     @DeleteMapping("")
     public ResponseEntity<?> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
-        Long userId = commonDtoHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
         return userService.deleteUser(request, userId);
     }
 
