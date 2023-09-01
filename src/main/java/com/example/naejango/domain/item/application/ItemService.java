@@ -8,6 +8,7 @@ import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
+import com.example.naejango.domain.item.dto.response.MatchingItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -21,6 +22,7 @@ import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,5 +136,11 @@ public class ItemService {
         }
 
         itemStorageRepository.saveAll(itemStorageList);
+    }
+
+    /** 아이템 매칭 */
+    public List<MatchingItemResponseDto> matchingItem(Point center, int radius, String itemName) {
+
+        return storageRepository.findStorageByItemName(center, radius, itemName);
     }
 }
