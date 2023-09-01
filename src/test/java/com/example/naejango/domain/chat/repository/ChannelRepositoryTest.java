@@ -1,6 +1,7 @@
 package com.example.naejango.domain.chat.repository;
 
 import com.example.naejango.domain.chat.domain.*;
+import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
@@ -13,39 +14,41 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableJpaAuditing
-class MessageRepositoryTest {
-
-    @Autowired
-    MessageRepository messageRepository;
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ChannelRepositoryTest {
     @Autowired
     ChatRepository chatRepository;
-    @Autowired
-    ChatMessageRepository chatMessageRepository;
-    @Autowired
-    ChannelRepository channelRepository;
     @Autowired
     UserRepository userRepository;
     @Autowired
     UserProfileRepository userProfileRepository;
+    @Autowired
+    ChatMessageRepository chatMessageRepository;
+    @Autowired
+    MessageRepository messageRepository;
+    @Autowired
+    ChannelRepository channelRepository;
     @PersistenceContext
     EntityManager em;
+
     @BeforeEach
     @Transactional
     void setup() {
@@ -113,29 +116,27 @@ class MessageRepositoryTest {
 
 
         // Message 생성
-        Message msg1 = Message.builder().content("처음 뵙겠습니다.").senderId(testUser2.getId()).channel(channel2).build();
-        Message msg2 = Message.builder().content("두번째 인데요.").senderId(testUser3.getId()).channel(channel2).build();
+        Message msg1 = Message.builder().content("메세지1").senderId(testUser2.getId()).build();
+        Message msg2 = Message.builder().content("메세지2").senderId(testUser2.getId()).build();
         messageRepository.save(msg1);
         messageRepository.save(msg2);
 
 
-
         // Chat - Message 연결
-        ChatMessage chatMessage1 = ChatMessage.builder().message(msg1).isRead(false).chat(chat3).build();
-        ChatMessage chatMessage2 = ChatMessage.builder().message(msg1).isRead(true).chat(chat4).build();
-        ChatMessage chatMessage3 = ChatMessage.builder().message(msg2).isRead(true).chat(chat5).build();
-        ChatMessage chatMessage4 = ChatMessage.builder().message(msg2).isRead(true).chat(chat3).build();
-        ChatMessage chatMessage5 = ChatMessage.builder().message(msg2).isRead(true).chat(chat4).build();
-        ChatMessage chatMessage6 = ChatMessage.builder().message(msg2).isRead(true).chat(chat5).build();
-
+        ChatMessage chatMessage1 = ChatMessage.builder().message(msg1).isRead(false).chat(chat1).build();
+        ChatMessage chatMessage2 = ChatMessage.builder().message(msg1).isRead(true).chat(chat2).build();
+        ChatMessage chatMessage3 = ChatMessage.builder().message(msg2).isRead(true).chat(chat3).build();
+        ChatMessage chatMessage4 = ChatMessage.builder().message(msg2).isRead(true).chat(chat4).build();
+        ChatMessage chatMessage5 = ChatMessage.builder().message(msg2).isRead(false).chat(chat5).build();
 
         chatMessageRepository.save(chatMessage1);
         chatMessageRepository.save(chatMessage2);
         chatMessageRepository.save(chatMessage3);
         chatMessageRepository.save(chatMessage4);
         chatMessageRepository.save(chatMessage5);
-        chatMessageRepository.save(chatMessage6);
 
+        chat1.updateLastMessage(msg1.getContent());
+        chat2.updateLastMessage(msg1.getContent());
         chat3.updateLastMessage(msg2.getContent());
         chat4.updateLastMessage(msg2.getContent());
         chat5.updateLastMessage(msg2.getContent());
@@ -144,47 +145,24 @@ class MessageRepositoryTest {
     }
 
     @Nested
-    class findRecentMessages {
+    class findParticipantsByChannelId {
         @Test
         @DisplayName("조회 성공")
-        void test1() {
+        void test1(){
             // given
-            User testUser2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel groupChannel = channelRepository.findChannelByOwnerId(testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-            Chat chat = chatRepository.findChatByChannelIdAndOwnerId(groupChannel.getId(), testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
+            User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            Channel channel = channelRepository.findChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
             // when
-            Page<Message> result = messageRepository.findRecentMessages(chat.getId(), Pageable.ofSize(5));
+            List<ParticipantInfoDto> result = channelRepository.findParticipantsByChannelId(channel.getId());
 
             // then
-            assertEquals(2, result.getContent().size());
-            assertEquals("두번째 인데요.", result.getContent().get(0).getContent());
+            assertEquals(3, result.size());
         }
     }
 
-    @Nested
-    class deleteMessagesByChannelId {
-        @Test
-        @Transactional
-        @DisplayName("삭제 성공")
-        void test1() {
-            // given
-            User testUser2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel groupChannel = channelRepository.findChannelByOwnerId(testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-            Chat chat = chatRepository.findChatByChannelIdAndOwnerId(groupChannel.getId(), testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
 
-            // when
-            List<Chat> chatList = chatRepository.findChatByChannelId(groupChannel.getId());
-            chatList.forEach(c -> chatMessageRepository.deleteChatMessageByChatId(c.getId()));
-            em.flush(); em.clear();
-            messageRepository.deleteMessagesByChannelId(groupChannel.getId());
-            em.flush(); em.clear();
-            Page<Message> result = messageRepository.findRecentMessages(chat.getId(), Pageable.ofSize(5));
 
-            // then
-            assertEquals(0, result.getContent().size());
-        }
-    }
 
 
 }

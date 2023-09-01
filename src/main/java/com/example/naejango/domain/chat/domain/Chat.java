@@ -7,9 +7,9 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 @Getter
 public class Chat extends TimeAuditingEntity {
     @Id
@@ -23,9 +23,12 @@ public class Chat extends TimeAuditingEntity {
     private String lastMessage;
 
     @OneToMany(mappedBy = "chat")
-    private List<ChatMessage> messages;
+    private List<ChatMessage> chatMessages;
 
     public void updateLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
+    }
+    public void changeTitle(String title) {
+        this.title = title;
     }
 }

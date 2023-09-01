@@ -7,10 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class UnsubscribeResponseDto {
-
-    private Long userId;
-    private Long unsubscribedChannelId;
+public class JoinGroupChatResponseDto {
+    private Long chatId;
     private String message;
-
 }

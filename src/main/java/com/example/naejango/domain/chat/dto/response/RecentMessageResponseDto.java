@@ -12,7 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecentMessageDto {
-    private Long total;
-    private List<MessageDto> messageDtos;
+public class RecentMessageResponseDto {
+    private int page;
+    private int size;
+    private boolean hasNext;
+    private List<MessageDto> messages;
 }

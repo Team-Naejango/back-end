@@ -66,8 +66,6 @@ public class WebSocketTest {
     @Autowired
     ChannelRepository channelRepository;
     @Autowired
-    ChannelUserRepository channelUserRepository;
-    @Autowired
     JwtGenerator jwtGenerator;
     @Autowired
     DataSourceProperties dataSourceProperties;
@@ -97,7 +95,6 @@ public class WebSocketTest {
 
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
-        System.out.println("accessToken = " + accessToken);
 
         // when
         stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);

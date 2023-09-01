@@ -11,10 +11,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    @Query("SELECT m FROM Message m JOIN m.chatMessage cm JOIN cm.chat c WHERE c.id = :chatId ORDER BY m.createdDate DESC")
+    @Query("SELECT m FROM Message m JOIN m.chatMessages cm JOIN cm.chat c WHERE c.id = :chatId ORDER BY m.createdDate DESC")
     Page<Message> findRecentMessages(@Param("chatId") Long chatId, Pageable pageable);
 
     @Modifying
-    @Query("UPDATE ChatMessage cm SET cm.isRead = true WHERE cm.chat.id = :chatId")
-    void readMessageByChatId(@Param("chatId") Long chatId);
+    @Query("DELETE FROM Message m WHERE m.channel.id = :channelId")
+    void deleteMessagesByChannelId(@Param("channelId")Long channelId);
+
 }
