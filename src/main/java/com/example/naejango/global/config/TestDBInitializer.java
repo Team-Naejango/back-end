@@ -30,7 +30,6 @@ public class TestDBInitializer implements ApplicationRunner {
     private final MessageRepository messageRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChannelRepository channelRepository;
-    private final ChannelUserRepository channelUserRepository;
     private final TransactionTemplate transactionTemplate;
 
     @PersistenceContext EntityManager em;
@@ -43,7 +42,7 @@ public class TestDBInitializer implements ApplicationRunner {
     @Transactional
     public void chatTestSetup() {
         transactionTemplate.execute(status -> {
-            // 테스트 유저 3명 등록
+            // 테스트 유저 4명 등록
             User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
             User testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
             User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
@@ -70,24 +69,11 @@ public class TestDBInitializer implements ApplicationRunner {
             testUser3.createUserProfile(userProfile4);
 
             // 채팅 채널 생성
-            Channel channel1 = new Channel();
-            Channel channel2 = new Channel();
+            Channel channel1 = Channel.builder().type(ChatType.PRIVATE).channelLimit(2).defaultTitle("일대일 채팅방").ownerId(null).build();
+            Channel channel2 = Channel.builder().type(ChatType.GROUP).channelLimit(3).defaultTitle("기본 설정 방제").ownerId(testUser2.getId()).build();
 
             channelRepository.save(channel1);
             channelRepository.save(channel2);
-
-            // 채널에 유저를 등록합니다.
-            ChannelUser channelUser1 = ChannelUser.builder().channel(channel1).user(testUser1).build();
-            ChannelUser channelUser2 = ChannelUser.builder().channel(channel1).user(testUser2).build();
-            ChannelUser channelUser3 = ChannelUser.builder().channel(channel2).user(testUser2).build();
-            ChannelUser channelUser4 = ChannelUser.builder().channel(channel2).user(testUser3).build();
-            ChannelUser channelUser5 = ChannelUser.builder().channel(channel2).user(testUser4).build();
-
-            channelUserRepository.save(channelUser1);
-            channelUserRepository.save(channelUser2);
-            channelUserRepository.save(channelUser3);
-            channelUserRepository.save(channelUser4);
-            channelUserRepository.save(channelUser5);
 
             // 채팅 생성
             // 채팅 채널 1 = chat1, chat2
@@ -101,15 +87,15 @@ public class TestDBInitializer implements ApplicationRunner {
                     .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
 
             Chat chat3 = Chat.builder().ownerId(testUser2.getId())
-                    .title("group chat")
+                    .title(channel2.getDefaultTitle())
                     .channelId(channel2.getId()).type(ChatType.GROUP).build();
 
             Chat chat4 = Chat.builder().ownerId(testUser3.getId())
-                    .title("group chat")
+                    .title(channel2.getDefaultTitle())
                     .channelId(channel2.getId()).type(ChatType.GROUP).build();
 
             Chat chat5 = Chat.builder().ownerId(testUser4.getId())
-                    .title("group chat")
+                    .title(channel2.getDefaultTitle())
                     .channelId(channel2.getId()).type(ChatType.GROUP).build();
 
             chatRepository.save(chat1);

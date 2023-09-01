@@ -22,6 +22,7 @@ public enum ErrorCode {
     /** 403 FORBIDDEN : 사용자가 콘텐츠에 접근할 권리를 가지고 있지 않음 */
     UNAUTHORIZED_MODIFICATION_REQUEST(HttpStatus.FORBIDDEN, "수정 권한이 없습니다."),
     UNAUTHORIZED_DELETE_REQUEST(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다."),
+    UNAUTHORIZED_READ_REQUEST(HttpStatus.FORBIDDEN, "조회 권한이 없습니다."),
     UNAUTHORIZED_SUBSCRIBE_REQUEST(HttpStatus.FORBIDDEN, "채팅 채널 입장 권한이 없습니다."),
     UNAUTHORIZED_SEND_MESSAGE_REQUEST(HttpStatus.FORBIDDEN, "해당 채팅 채널에 메세지를 보낼 권한이 없습니다."),
     SIGNUP_INCOMPLETE(HttpStatus.FORBIDDEN, "회원가입 절차가 완료되지 않은 회원입니다."),
@@ -30,6 +31,8 @@ public enum ErrorCode {
     MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메세지를 찾을 수 없습니다."),
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
     USERPROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 프로필을 찾을 수 없습니다."),
+    CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Chat 을 찾을 수 없습니다."),
+    CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 채널을 찾을 수 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User 를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Category를 찾을 수 없습니다."),
     STORAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Storage를 찾을 수 없습니다."),

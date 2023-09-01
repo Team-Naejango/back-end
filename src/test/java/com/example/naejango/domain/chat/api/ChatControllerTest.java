@@ -2,34 +2,44 @@ package com.example.naejango.domain.chat.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.example.naejango.domain.chat.application.ChannelService;
 import com.example.naejango.domain.chat.application.ChatService;
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.ChatType;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
-import com.example.naejango.domain.chat.dto.response.StartPrivateChatResponseDto;
+import com.example.naejango.domain.chat.dto.request.ChangeChatTitleRequestDto;
+import com.example.naejango.domain.chat.dto.request.DeleteChatResponseDto;
+import com.example.naejango.domain.chat.dto.response.ChangeChatTitleResponseDto;
+import com.example.naejango.domain.chat.dto.response.FindChatResponseDto;
+import com.example.naejango.domain.chat.dto.response.JoinGroupChatResponseDto;
 import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.handler.AuthenticationHandler;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epages.restdocs.apispec.ResourceDocumentation.*;
+import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -42,170 +52,369 @@ class ChatControllerTest extends RestDocsSupportTest {
     @MockBean
     private ChatService chatServiceMock;
     @MockBean
+    private ChannelService channelServiceMock;
+    @MockBean
     private AuthenticationHandler authenticationHandlerMock;
 
-    @Test
-    @Tag("api")
-    @DisplayName("1대1 채팅하기 : 채팅 채널이 이미 존재하는 경우")
-    void test1() throws Exception {
-        // given
-        User sender = User.builder().id(1L).role(Role.USER).userKey("test_1").password("").build();
-        User receiver = User.builder().id(2L).role(Role.USER).userKey("test_2").password("").build();
+    @Nested
+    class joinGroupChat {
+        User user = User.builder()
+                .id(1L)
+                .userKey("test")
+                .build();
 
-        Channel channel = Channel.builder().id(3L).build();
-        Channel newChannel = Channel.builder().id(4L).build();
+        Channel channel = Channel.builder()
+                .id(2L)
+                .defaultTitle("공동구매")
+                .type(ChatType.GROUP)
+                .build();
 
-        Chat chat1 = Chat.builder().id(4L).type(ChatType.PRIVATE).ownerId(sender.getId()).build();
-        Chat chat2 = Chat.builder().id(5L).type(ChatType.PRIVATE).ownerId(receiver.getId()).build();
+        Chat chat = Chat.builder()
+                .id(3L)
+                .type(ChatType.GROUP)
+                .channelId(channel.getId())
+                .ownerId(user.getId())
+                .build();
 
-        BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
-        BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
-                .willReturn(Optional.of(new StartPrivateChatResponseDto(channel.getId(), chat1.getId())));
+        @Test
+        @Tag("api")
+        @DisplayName("그룹 채널 참여 : 이미 채널에 참여되어 있는 경우")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.of(chat.getId()));
 
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .post("/api/chat/group/{channelId}", channel.getId())
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
 
-        BDDMockito.given(chatServiceMock.createPrivateChat(sender.getId(), receiver.getId()))
-                .willReturn(new StartPrivateChatResponseDto(newChannel.getId(), chat1.getId()));
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .get("/api/chat/private/{receiverId}", receiver.getId())
-                        .header("Authorization", "Bearer {accessToken}")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            resultActions.andExpect(status().isConflict());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
+                    new JoinGroupChatResponseDto(chat.getId(), "이미 참여중인 채널입니다.")
+            )));
+        }
 
-        // then
-        verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
-        verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
-        verify(chatServiceMock, never()).createPrivateChat(anyLong(), anyLong());
+        @Test
+        @Tag("api")
+        @DisplayName("그룹 채널 참여 : 참여 중이지 않은 경우")
+        void test2() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.empty());
+            BDDMockito.given(chatServiceMock.joinGroupChat(channel.getId(), user.getId())).willReturn(chat.getId());
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(
-                        content().json(objectMapper.writeValueAsString(new StartPrivateChatResponseDto(channel.getId(), chat1.getId())))
-                );
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .post("/api/chat/group/{channelId}", channel.getId())
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
+            verify(chatServiceMock, times(1)).joinGroupChat(channel.getId(), user.getId());
+            
+            resultActions.andExpect(status().isCreated());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
+                    new JoinGroupChatResponseDto(chat.getId(), "그룹 채팅이 시작되었습니다.")
+            )));
+
+            // restDocs
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("채팅")
+                                    .summary("그룹 채널에 참여합니다.")
+                                    .description("기존에 존재하는 그룹 채널에 참여합니다. \n\n" +
+                                            "이미 참여중인 채널인 경우 이미 채널에 참여중이라는 메세지와 함께 채팅방 id 를 응답합니다. \n\n" +
+                                            "참여중이지 않은 채팅인 경우 채팅방(Chat) 을 새로 생성하고 채널에 참여 합니다.")
+                                    .pathParameters(
+                                            parameterWithName("channelId").description("그룹 채널 id")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("chatId").description("내 채팅방 id"),
+                                            fieldWithPath("message").description("그룹 채널 참여 결과 메세지")
+                                    )
+                                    .responseSchema(
+                                            Schema.schema("그룹 채널 참여 Response")
+                                    )
+                                    .build()
+                    )
+            ));
+        }
     }
 
-    @Test
-    @Tag("api")
-    @DisplayName("1대1 채팅하기 : 채팅방이 존재하지 않는 경우")
-    void test2() throws Exception {
-        // given
-        User sender = User.builder().id(1L).role(Role.USER).userKey("test_1").password("").build();
-        User receiver = User.builder().id(2L).role(Role.USER).userKey("test_2").password("").build();
+    @Nested
+    class hasChat {
+        User user = User.builder()
+                .id(1L)
+                .userKey("test")
+                .build();
 
-        Channel channel = Channel.builder().id(3L).build();
-        Channel newChannel = Channel.builder().id(4L).build();
+        Channel channel = Channel.builder()
+                .id(2L)
+                .defaultTitle("공동구매")
+                .type(ChatType.GROUP)
+                .build();
 
-        Chat chat1 = Chat.builder().id(4L).type(ChatType.PRIVATE).ownerId(sender.getId()).build();
-        Chat chat2 = Chat.builder().id(5L).type(ChatType.PRIVATE).ownerId(receiver.getId()).build();
+        Chat chat = Chat.builder()
+                .id(3L)
+                .title(channel.getDefaultTitle())
+                .ownerId(user.getId())
+                .channelId(channel.getId())
+                .type(ChatType.GROUP)
+                .build();
 
-        BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
-        BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
-                .willReturn(Optional.empty());
-        BDDMockito.given(chatServiceMock.createPrivateChat(sender.getId(), receiver.getId()))
-                .willReturn(new StartPrivateChatResponseDto(newChannel.getId(), chat1.getId()));
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .get("/api/chat/private/{receiverId}", receiver.getId())
-                        .header("Authorization", "Bearer {accessToken}")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()));
+        @Test
+        @Tag("api")
+        @DisplayName("조회 결과 없음")
+        void test2() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(channelServiceMock.findChat(channel.getId(), user.getId())).willReturn(Optional.empty());
 
-        // then
-        verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
-        verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
-        verify(chatServiceMock, times(1)).createPrivateChat(sender.getId(), receiver.getId());
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .get("/api/chat/{channelId}", channel.getId())
+                            .header("Authorization", "Bearer {accessToken}")
+                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
-        resultActions.andExpect(status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(new StartPrivateChatResponseDto(newChannel.getId(), chat1.getId()))));
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(channelServiceMock, times(1)).findChat(channel.getId(), user.getId());
 
-        resultActions.andDo(restDocs.document(
-                resource(
-                        ResourceSnippetParameters.builder()
-                                .tag("채팅")
-                                .summary("특정 회원에 대하여 일대일 채팅의 채널 id 및 채팅 id 를 반환합니다.")
-                                .pathParameters(
-                                        parameterWithName("receiverId").description("상대방 id")
-                                )
-                                .responseFields(
-                                        fieldWithPath("channelId").description("채팅 채널 id"),
-                                        fieldWithPath("chatId").description("내 채팅방 id")
-                                )
-                                .build()
-                )
-        ));
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(new FindChatResponseDto(null, "채널에 참여하고 있지 않습니다."))));
+        }
+        @Test
+        @Tag("api")
+        @DisplayName("조회 결과 있음")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(channelServiceMock.findChat(channel.getId(), user.getId())).willReturn(Optional.of(chat));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .get("/api/chat/{channelId}", channel.getId())
+                            .header("Authorization", "Bearer {accessToken}")
+                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(channelServiceMock, times(1)).findChat(channel.getId(), user.getId());
+
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(new FindChatResponseDto(chat.getId(), "해당 채널의 채팅방을 조회했습니다."))));
+        }
     }
 
-    @Test
-    @Tag("api")
-    @DisplayName("내 채팅방 조회")
-    void test3() throws Exception {
-        // given
+
+    @Nested
+    class myChatList {
         User user = User.builder().id(1L).role(Role.USER).userKey("test_me").password("").build();
 
-        Chat chat1 = Chat.builder().id(2L).title("너만오면고").channelId(5L)
+        Chat chat1 = Chat.builder().id(2L).title("책상점").channelId(5L)
                 .lastMessage("안녕하세요").ownerId(user.getId()).type(ChatType.PRIVATE).build();
-        Chat chat2 = Chat.builder().id(3L).title("고수만").channelId(6L)
-                .lastMessage("고고").ownerId(user.getId()).type(ChatType.PRIVATE).build();
-        Chat chat3 = Chat.builder().id(4L).title("빨무3:3").channelId(7L)
-                .lastMessage("ㅎㅇ").ownerId(user.getId()).type(ChatType.GROUP).build();
+        Chat chat2 = Chat.builder().id(3L).title("장터").channelId(6L)
+                .lastMessage("물티슈팔아요").ownerId(user.getId()).type(ChatType.GROUP).build();
+        Chat chat3 = Chat.builder().id(4L).title("공동구매방").channelId(7L)
+                .lastMessage("싸네요").ownerId(user.getId()).type(ChatType.GROUP).build();
 
         ChatInfoDto chatInfo1 = new ChatInfoDto(chat1, 1);
         ChatInfoDto chatInfo2 = new ChatInfoDto(chat2, 2);
         ChatInfoDto chatInfo3 = new ChatInfoDto(chat3,3);
+        @Test
+        @Tag("api")
+        @DisplayName("채팅방 조회 성공")
+        void test1() throws Exception {
+            // given
+            List<ChatInfoDto> dtoList = List.of(chatInfo3, chatInfo2, chatInfo1);
+            Page<ChatInfoDto> pagingResult = new PageImpl<>(dtoList, Pageable.unpaged(), dtoList.size());
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(chatServiceMock.myChatList(user.getId(), 0, 10)).willReturn(pagingResult);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .get("/api/chat")
+                            .queryParam("page", "0")
+                            .queryParam("size", "10")
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
 
 
-        // when
-        BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
-        BDDMockito.given(chatRepositoryMock.findChatByOwnerIdOrderByLastChat(user.getId(), PageRequest.of(0, 10)))
-                .willReturn(new PageImpl<>(List.of(chatInfo3, chatInfo2, chatInfo1)));
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(chatServiceMock, times(1)).myChatList(user.getId(), 0, 10);
 
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .get("/api/chat")
-                        .queryParam("page", "0")
-                        .queryParam("size", "10")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-        );
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.jsonPath("page").value(0))
+                    .andExpect(MockMvcResultMatchers.jsonPath("size").value(10))
+                    .andExpect(MockMvcResultMatchers.jsonPath("hasNext").value(false))
+                    .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[0].chatId").value(4L))
+                    .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[1].chatId").value(3L))
+                    .andExpect( MockMvcResultMatchers.jsonPath("chatInfoList[2].chatId").value(2L));
 
+            // restDocs
+            resultActions.andDo(
+                    restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("채팅")
+                                            .summary("채팅방 목록을 가져옵니다.")
+                                            .description("채팅방 목록을 시현하기 위해 채팅방 정보가 담긴 목록을 가지고 옵니다. \n\n")
+                                            .responseFields(
+                                                    fieldWithPath("page").description("요청한 페이지"),
+                                                    fieldWithPath("size").description("요청한 결과물 수"),
+                                                    fieldWithPath("hasNext").description("조회할 결과물이 남았는지 여부"),
+                                                    fieldWithPath("chatInfoList[].chatId").description("채팅 Id"),
+                                                    fieldWithPath("chatInfoList[].channelId").description("채널 Id"),
+                                                    fieldWithPath("chatInfoList[].title").description("제목"),
+                                                    fieldWithPath("chatInfoList[].type").description("채팅 타입(개인, 그룹)"),
+                                                    fieldWithPath("chatInfoList[].lastMessage").description("마지막 대화 내용"),
+                                                    fieldWithPath("chatInfoList[].unreadMessages").description("안읽은 메세지 수"),
+                                                    fieldWithPath("chatInfoList[].lastChatAt").description("마지막 대화 시각")
+                                            )
+                                            .responseSchema(
+                                                    Schema.schema("내 채팅방 목록 Response")
+                                            )
+                                            .build()
+                            )
+                    )
+            );
+        }
+    }
 
-        // then
-        verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
-        verify(chatRepositoryMock, times(1)).findChatByOwnerIdOrderByLastChat(user.getId(), PageRequest.of(0, 10));
+    @Nested
+    class changeChatTitle {
+        User user = User.builder()
+                .id(1L)
+                .build();
 
-        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("ownerId").value(1L))
-                .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[0].chatId").value(4L))
-                .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[1].chatId").value(3L))
-                .andExpect( MockMvcResultMatchers.jsonPath("chatInfoList[2].chatId").value(2L));
+        Chat chat = Chat.builder()
+                .id(2L)
+                .title("변경 전 제목")
+                .build();
 
-        // restDocs
-        resultActions.andDo(
-                restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("채팅")
-                                        .summary("채팅방 목록을 가져옵니다.")
-                                        .description("채팅방의 간략한 정보가 담긴 목록을 가지고 옵니다.\n\n" +
-                                                "채팅방 목록을 시현하기 위한 모든 정보가 담겨있습니다.\n\n")
-                                        .responseFields(
-                                                fieldWithPath("ownerId").description("채팅 주인"),
-                                                fieldWithPath("chatInfoList[].chatId").description("채팅 Id"),
-                                                fieldWithPath("chatInfoList[].channelId").description("채널 Id"),
-                                                fieldWithPath("chatInfoList[].title").description("제목"),
-                                                fieldWithPath("chatInfoList[].type").description("채팅 타입(개인, 그룹)"),
-                                                fieldWithPath("chatInfoList[].lastMessage").description("마지막 대화 내용"),
-                                                fieldWithPath("chatInfoList[].unreadMessages").description("안읽은 메세지 수"),
-                                                fieldWithPath("chatInfoList[].lastChatAt").description("마지막 대화 시각")
-                                        )
-                                        .responseSchema(
-                                                Schema.schema("내 채팅방 목록 응답")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+        @Test
+        @DisplayName("변경 성공")
+        void test1() throws Exception {
+            // given
+            var requestDto = ChangeChatTitleRequestDto.builder().title("변경한 제목").build();
+            var responseDTo = ChangeChatTitleResponseDto.builder().chatId(chat.getId()).changedTitle("변경한 제목").build();
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .patch("/api/chat/{chatId}", chat.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .characterEncoding(StandardCharsets.UTF_8)
+                            .content(objectMapper.writeValueAsString(requestDto))
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(chatServiceMock, times(1)).changeChatTitle(user.getId(), chat.getId(), requestDto.getTitle());
+
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(responseDTo)));
+
+            // restDoc
+            resultActions.andDo(restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("채팅")
+                                            .summary("채팅방의 제목을 변경합니다.")
+                                            .description("채팅방 제목을 변경합니다.\n\n " +
+                                                    "채널의 기본 제목이 아니고 개개인에게 보여지는 채팅방의 제목입니다")
+                                            .pathParameters(
+                                                    parameterWithName("chatId").description("변경하고자 하는 채팅방 id")
+                                            )
+                                            .requestFields(
+                                                    fieldWithPath("title").description("변경하고자 하는 제목")
+                                            )
+                                            .responseFields(
+                                                    fieldWithPath("chatId").description("제목이 변경된 채팅방 id"),
+                                                    fieldWithPath("changedTitle").description("변경된 제목")
+                                            ).build()
+                            )
+                    )
+            );
+        }
+    }
+
+    @Nested
+    class deleteChat {
+        User user = User.builder()
+                .id(1L)
+                .build();
+
+        Chat chat = Chat.builder()
+                .id(2L)
+                .title("변경 전 제목")
+                .build();
+        @Test
+        @Tag("api")
+        @DisplayName("대화방 나가기")
+        void test1() throws Exception {
+            // given
+            DeleteChatResponseDto responseDto = DeleteChatResponseDto.builder().chatId(chat.getId()).message("해당 채팅방을 종료했습니다.").build();
+            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .delete("/api/chat/{chatId}", chat.getId())
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(chatServiceMock, times(1)).deleteChat(user.getId(), chat.getId());
+
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(responseDto)));
+
+            // restDocs
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("채팅")
+                                    .summary("채팅방을 종료합니다.")
+                                    .description("채팅방을 종료합니다.\n\n" +
+                                            "일대일 채팅의 경우, Chat 과 연관된 ChatMessage 가 삭제 됩니다.\n\n" +
+                                            "그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제됩니다.\n\n" +
+                                            "Channel 과 연관된 ChatMessage 가 없으면 채널에 아무도 남지 않았다고 판단합니다.\n\n" +
+                                            "채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.\n\n")
+                                    .pathParameters(
+                                            parameterWithName("chatId").description("종료하고자 하는 채팅방 id")
+                                    ).responseFields(
+                                            fieldWithPath("chatId").description("종료된 채팅방 id"),
+                                            fieldWithPath("message").description("종료 결과를 알려주는 메세지")
+                                    ).responseSchema(
+                                            Schema.schema("채팅방 종료 Response")
+                                    ).build()
+                    ))
+            );
+        }
 
     }
+
+
+
 
 }

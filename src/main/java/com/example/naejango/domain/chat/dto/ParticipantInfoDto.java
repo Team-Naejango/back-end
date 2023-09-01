@@ -1,16 +1,14 @@
 package com.example.naejango.domain.chat.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class ParticipantInfoDto {
-    private Long userId;
+    private Long participantId;
     private String nickname;
     private String imgUrl;
 }

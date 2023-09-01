@@ -77,7 +77,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
 
             // 채널 구독 권한 확인
             Long channelId = getChannelId(accessor);
-            if(!channelService.isParticipants(channelId, userId)) throw new WebSocketException(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST);
+            if(channelService.findChat(channelId, userId).isEmpty()) throw new WebSocketException(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST);
             return generateMessage(message, accessor);
         }
 

@@ -13,6 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class MyChatListResponseDto {
-    private Long ownerId;
+    private int page;
+    private int size;
+    private boolean hasNext;
     private List<ChatInfoDto> chatInfoList;
 }

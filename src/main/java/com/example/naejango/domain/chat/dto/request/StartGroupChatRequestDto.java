@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.dto.response;
+package com.example.naejango.domain.chat.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StartPrivateChatResponseDto {
-    private Long channelId;
-    private Long chatId;
+public class StartGroupChatRequestDto {
+    private String defaultTitle;
+    private int limit;
 }
