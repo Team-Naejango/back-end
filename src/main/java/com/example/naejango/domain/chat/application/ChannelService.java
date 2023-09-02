@@ -1,6 +1,6 @@
 package com.example.naejango.domain.chat.application;
 
-import com.example.naejango.domain.chat.domain.Chat;
+import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,12 +18,14 @@ public class ChannelService {
     private final ChatRepository chatRepository;
     private final ChannelRepository channelRepository;
 
-    public Optional<Chat> findChat(Long channelId, Long userId) {
-        return chatRepository.findChatByChannelIdAndOwnerId(channelId, userId);
+    public List<ParticipantInfoDto> findParticipantsInChannel(Long channelId, Long userId) {
+        // 조회 권한 확인
+        if(chatRepository.findChatByChannelIdAndOwnerId(channelId, userId).isEmpty()) throw new CustomException(ErrorCode.UNAUTHORIZED_READ_REQUEST);
+        return channelRepository.findParticipantsByChannelId(channelId);
     }
 
-    public List<ParticipantInfoDto> findChatParticipants(Long channelId, Long userId) {
-        if(findChat(channelId, userId).isEmpty()) throw new CustomException(ErrorCode.UNAUTHORIZED_READ_REQUEST);
-        return channelRepository.findParticipantsByChannelId(channelId);
+    public boolean isFull(Long channelId) {
+        GroupChannel channel = (GroupChannel) channelRepository.findById(channelId).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+        return channel.getChannelLimit() <= channel.getParticipantsCount();
     }
 }

@@ -13,7 +13,7 @@ import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

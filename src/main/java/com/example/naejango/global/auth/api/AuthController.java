@@ -11,7 +11,7 @@ import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.TokenException;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

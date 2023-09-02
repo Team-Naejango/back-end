@@ -6,7 +6,7 @@ import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.common.handler.GeomUtil;
+import com.example.naejango.global.common.util.GeomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

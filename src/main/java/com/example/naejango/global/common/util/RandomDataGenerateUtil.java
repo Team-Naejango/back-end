@@ -1,7 +1,9 @@
-package com.example.naejango.global.common.handler;
+package com.example.naejango.global.common.util;
 
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.user.domain.Gender;
+import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -10,10 +12,11 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Random;
 
 @Component
+@RequiredArgsConstructor
 public class RandomDataGenerateUtil {
 
     private final Random random = new Random();
-
+    private final GeomUtil geomUtil;
     private final String[] nicknameAdj = {
             "밝은", "아름다운", "창조적인", "대담한", "빠른", "똑똑한", "용감한", "기발한", "날렵한", "웅장한", "차분한", "섬세한",
             "매력적인", "활발한", "강인한", "화려한", "감각적인", "진실한", "경쾌한", "유려한", "무한한", "미스테리한", "귀여운", "낭만적인",
@@ -81,6 +84,17 @@ public class RandomDataGenerateUtil {
         ResponseEntity<Void> response = restTemplate.getForEntity(imageUrl, Void.class);
         HttpHeaders headers = response.getHeaders();
         return headers.getFirst(HttpHeaders.LOCATION);
+    }
+
+    public Point getRandomPointInGangnam() {
+        final double MIN_LATITUDE = 37.473824;
+        final double MAX_LATITUDE = 37.517071;
+        final double MIN_LONGITUDE = 127.014418;
+        final double MAX_LONGITUDE = 127.060426;
+
+        double randomLatitude = MIN_LATITUDE + (MAX_LATITUDE - MIN_LATITUDE) * random.nextDouble();
+        double randomLongitude = MIN_LONGITUDE + (MAX_LONGITUDE - MIN_LONGITUDE) * random.nextDouble();
+        return geomUtil.createPoint(randomLongitude, randomLatitude);
     }
 
     public Gender getRandomGender() {

@@ -23,6 +23,7 @@ public enum ErrorCode {
     UNAUTHORIZED_MODIFICATION_REQUEST(HttpStatus.FORBIDDEN, "수정 권한이 없습니다."),
     UNAUTHORIZED_DELETE_REQUEST(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다."),
     UNAUTHORIZED_READ_REQUEST(HttpStatus.FORBIDDEN, "조회 권한이 없습니다."),
+    UNAUTHORIZED_CREATE_CHANNEL(HttpStatus.FORBIDDEN, "채널 개설 권한이 없습니다."),
     UNAUTHORIZED_SUBSCRIBE_REQUEST(HttpStatus.FORBIDDEN, "채팅 채널 입장 권한이 없습니다."),
     UNAUTHORIZED_SEND_MESSAGE_REQUEST(HttpStatus.FORBIDDEN, "해당 채팅 채널에 메세지를 보낼 권한이 없습니다."),
     SIGNUP_INCOMPLETE(HttpStatus.FORBIDDEN, "회원가입 절차가 완료되지 않은 회원입니다."),
@@ -43,6 +44,8 @@ public enum ErrorCode {
 
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 진행중인 채팅이 있습니다."),
+    CHANNEL_IS_FULL(HttpStatus.CONFLICT, "해당 채널의 정원이 가득 찼습니다."),
+    GROUP_CHANNEL_ALREADY_EXIST(HttpStatus.CONFLICT, "해당 창고에 할당된 그룹 채널이 이미 있습니다."),
     TOKEN_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 리프레시 토큰을 가지고 있습니다. 엑세스 토큰을 재발급 합니다."),
     WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다."),
     FOLLOW_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 팔로우 등록 되어있습니다.")

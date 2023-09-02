@@ -18,8 +18,8 @@ public class Chat extends TimeAuditingEntity {
     private Long id;
     private Long ownerId;
     private Long channelId;
+    private ChatType chatType;
     private String title;
-    private ChatType type;
     private String lastMessage;
 
     @OneToMany(mappedBy = "chat")

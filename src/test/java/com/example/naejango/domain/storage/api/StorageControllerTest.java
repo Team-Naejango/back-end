@@ -2,20 +2,24 @@ package com.example.naejango.domain.storage.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.GroupChannel;
+import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
-import com.example.naejango.domain.item.application.ItemService;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.storage.dto.ItemInfoDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
+import com.example.naejango.domain.storage.dto.ItemInfoDto;
+import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
-import com.example.naejango.global.common.handler.GeomUtil;
+import com.example.naejango.domain.user.domain.Role;
+import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.global.common.util.AuthenticationHandler;
+import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -24,6 +28,7 @@ import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
@@ -32,13 +37,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,7 +55,7 @@ class StorageControllerTest extends RestDocsSupportTest {
     @MockBean
     private AuthenticationHandler authenticationHandlerMock;
     @MockBean
-    private ItemService itemService;
+    private ChannelRepository channelRepository;
     @MockBean
     private GeomUtil geomUtilMock;
     private final GeomUtil geomUtil = new GeomUtil();
@@ -69,13 +74,13 @@ class StorageControllerTest extends RestDocsSupportTest {
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
         // when
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/storage")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson)
-                        .header("Authorization", "엑세스 토큰")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .post("/api/storage")
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .header("Authorization", "엑세스 토큰")
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
         // then
@@ -127,10 +132,10 @@ class StorageControllerTest extends RestDocsSupportTest {
         List<Storage> storages = Arrays.asList(testStorage1, testStorage2, testStorage3);
         BDDMockito.given(storageServiceMock.myStorageList(anyLong())).willReturn(storages);
 
-        ResultActions resultActions = mockMvc.perform(
-                get("/api/storage")
-                        .header("Authorization", "엑세스 토큰")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .get("/api/storage")
+                .header("Authorization", "엑세스 토큰")
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
         // then
@@ -187,20 +192,20 @@ class StorageControllerTest extends RestDocsSupportTest {
         BDDMockito.given(storageServiceMock.findItemList(storage.getId(), true, 0, 10)).willReturn(ItemInfoList);
 
         // then
-        ResultActions resultActions = mockMvc.perform(
-                get("/api/storage/{storageId}", 1L)
-                        .queryParam("status", "true")
-                        .queryParam("page", "0")
-                        .queryParam("size", "10")
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .get("/api/storage/{storageId}/items", 1L)
+                .queryParam("status", "true")
+                .queryParam("page", "0")
+                .queryParam("size", "10")
         );
 
         // then
         verify(storageServiceMock, times(1)).findItemList(1L, Boolean.TRUE, 0, 10);
         resultActions
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("창고 내의 아이템을 조회했습니다."))
                 .andExpect(jsonPath("page").value("0"))
-                .andExpect(jsonPath("size").value("10"))
-                .andExpect(jsonPath("result").value("4"));
+                .andExpect(jsonPath("size").value("10"));
 
         // restDocs
         resultActions.andDo(restDocs.document(
@@ -217,9 +222,9 @@ class StorageControllerTest extends RestDocsSupportTest {
                                         parameterWithName("size").description("페이지 당 결과물 수")
                                 )
                                 .responseFields(
+                                        fieldWithPath("message").description("조회 결과 메세지"),
                                         fieldWithPath("page").description("요청한 페이지"),
                                         fieldWithPath("size").description("페이지당 결과물 수"),
-                                        fieldWithPath("result").description("조회 결과 개수"),
                                         fieldWithPath("itemList[].itemId").description("아이템 id"),
                                         fieldWithPath("itemList[].category").description("아이템 카테고리"),
                                         fieldWithPath("itemList[].type").description("아이템 타입(BUY / SELL)"),
@@ -231,6 +236,66 @@ class StorageControllerTest extends RestDocsSupportTest {
                                 )
                                 .build()
                 )));
+    }
+
+    @Test
+    @Tag("api")
+    @DisplayName("창고의 그룹 채널 조회")
+    void findGroupChannel() throws Exception {
+        // given
+        User user = User.builder().id(1L).role(Role.USER).userKey("test_1").password("").build();
+
+        Storage storage = Storage.builder()
+                .id(2L)
+                .name("테스트 창고1")
+                .location(geomUtil.createPoint(127.0371, 37.4951))
+                .address("서울시 강남구")
+                .build();
+
+        GroupChannel channel = GroupChannel.builder()
+                .id(4L)
+                .chatType(ChatType.GROUP)
+                .storageId(storage.getId())
+                .participantsCount(3)
+                .channelLimit(5)
+                .ownerId(user.getId())
+                .defaultTitle("그룹채널 1")
+                .build();
+
+        BDDMockito.given(channelRepository.findGroupChannelByStorageId(storage.getId()))
+                .willReturn(Optional.of(channel));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .get("/api/storage/{storageId}/channel", storage.getId())
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+        );
+
+        // then
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("message").value("해당 창고의 그룹 채널 정보가 조회되었습니다."));
+
+        // restDocs
+        resultActions.andDo(restDocs.document(
+                resource(ResourceSnippetParameters.builder()
+                        .tag("창고")
+                        .summary("창고 그룹 채널 조회")
+                        .pathParameters(
+                                parameterWithName("storageId").description("창고 id")
+                        ).responseFields(
+                                fieldWithPath("message").description("조회 결과 메세지"),
+                                fieldWithPath("channelInfo").description("조회된 채널"),
+                                fieldWithPath("channelInfo.channelId").description("조회된 채널"),
+                                fieldWithPath("channelInfo.ownerId").description("조회된 채널"),
+                                fieldWithPath("channelInfo.storageId").description("조회된 채널"),
+                                fieldWithPath("channelInfo.participantsCount").description("조회된 채널"),
+                                fieldWithPath("channelInfo.defaultTitle").description("조회된 채널"),
+                                fieldWithPath("channelInfo.channelLimit").description("조회된 채널")
+                        ).responseSchema(
+                                Schema.schema("창고 채널 조회 Response")
+                        )
+                        .build())
+        ));
     }
 
 
@@ -274,17 +339,16 @@ class StorageControllerTest extends RestDocsSupportTest {
         BDDMockito.given(geomUtilMock.calculateDistance(any(Point.class), any(Point.class))).willReturn(0);
 
         // when
-        ResultActions resultActions = mockMvc.perform(
-                get("/api/storage/nearby")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .queryParam("lon", centerLongitude)
-                        .queryParam("lat", centerLatitude)
-                        .queryParam("rad", String.valueOf(rad))
-                        .queryParam("page", String.valueOf(page))
-                        .queryParam("size", String.valueOf(size))
-                        .header("Authorization", "엑세스 토큰")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-        );
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .get("/api/storage/nearby")
+                .characterEncoding(StandardCharsets.UTF_8)
+                .queryParam("lon", centerLongitude)
+                .queryParam("lat", centerLatitude)
+                .queryParam("rad", String.valueOf(rad))
+                .queryParam("page", String.valueOf(page))
+                .queryParam("size", String.valueOf(size))
+                .header("Authorization", "엑세스 토큰")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         // then
         verify(geomUtilMock, times(1)).createPoint(126.0, 37.0);
@@ -326,10 +390,10 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("totalPage").description("총 페이지 수")
                                         )
                                         .requestSchema(
-                                                Schema.schema("근처 창고 조회 요청")
+                                                Schema.schema("근처 창고 조회 Request")
                                         )
                                         .responseSchema(
-                                                Schema.schema("근처 창고 조회 결과")
+                                                Schema.schema("근처 창고 조회 Response")
                                         ).build()
                         )));
     }
@@ -347,20 +411,17 @@ class StorageControllerTest extends RestDocsSupportTest {
         ModifyStorageInfoRequestDto requestDto = ModifyStorageInfoRequestDto.builder().name("변경된 이름").description("창고 정보 변경").imgUrl("변경 url").build();
 
         // when
-        ResultActions resultActions = mockMvc.perform(
-                patch("/api/storage/{storageId}", testStorage.getId())
-                        .header("Authorization", "엑세스 토큰")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-        );
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .patch("/api/storage/{storageId}", testStorage.getId())
+                .header("Authorization", "엑세스 토큰")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto))
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         // then
         verify(storageServiceMock, times(1)).modifyStorageInfo(any(ModifyStorageInfoRequestDto.class), anyLong(), anyLong());
 
-        resultActions.andExpect(
-                status().isOk()
-        );
+        resultActions.andExpect(status().isOk());
 
         // RestDocs
         resultActions.andDo(
@@ -394,11 +455,10 @@ class StorageControllerTest extends RestDocsSupportTest {
                 .build();
 
         // when
-        ResultActions resultActions = mockMvc.perform(
-                delete("/api/storage/{storageId}", storage.getId())
-                        .header("Authorization", "엑세스 토큰")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-        );
+        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                .delete("/api/storage/{storageId}", storage.getId())
+                .header("Authorization", "엑세스 토큰")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         // then
         verify(storageServiceMock, times(1)).deleteStorage(anyLong(), anyLong());

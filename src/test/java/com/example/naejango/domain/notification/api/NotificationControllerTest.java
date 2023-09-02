@@ -3,7 +3,7 @@ package com.example.naejango.domain.notification.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.notification.application.NotificationService;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

@@ -8,6 +8,7 @@ import lombok.*;
 @Builder
 @ToString
 public class JoinGroupChatResponseDto {
+    private Long channelId;
     private Long chatId;
     private String message;
 }

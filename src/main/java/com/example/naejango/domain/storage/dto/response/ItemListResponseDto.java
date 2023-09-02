@@ -11,8 +11,8 @@ import java.util.List;
 @Builder
 @ToString
 public class ItemListResponseDto {
+    private String message;
     private int page;
     private int size;
-    private int result;
     private List<ItemInfoDto> itemList;
 }

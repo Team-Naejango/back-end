@@ -4,7 +4,7 @@ import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

@@ -1,7 +1,7 @@
 package com.example.naejango.domain.notification.api;
 
 import com.example.naejango.domain.notification.application.NotificationService;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;

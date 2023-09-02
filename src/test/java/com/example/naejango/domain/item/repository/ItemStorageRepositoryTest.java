@@ -5,7 +5,7 @@ import com.example.naejango.domain.item.domain.ItemStorage;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
-import com.example.naejango.global.common.handler.GeomUtil;
+import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

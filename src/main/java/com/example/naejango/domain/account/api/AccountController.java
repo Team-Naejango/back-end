@@ -3,7 +3,7 @@ package com.example.naejango.domain.account.api;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.account.dto.request.ChargeAccountRequestDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
