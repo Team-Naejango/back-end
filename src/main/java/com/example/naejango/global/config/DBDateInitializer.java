@@ -14,8 +14,7 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.common.handler.GeomUtil;
-import com.example.naejango.global.common.handler.RandomDataGenerateUtil;
+import com.example.naejango.global.common.util.RandomDataGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -41,11 +40,10 @@ public class DBDateInitializer implements ApplicationRunner {
     private final TransactionTemplate transactionTemplate;
     private final ItemRepository itemRepository;
     private final ItemStorageRepository itemStorageRepository;
-    private final GeomUtil geomUtil;
     private final RandomDataGenerateUtil randomUtil;
 
-    private List<Long> userIdList = new ArrayList<>();
-    private List<Integer> catIdList = new ArrayList<>();
+    private final List<Long> userIdList = new ArrayList<>();
+    private final List<Integer> catIdList = new ArrayList<>();
 
     @PersistenceContext EntityManager em;
 
@@ -104,7 +102,7 @@ public class DBDateInitializer implements ApplicationRunner {
 
                 for (int j = 0; j < randomUtil.getRandomInt(4); j++) {
                     Storage testStorage = Storage.builder().name(randomUtil.getRandomStorageName())
-                            .location(geomUtil.getRandomPointInGangnam())
+                            .location(randomUtil.getRandomPointInGangnam())
                             .user(testUser)
                             .description("테스트 창고 입니다.")
                             .imgUrl(randomUtil.getRandomImageUrl())

@@ -25,7 +25,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
      */
     @Query("SELECT NEW com.example.naejango.domain.chat.dto.PrivateChatDto(cnl.id, c1.id) " +
             "FROM Channel cnl JOIN Chat c1 ON c1.channelId = cnl.id JOIN Chat c2 ON c2.channelId = cnl.id " +
-            "WHERE c2.type = com.example.naejango.domain.chat.domain.ChatType.PRIVATE " +
+            "WHERE c2.chatType = com.example.naejango.domain.chat.domain.ChatType.PRIVATE " +
             "AND c1.ownerId = :ownerId AND c2.ownerId = :theOtherId ")
     Optional<PrivateChatDto> findPrivateChannelBetweenUsers(@Param("ownerId") Long ownerId, @Param("theOtherId") Long theOtherId);
 
@@ -54,10 +54,9 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId AND c.ownerId = :ownerId")
     Optional<Chat> findChatByChannelIdAndOwnerId(@Param("channelId") Long channelId, @Param("ownerId") Long ownerId);
 
-    @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId")
-    List<Chat> findChatByChannelId(@Param("channelId") Long channelId);
+    List<Chat> findByChannelId(Long channelId);
 
     @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId AND " +
-            "c.ownerId = :userId AND c.type = com.example.naejango.domain.chat.domain.ChatType.GROUP")
+            "c.ownerId = :userId AND c.chatType = com.example.naejango.domain.chat.domain.ChatType.GROUP")
     Optional<Long> findGroupChat(@Param("channelId")Long channelId, @Param("userId") Long userId);
 }

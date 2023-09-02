@@ -39,7 +39,7 @@ public class Storage extends TimeAuditingEntity implements Serializable {
     @Column(nullable = false)
     private String address;
 
-    @Column(columnDefinition = "Geometry(Point, 4326)")
+    @Column(columnDefinition = "Geometry(Point, 4326)", nullable = false)
     private Point location;
 
     @ManyToOne(fetch = FetchType.LAZY)

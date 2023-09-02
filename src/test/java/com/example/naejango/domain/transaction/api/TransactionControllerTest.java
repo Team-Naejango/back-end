@@ -9,7 +9,7 @@ import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequ
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

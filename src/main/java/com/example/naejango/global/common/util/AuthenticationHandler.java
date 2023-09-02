@@ -1,4 +1,4 @@
-package com.example.naejango.global.common.handler;
+package com.example.naejango.global.common.util;
 
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.auth.principal.PrincipalDetails;

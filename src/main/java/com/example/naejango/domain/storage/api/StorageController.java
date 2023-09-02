@@ -1,5 +1,8 @@
 package com.example.naejango.domain.storage.api;
 
+import com.example.naejango.domain.chat.domain.GroupChannel;
+import com.example.naejango.domain.chat.dto.GroupChannelDto;
+import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
@@ -7,13 +10,17 @@ import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.FindStorageNearbyRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
+import com.example.naejango.domain.storage.dto.response.FindStorageChannelResponseDto;
 import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
 import com.example.naejango.domain.storage.dto.response.MyStorageListResponseDto;
 import com.example.naejango.domain.storage.dto.response.StorageNearbyListResponseDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
-import com.example.naejango.global.common.handler.GeomUtil;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.util.AuthenticationHandler;
+import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +35,7 @@ import java.util.List;
 public class StorageController {
     private final StorageService storageService;
     private final AuthenticationHandler authenticationHandler;
+    private final ChannelRepository channelRepository;
     private final GeomUtil geomUtil;
 
     /**
@@ -52,16 +60,24 @@ public class StorageController {
         return ResponseEntity.ok().body(new MyStorageListResponseDto(storages));
     }
 
+    @GetMapping("{storageId}/channel")
+    public ResponseEntity<FindStorageChannelResponseDto> findGroupChannel(@PathVariable("storageId") Long storageId) {
+        GroupChannel groupChannel = channelRepository.findGroupChannelByStorageId(storageId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+        return ResponseEntity.ok().body(new FindStorageChannelResponseDto(new GroupChannelDto(groupChannel), "해당 창고의 그룹 채널 정보가 조회되었습니다."));
+    }
+
     /**
      * 창고에 있는 아이템 조회
      */
-    @GetMapping("/{storageId}")
+    @GetMapping("/{storageId}/items")
     public ResponseEntity<ItemListResponseDto> ItemList(@PathVariable("storageId") Long storageId,
                                                         @RequestParam("status") Boolean status,
-                                                        @RequestParam("page") int page,
-                                                        @RequestParam("size") int size) {
+                                                        @RequestParam(value = "page", defaultValue = "0") int page,
+                                                        @RequestParam(value = "size", defaultValue = "10") int size) {
         List<ItemInfoDto> itemList = storageService.findItemList(storageId, status, page, size);
-        return ResponseEntity.ok().body(new ItemListResponseDto(page, size, itemList.size(), itemList));
+        if(itemList.size() == 0) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ItemListResponseDto("등록된 아이템이 없습니다.", page, size, itemList));
+        return ResponseEntity.ok().body(new ItemListResponseDto("창고 내의 아이템을 조회했습니다.", page, size, itemList));
     }
 
     /**

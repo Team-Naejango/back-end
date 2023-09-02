@@ -6,7 +6,7 @@ import com.example.naejango.domain.chat.dto.MessageDto;
 import com.example.naejango.domain.chat.dto.response.RecentMessageResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;

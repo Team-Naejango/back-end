@@ -12,7 +12,7 @@ import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
-import com.example.naejango.global.common.handler.GeomUtil;
+import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;

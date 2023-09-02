@@ -1,12 +1,12 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.application.ChannelService;
 import com.example.naejango.domain.chat.application.WebSocketService;
+import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.WebSocketException;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -26,8 +26,7 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketChannelInterceptor implements ChannelInterceptor {
-
-    private final ChannelService channelService;
+    private final ChatRepository chatRepository;
     private final AuthenticationHandler authenticationHandler;
     private final WebSocketService webSocketService;
     private final JwtAuthenticator jwtAuthenticator;
@@ -77,7 +76,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
 
             // 채널 구독 권한 확인
             Long channelId = getChannelId(accessor);
-            if(channelService.findChat(channelId, userId).isEmpty()) throw new WebSocketException(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST);
+            if(chatRepository.findChatByChannelIdAndOwnerId(channelId, userId).isEmpty()) throw new WebSocketException(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST);
             return generateMessage(message, accessor);
         }
 

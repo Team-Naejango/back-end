@@ -3,7 +3,7 @@ package com.example.naejango.domain.follow.api;
 import com.example.naejango.domain.follow.application.FollowService;
 import com.example.naejango.domain.follow.dto.response.FindFollowResponseDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

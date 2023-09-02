@@ -2,12 +2,15 @@ package com.example.naejango.global.config;
 
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.repository.*;
+import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
+import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -25,6 +28,8 @@ import javax.persistence.PersistenceContext;
 public class TestDBInitializer implements ApplicationRunner {
 
     private final UserRepository userRepository;
+    private final GeomUtil geomUtil;
+    private final StorageRepository storageRepository;
     private final UserProfileRepository userProfileRepository;
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
@@ -68,9 +73,24 @@ public class TestDBInitializer implements ApplicationRunner {
             testUser3.createUserProfile(userProfile3);
             testUser3.createUserProfile(userProfile4);
 
+            // 창고 1개 생성
+            Storage storage = Storage.builder()
+                    .location(geomUtil.createPoint(127.02, 37.49))
+                    .address("주소")
+                    .name("창고")
+                    .build();
+
+            storageRepository.save(storage);
+
             // 채팅 채널 생성
-            Channel channel1 = Channel.builder().type(ChatType.PRIVATE).channelLimit(2).defaultTitle("일대일 채팅방").ownerId(null).build();
-            Channel channel2 = Channel.builder().type(ChatType.GROUP).channelLimit(3).defaultTitle("기본 설정 방제").ownerId(testUser2.getId()).build();
+            PrivateChannel channel1 = new PrivateChannel();
+            GroupChannel channel2 = GroupChannel.builder()
+                    .ownerId(testUser2.getId())
+                    .storageId(storage.getId())
+                    .channelLimit(5)
+                    .defaultTitle("공동 구매")
+                    .build();
+
 
             channelRepository.save(channel1);
             channelRepository.save(channel2);
@@ -80,23 +100,23 @@ public class TestDBInitializer implements ApplicationRunner {
             // 채팅 채널 2 = chat3, chat4, chat5
             Chat chat1 = Chat.builder().ownerId(testUser1.getId())
                     .title(testUser2.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
+                    .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
 
             Chat chat2 = Chat.builder().ownerId(testUser2.getId())
                     .title(testUser1.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
+                    .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
 
             Chat chat3 = Chat.builder().ownerId(testUser2.getId())
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).type(ChatType.GROUP).build();
+                    .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
 
             Chat chat4 = Chat.builder().ownerId(testUser3.getId())
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).type(ChatType.GROUP).build();
+                    .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
 
             Chat chat5 = Chat.builder().ownerId(testUser4.getId())
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).type(ChatType.GROUP).build();
+                    .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
 
             chatRepository.save(chat1);
             chatRepository.save(chat2);

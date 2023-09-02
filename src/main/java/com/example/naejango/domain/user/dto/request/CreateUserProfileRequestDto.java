@@ -1,7 +1,7 @@
 package com.example.naejango.domain.user.dto.request;
 
 import com.example.naejango.domain.user.domain.Gender;
-import com.example.naejango.global.common.handler.EnumConstraint;
+import com.example.naejango.global.common.validation.EnumConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

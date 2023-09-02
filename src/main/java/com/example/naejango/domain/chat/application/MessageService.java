@@ -32,12 +32,16 @@ public class MessageService {
     public void publishMessage(Long channelId, Long senderId, String content, Set<Long> subscriberIds) {
         // 메세지를 저장합니다.
         Channel channel = em.getReference(Channel.class, channelId);
-        Message sentMessage = Message.builder().senderId(senderId).content(content).channel(channel).build();
+        Message sentMessage = Message.builder()
+                .senderId(senderId)
+                .content(content)
+                .channel(channel)
+                .build();
         messageRepository.save(sentMessage);
 
         // 메세지를 채팅방에 할당 합니다.
         // 채널에 연결되어 있는 모든 chatId를 찾아 옵니다.
-        chatRepository.findChatByChannelId(channelId).forEach(chat -> {
+        chatRepository.findByChannelId(channelId).forEach(chat -> {
             ChatMessage chatMessage = ChatMessage.builder().isRead(false).message(sentMessage).chat(chat).build();
             // 현재 구독중(보고 있는)인 유저의 경우 읽음 처리를 합니다.
             if(subscriberIds.contains(chat.getOwnerId())) chatMessage.read();
@@ -49,8 +53,9 @@ public class MessageService {
     }
 
     public Page<Message> recentMessages(Long userId, Long chatId, int page, int size) {
+        // 보안 로직
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
-        if(!chat.getOwnerId().equals(userId)) throw new CustomException(ErrorCode.UNAUTHORIZED_READ_REQUEST);
+        if(!userId.equals(chat.getOwnerId())) throw new CustomException(ErrorCode.UNAUTHORIZED_READ_REQUEST);
         return messageRepository.findRecentMessages(chatId, PageRequest.of(page, size));
     }
 

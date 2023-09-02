@@ -1,21 +1,23 @@
-package com.example.naejango.global.common.handler;
+package com.example.naejango.global.common.util;
 
+import com.example.naejango.domain.storage.dto.Coord;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Component;
 
-import java.util.Random;
-
 @Component
 public class GeomUtil {
     private static final double EARTH_RADIUS_METERS = 6371000.0;
-    private final Random random = new Random();
 
     private final GeometryFactory factory = new GeometryFactory();
 
     public Point createPoint(double longitude, double latitude) {
         return factory.createPoint(new Coordinate(longitude, latitude));
+    }
+
+    public Point createPoint(Coord coord) {
+        return factory.createPoint(new Coordinate(coord.getLongitude(), coord.getLatitude()));
     }
 
     public int calculateDistance(Point point1, Point point2) {
@@ -37,17 +39,6 @@ public class GeomUtil {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return EARTH_RADIUS_METERS * c;
-    }
-
-    public Point getRandomPointInGangnam() {
-        final double MIN_LATITUDE = 37.473824;
-        final double MAX_LATITUDE = 37.517071;
-        final double MIN_LONGITUDE = 127.014418;
-        final double MAX_LONGITUDE = 127.060426;
-
-        double randomLatitude = MIN_LATITUDE + (MAX_LATITUDE - MIN_LATITUDE) * random.nextDouble();
-        double randomLongitude = MIN_LONGITUDE + (MAX_LONGITUDE - MIN_LONGITUDE) * random.nextDouble();
-        return createPoint(randomLongitude, randomLatitude);
     }
 
 }

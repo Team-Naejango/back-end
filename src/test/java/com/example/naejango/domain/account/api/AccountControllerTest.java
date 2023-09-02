@@ -5,7 +5,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.account.dto.request.ChargeAccountRequestDto;
 import com.example.naejango.domain.config.RestDocsSupportTest;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

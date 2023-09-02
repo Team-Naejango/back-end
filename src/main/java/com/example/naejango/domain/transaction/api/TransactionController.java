@@ -7,7 +7,7 @@ import com.example.naejango.domain.transaction.dto.response.CreateTransactionRes
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

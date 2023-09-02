@@ -9,7 +9,7 @@ import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.ModifyUserProfileResponseDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

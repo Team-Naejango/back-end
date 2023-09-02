@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StartGroupChatResponseDto {
+public class StartGroupChannelResponseDto {
     private Long channelId;
     private Long chatId;
+    private String message;
 }

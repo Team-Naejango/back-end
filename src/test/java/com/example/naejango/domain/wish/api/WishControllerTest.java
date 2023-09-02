@@ -6,7 +6,7 @@ import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.wish.application.WishService;
 import com.example.naejango.domain.wish.dto.response.FindWishResponseDto;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

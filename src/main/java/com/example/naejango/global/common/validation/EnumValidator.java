@@ -1,4 +1,4 @@
-package com.example.naejango.global.common.handler;
+package com.example.naejango.global.common.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

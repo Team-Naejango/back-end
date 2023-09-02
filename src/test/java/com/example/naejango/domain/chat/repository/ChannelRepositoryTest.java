@@ -79,8 +79,13 @@ class ChannelRepositoryTest {
         testUser3.createUserProfile(userProfile4);
 
         // 채팅 채널 생성
-        Channel channel1 = Channel.builder().type(ChatType.PRIVATE).channelLimit(2).defaultTitle("일대일 채팅방").ownerId(null).build();
-        Channel channel2 = Channel.builder().type(ChatType.GROUP).channelLimit(3).defaultTitle("기본 설정 방제").ownerId(testUser2.getId()).build();
+        PrivateChannel channel1 = PrivateChannel.builder().build();
+        GroupChannel channel2 = GroupChannel.builder()
+                .chatType(ChatType.GROUP)
+                .channelLimit(5)
+                .defaultTitle("기본 설정 방제")
+                .ownerId(testUser2.getId())
+                .build();
 
         channelRepository.save(channel1);
         channelRepository.save(channel2);
@@ -90,23 +95,23 @@ class ChannelRepositoryTest {
         // 채팅 채널 2 = chat3, chat4, chat5
         Chat chat1 = Chat.builder().ownerId(testUser1.getId())
                 .title(testUser2.getUserProfile().getNickname())
-                .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
+                .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
 
         Chat chat2 = Chat.builder().ownerId(testUser2.getId())
                 .title(testUser1.getUserProfile().getNickname())
-                .channelId(channel1.getId()).type(ChatType.PRIVATE).build();
+                .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
 
         Chat chat3 = Chat.builder().ownerId(testUser2.getId())
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).type(ChatType.GROUP).build();
+                .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
 
         Chat chat4 = Chat.builder().ownerId(testUser3.getId())
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).type(ChatType.GROUP).build();
+                .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
 
         Chat chat5 = Chat.builder().ownerId(testUser4.getId())
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).type(ChatType.GROUP).build();
+                .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
 
         chatRepository.save(chat1);
         chatRepository.save(chat2);
@@ -151,7 +156,7 @@ class ChannelRepositoryTest {
         void test1(){
             // given
             User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel channel = channelRepository.findChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+            Channel channel = channelRepository.findGroupChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
             // when
             List<ParticipantInfoDto> result = channelRepository.findParticipantsByChannelId(channel.getId());
@@ -160,8 +165,6 @@ class ChannelRepositoryTest {
             assertEquals(3, result.size());
         }
     }
-
-
 
 
 

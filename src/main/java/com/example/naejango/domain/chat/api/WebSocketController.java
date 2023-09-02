@@ -8,7 +8,7 @@ import com.example.naejango.domain.chat.dto.response.SubscribeResponseDto;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import com.example.naejango.global.common.exception.WebSocketErrorResponse;
 import com.example.naejango.global.common.exception.WebSocketException;
-import com.example.naejango.global.common.handler.AuthenticationHandler;
+import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
