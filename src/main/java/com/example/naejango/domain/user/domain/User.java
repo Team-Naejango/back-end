@@ -39,10 +39,6 @@ public class User extends TimeAuditingEntity {
     @OneToMany(mappedBy = "user")
     private List<Storage> storages;
 
-    public void allocateStorage(Storage storage) {
-        this.storages.add(storage);
-    }
-
     public void createUserProfile(UserProfile userProfile) {
         this.userProfile = userProfile;
         this.role = Role.USER;

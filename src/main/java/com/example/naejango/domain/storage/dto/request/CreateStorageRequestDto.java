@@ -18,17 +18,17 @@ public class CreateStorageRequestDto {
     private String name;
 
     @NotNull
-    @Length(max = 100)
-    private String imgUrl;
-
-    @NotNull
-    private String description;
+    @Valid
+    private Coord coord;
 
     @NotNull
     @Length(max = 100)
     private String address;
 
     @NotNull
-    @Valid
-    private Coord coord;
+    private String description;
+
+    @NotNull
+    @Length(max = 100)
+    private String imgUrl;
 }

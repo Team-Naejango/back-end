@@ -10,10 +10,7 @@ import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.FindStorageNearbyRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
-import com.example.naejango.domain.storage.dto.response.FindStorageChannelResponseDto;
-import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
-import com.example.naejango.domain.storage.dto.response.MyStorageListResponseDto;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyListResponseDto;
+import com.example.naejango.domain.storage.dto.response.*;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -26,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -39,14 +35,18 @@ public class StorageController {
     private final GeomUtil geomUtil;
 
     /**
-     * 창고 생성 및 요청한 회원에게 할당
+     * 창고를 생성합니다.
+     * @param requestDto 창고 이름(name), 좌표(coord), 주소(address), 설명(description), 이미지링크(imgUrl)
+     * @return CreatrStorageResponseDto 창고 Id(storage), 생성 결과(message)
      */
     @PostMapping("")
-    public ResponseEntity<Void> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto, Authentication authentication) {
+    public ResponseEntity<CreateStorageResponseDto> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto, Authentication authentication) {
         Long userId = authenticationHandler.userIdFromAuthentication(authentication);
-        Long storageId = storageService.createStorage(requestDto, userId);
-        String storageUri = "/api/storage/" + storageId.toString();
-        return ResponseEntity.created(URI.create(storageUri)).body(null);
+        Long storageId = storageService.createStorage(requestDto.getName(), requestDto.getCoord(),
+                requestDto.getAddress(), requestDto.getDescription(), requestDto.getImgUrl(), userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new CreateStorageResponseDto(storageId, "창고가 생성되었습니다.")
+        );
     }
 
     /**

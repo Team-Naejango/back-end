@@ -50,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(StorageController.class)
 class StorageControllerTest extends RestDocsSupportTest {
+
     @MockBean
     private StorageService storageServiceMock;
     @MockBean
@@ -68,8 +69,8 @@ class StorageControllerTest extends RestDocsSupportTest {
         double testLon = 126.0;
         double testLat = 37.0;
         Coord testCoord = new Coord(testLon, testLat);
-        CreateStorageRequestDto requestDto =
-                new CreateStorageRequestDto("name", "imgUrl", "description", "address", testCoord);
+        CreateStorageRequestDto requestDto = new CreateStorageRequestDto("name", testCoord,
+                "address", "description", "imgUrl");
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
@@ -85,7 +86,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // then
         verify(authenticationHandlerMock, only()).userIdFromAuthentication(any());
-        verify(storageServiceMock, only()).createStorage(any(CreateStorageRequestDto.class), any(Long.class));
+        verify(storageServiceMock, only()).createStorage(anyString(), any(Coord.class), anyString(), anyString(), anyString(), anyLong());
         resultActions.andExpect(
                 status().isCreated());
 
@@ -104,9 +105,14 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("coord.longitude").description("경도"),
                                                 fieldWithPath("coord.latitude").description("위도")
                                         )
-                                        .responseFields()
+                                        .responseFields(
+                                                fieldWithPath("storageId").description("생성된 창고 id"),
+                                                fieldWithPath("message").description("결과 메세지")
+                                        )
                                         .requestSchema(
                                                 Schema.schema("창고 생성 Request")
+                                        ).responseSchema(
+                                                Schema.schema("창고 생성 Response")
                                         ).build()
                         )));
     }
@@ -299,7 +305,6 @@ class StorageControllerTest extends RestDocsSupportTest {
         ));
     }
 
-
     @Test
     @Tag("api")
     @DisplayName("좌표 및 반경을 기준으로 창고 조회")
@@ -475,4 +480,5 @@ class StorageControllerTest extends RestDocsSupportTest {
                 )
         );
     }
+
 }

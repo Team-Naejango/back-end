@@ -2,7 +2,6 @@ package com.example.naejango.domain.storage.domain;
 
 import com.example.naejango.domain.common.TimeAuditingEntity;
 import com.example.naejango.domain.item.domain.ItemStorage;
-import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
@@ -48,20 +47,6 @@ public class Storage extends TimeAuditingEntity implements Serializable {
 
     @OneToMany(mappedBy = "storage")
     List<ItemStorage> itemStorages = new ArrayList<>();
-
-    public void assignUser(User user) {
-        this.user = user;
-        user.allocateStorage(this);
-    }
-
-    public Storage(CreateStorageRequestDto requestDto, Point location) {
-        this.name = requestDto.getName();
-        this.imgUrl = requestDto.getImgUrl();
-        this.description = requestDto.getDescription();
-        this.address = requestDto.getAddress();
-        this.location = location;
-        this.itemStorages = new ArrayList<>();
-    }
 
     public void modify(ModifyStorageInfoRequestDto requestDto) {
         this.description = requestDto.getDescription();
