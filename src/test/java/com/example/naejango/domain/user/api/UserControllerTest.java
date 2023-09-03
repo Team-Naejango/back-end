@@ -206,7 +206,11 @@ class UserControllerTest extends RestDocsSupportTest {
                                 ResourceSnippetParameters.builder()
                                         .tag("회원")
                                         .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
-                                        .requestFields()
+                                        .requestFields(
+                                                fieldWithPath("nickname").description("닉네임"),
+                                                fieldWithPath("intro").description("소개"),
+                                                fieldWithPath("imgUrl").description("이미지 링크")
+                                        )
                                         .responseFields(
                                                 fieldWithPath("birth").description("생년월일"),
                                                 fieldWithPath("nickname").description("닉네임"),
