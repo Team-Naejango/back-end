@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    @Query("SELECT NEW com.example.naejango.domain.storage.dto.ItemInfoDto(i.id, c.name, i.type, i.name, i.imgUrl) " +
+    @Query("SELECT NEW com.example.naejango.domain.storage.dto.ItemInfoDto(i.id, c.name, i.type, i.name, i.imgUrl, i.description) " +
             "FROM Item i JOIN i.category c WHERE i.id IN (SELECT itst.item.id FROM ItemStorage itst WHERE itst.storage.id = :storageId) " +
             "AND i.status = :status ORDER BY i.id DESC")
     Page<ItemInfoDto> findByStorageId(@Param("storageId") Long storageId, @Param("status") Boolean status, Pageable pageable);
