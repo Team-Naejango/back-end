@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateStorageRequestDto {
-    @Length(min = 2, max = 12)
+    @Length(min = 2, max = 25)
     private String name;
 
     @NotNull
@@ -26,6 +26,7 @@ public class CreateStorageRequestDto {
     private String address;
 
     @NotNull
+    @Length(max = 1000)
     private String description;
 
     @NotNull
