@@ -15,6 +15,7 @@ public class ItemInfoDto {
     private ItemType type;
     private String name;
     private String imgUrl;
+    private String description;
 
     public ItemInfoDto(Item item, String category) {
         this.itemId = item.getId();
@@ -22,5 +23,6 @@ public class ItemInfoDto {
         this.type = item.getType();
         this.name = item.getName();
         this.imgUrl = item.getImgUrl();
+        this.description = item.getDescription();
     }
 }
