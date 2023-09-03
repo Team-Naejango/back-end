@@ -178,11 +178,11 @@ class StorageControllerTest extends RestDocsSupportTest {
     void findItems() throws Exception {
         // given
         Storage storage = Storage.builder().id(1L).name("테스트 창고").build();
-        Item item1 = Item.builder().id(2L).status(true).type(ItemType.BUY).name("item1").imgUrl("imgUrl").build();
-        Item item2 = Item.builder().id(3L).status(true).type(ItemType.SELL).name("item2").imgUrl("imgUrl").build();
-        Item item3 = Item.builder().id(4L).status(false).type(ItemType.BUY).name("item3").imgUrl("imgUrl").build();
-        Item item4 = Item.builder().id(5L).status(true).type(ItemType.SELL).name("item4").imgUrl("imgUrl").build();
-        Item item5 = Item.builder().id(6L).status(true).type(ItemType.SELL).name("item5").imgUrl("imgUrl").build();
+        Item item1 = Item.builder().id(2L).status(true).type(ItemType.BUY).name("item1").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item2 = Item.builder().id(3L).status(true).type(ItemType.SELL).name("item2").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item3 = Item.builder().id(4L).status(false).type(ItemType.BUY).name("item3").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item4 = Item.builder().id(5L).status(true).type(ItemType.SELL).name("item4").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item5 = Item.builder().id(6L).status(true).type(ItemType.SELL).name("item5").imgUrl("imgUrl").description("아이템 설명").build();
         Category category = Category.builder().id(7).name("생필품").build();
         List<Item> itemList = List.of(item1, item2, item3, item4, item5);
         List<ItemInfoDto> ItemInfoList = itemList.stream().filter(Item::getStatus)
