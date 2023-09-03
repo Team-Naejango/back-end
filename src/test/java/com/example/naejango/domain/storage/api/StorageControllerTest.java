@@ -229,7 +229,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                                         fieldWithPath("itemList[].category").description("아이템 카테고리"),
                                         fieldWithPath("itemList[].type").description("아이템 타입(BUY / SELL)"),
                                         fieldWithPath("itemList[].name").description("아이템 제목"),
-                                        fieldWithPath("itemList[].imgUrl").description("아이템 이미지 링크")
+                                        fieldWithPath("itemList[].imgUrl").description("아이템 이미지 링크"),
+                                        fieldWithPath("itemList[].description").description("아이템 설명")
                                 )
                                 .responseSchema(
                                         Schema.schema("아이템 조회 응답")
