@@ -3,14 +3,18 @@ package com.example.naejango.domain.storage.api;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
+import com.example.naejango.domain.item.domain.Category;
+import com.example.naejango.domain.item.repository.CategoryRepository;
+import com.example.naejango.domain.storage.application.SearchingConditionDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
-import com.example.naejango.domain.storage.dto.request.FindStorageNearbyRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
+import com.example.naejango.domain.storage.dto.request.SearchStorageRequestDto;
 import com.example.naejango.domain.storage.dto.response.*;
+import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -23,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -30,12 +35,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StorageController {
     private final StorageService storageService;
+    private final StorageRepository storageRepository;
     private final AuthenticationHandler authenticationHandler;
     private final ChannelRepository channelRepository;
+    private final CategoryRepository categoryRepository;
     private final GeomUtil geomUtil;
 
     /**
-     * 창고를 생성합니다.
+     * 창고 생성
+     *
      * @param requestDto 창고 이름(name), 좌표(coord), 주소(address), 설명(description), 이미지링크(imgUrl)
      * @return CreatrStorageResponseDto 창고 Id(storage), 생성 결과(message)
      */
@@ -60,6 +68,11 @@ public class StorageController {
         return ResponseEntity.ok().body(new MyStorageListResponseDto(storages));
     }
 
+    /**
+     * 창고에 등록된 그룹 채팅 조회
+     * @param storageId 창고 id
+     * @return FindStorageChannelResponseDto 채널 id(channelId), 결과 메세지(message)
+     */
     @GetMapping("{storageId}/channel")
     public ResponseEntity<FindStorageChannelResponseDto> findGroupChannel(@PathVariable("storageId") Long storageId) {
         GroupChannel groupChannel = channelRepository.findGroupChannelByStorageId(storageId)
@@ -68,7 +81,7 @@ public class StorageController {
     }
 
     /**
-     * 창고에 있는 아이템 조회
+     * 창고에 등록된 아이템 조회
      */
     @GetMapping("/{storageId}/items")
     public ResponseEntity<ItemListResponseDto> ItemList(@PathVariable("storageId") Long storageId,
@@ -76,21 +89,30 @@ public class StorageController {
                                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                                         @RequestParam(value = "size", defaultValue = "10") int size) {
         List<ItemInfoDto> itemList = storageService.findItemList(storageId, status, page, size);
-        if(itemList.size() == 0) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ItemListResponseDto("등록된 아이템이 없습니다.", page, size, itemList));
+        if (itemList.size() == 0)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ItemListResponseDto("등록된 아이템이 없습니다.", page, size, itemList));
         return ResponseEntity.ok().body(new ItemListResponseDto("창고 내의 아이템을 조회했습니다.", page, size, itemList));
     }
 
     /**
-     * 좌표 및 반경을 기준으로 창고 조회
+     * 창고 검색
+     * 검색 조건은 좌표 / 반경 / 카테고리 / 아이템 타입 / 키워드 / 아이템 상태 입니다.
+     * @param requestDto 좌표(lon, lat), 반경(rad), 카테고리(cat), 키워드(keyword), 아이템 타입(type), 아이템 상태(status)
      */
-    @GetMapping("/nearby")
-    public ResponseEntity<StorageNearbyListResponseDto> storageNearbyList
-    (@Valid @ModelAttribute FindStorageNearbyRequestDto requestDto) {
+    @GetMapping("/search")
+    public ResponseEntity<SearchStorageResponseDto> searchStorage(@Valid @ModelAttribute SearchStorageRequestDto requestDto) {
         Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
-        int totalCount = storageService.countStorageNearby(center, requestDto.getRad());
-        List<StorageNearbyInfoDto> content = storageService.storageNearby(center, requestDto.getRad(), requestDto.getPage(), requestDto.getSize());
-        var response = new StorageNearbyListResponseDto(requestDto.getPage(), requestDto.getSize(), totalCount, content);
-        return ResponseEntity.ok().body(response);
+        Category category = categoryRepository.findById(requestDto.getCat()).orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+        String[] keywords = requestDto.getKeyword() == null? new String[]{} : Arrays.stream(requestDto.getKeyword().split(" ")).map(word -> "%" + word + "%").toArray(String[]::new);
+        SearchingConditionDto conditions = SearchingConditionDto.builder()
+                .cat(category)
+                .itemType(requestDto.getType())
+                .keyword(keywords)
+                .status(requestDto.getStatus()).build();
+        var searchResult =
+                storageRepository.searchStorageByConditions(center, requestDto.getRad(), requestDto.getPage(), requestDto.getSize(), conditions);
+        return ResponseEntity.ok().body(new SearchStorageResponseDto(
+                new Coord(center), requestDto.getRad(), requestDto.getPage(), requestDto.getSize(), conditions, searchResult));
     }
 
     /**

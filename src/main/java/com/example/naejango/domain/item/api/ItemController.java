@@ -6,19 +6,15 @@ import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
-import com.example.naejango.domain.item.dto.response.MatchingItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.global.common.dto.BaseResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
-import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RequestMapping("/api/item")
 @RestController
@@ -26,7 +22,6 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private final AuthenticationHandler authenticationHandler;
-    private final GeomUtil geomUtil;
     /** 아이템 생성 */
     @PostMapping("")
     public ResponseEntity<CreateItemResponseDto> createItem(Authentication authentication, @RequestBody CreateItemRequestDto createItemRequestDto) {
@@ -61,13 +56,4 @@ public class ItemController {
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
     }
 
-    /** 아이템 매칭 */
-    @GetMapping("/matching")
-    public ResponseEntity<List<MatchingItemResponseDto>> matchingItem(@RequestParam("lon") double longitude, @RequestParam("lat") double latitude,
-                                                                      @RequestParam("rad") int radius, @RequestParam("itemName") String itemName) {
-        Point center = geomUtil.createPoint(longitude, latitude);
-        List<MatchingItemResponseDto> matchingItemResponseDtoList = itemService.matchingItem(center, radius, itemName);
-
-        return ResponseEntity.ok().body(matchingItemResponseDtoList);
-    }
 }

@@ -5,10 +5,8 @@ import com.example.naejango.domain.item.repository.ItemStorageRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
-import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -59,14 +57,6 @@ public class StorageService {
         return storageRepository.findByUserId(userId);
     }
 
-    public List<StorageNearbyInfoDto> storageNearby(Point center, int radius, int page, int size) {
-        return storageRepository.findStorageNearby(center, radius, page, size);
-    }
-
-    public int countStorageNearby(Point center, int radius) {
-        return storageRepository.countStorageWithinRadius(center, radius);
-    }
-
     @Transactional
     public void modifyStorageInfo(ModifyStorageInfoRequestDto requestDto, Long storageId, Long userId) {
         Storage storage = storageRepository.findById(storageId).orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
@@ -86,4 +76,5 @@ public class StorageService {
         itemStorageRepository.deleteByStorageId(deleteStorage.getId());
         storageRepository.delete(deleteStorage);
     }
+
 }

@@ -195,7 +195,7 @@ public class WebSocketTest {
         sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
         SendMessageRequestDto requestDto = SendMessageRequestDto.builder().content("메세지 전송").build();
         stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(requestDto));
-        Thread.sleep(100);
+        Thread.sleep(200);
 
         // then
         var dto = new SubscribeResponseDto(4L, null, "소켓 통신 정보를 수신합니다.");
