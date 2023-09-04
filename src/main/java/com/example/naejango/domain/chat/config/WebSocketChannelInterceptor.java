@@ -56,7 +56,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
 
             // 인증 처리
             Authentication authentication = jwtAuthenticator.authenticateWebSocketRequest(accessor);
-            Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+            Long userId = authenticationHandler.getUserId(authentication);
             userRegistry.onApplicationEvent(
                     new SessionConnectedEvent(
                             this, MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()), authentication));
@@ -69,7 +69,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
         /* 구독 요청(Channel 에 연결된 Chat 객체가 있는지 확인)  */
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
             // 인증 객체에서 userId 를 꺼내옵니다.
-            Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+            Long userId = authenticationHandler.getUserId(accessor.getUser());
 
             // 에러 수신 채널 구독
             if("/user/queue/info".equals(accessor.getDestination())) return generateMessage(message, accessor);
@@ -83,7 +83,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
         /* 메세지 전송 요청 : 메세지 발송 권한 인증(구독 여부 확인) */
         if (StompCommand.SEND.equals(accessor.getCommand()) || StompCommand.MESSAGE.equals(accessor.getCommand())) {
             // 발송 권한 확인
-            Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+            Long userId = authenticationHandler.getUserId(accessor.getUser());
             Long channelId = getChannelId(accessor);
             if (!webSocketService.isSubscriber(userId, channelId)) throw new WebSocketException(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST);
             return generateMessage(message, accessor);
@@ -92,7 +92,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
         /* 구독 취소 요청 */
         if(StompCommand.UNSUBSCRIBE.equals(accessor.getCommand())){
             // subscriptionId 정보 받아오기
-            Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+            Long userId = authenticationHandler.getUserId(accessor.getUser());
             String subscriptionId = accessor.getSubscriptionId();
 
             // 해당 subscription 제거
@@ -103,7 +103,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
         /* 웹소켓 연결 종료 요청 */
         if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
             // 모든 구독 정보 삭제
-            Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+            Long userId = authenticationHandler.getUserId(accessor.getUser());
             webSocketService.disconnect(userId, accessor.getSessionId());
 
             return message;

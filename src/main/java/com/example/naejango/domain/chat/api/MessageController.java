@@ -39,7 +39,7 @@ public class MessageController {
                                                                       @RequestParam(value = "page", defaultValue = "0") int page,
                                                                       @RequestParam(value = "size", defaultValue = "25") @Max(100) int size,
                                                                       Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
 
         Page<Message> result = messageService.recentMessages(userId, chatId, page, size);
         if(result.isEmpty()) throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND);

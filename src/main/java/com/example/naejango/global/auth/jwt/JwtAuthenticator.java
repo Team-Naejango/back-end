@@ -2,7 +2,7 @@ package com.example.naejango.global.auth.jwt;
 
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
+import com.example.naejango.global.auth.dto.response.ValidateTokenResponseDto;
 import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -31,7 +31,7 @@ public class JwtAuthenticator {
      * @param request Http 요청
      */
     public void authenticateRequest(HttpServletRequest request) {
-        ValidateTokenResponseDto validateResult = jwtValidator.validateTokenInRequest(request);
+        ValidateTokenResponseDto validateResult = jwtValidator.isValidToken(request);
         if (validateResult.isValidToken()){
             authenticate(validateResult.getUserId());
         }
@@ -46,7 +46,7 @@ public class JwtAuthenticator {
      */
 
     public Authentication authenticateWebSocketRequest(StompHeaderAccessor accessor) {
-        var validationResult = jwtValidator.validateTokenInRequest(accessor);
+        var validationResult = jwtValidator.isValidToken(accessor);
         if(!validationResult.isValidToken()) throw new WebSocketException(ErrorCode.ACCESS_TOKEN_NOT_VALID);
         return getPrincipal(validationResult.getUserId());
     }

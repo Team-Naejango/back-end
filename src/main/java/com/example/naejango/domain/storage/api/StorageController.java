@@ -49,7 +49,7 @@ public class StorageController {
      */
     @PostMapping("")
     public ResponseEntity<CreateStorageResponseDto> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto, Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         Long storageId = storageService.createStorage(requestDto.getName(), requestDto.getCoord(),
                 requestDto.getAddress(), requestDto.getDescription(), requestDto.getImgUrl(), userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -63,7 +63,7 @@ public class StorageController {
      */
     @GetMapping("")
     public ResponseEntity<MyStorageListResponseDto> myStorageList(Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         List<Storage> storages = storageService.myStorageList(userId);
         return ResponseEntity.ok().body(new MyStorageListResponseDto(storages));
     }
@@ -121,7 +121,7 @@ public class StorageController {
     @PatchMapping("/{storageId}")
     public ResponseEntity<Void> modifyStorageInfo(@RequestBody @Valid ModifyStorageInfoRequestDto requestDto,
                                                   @PathVariable Long storageId, Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         storageService.modifyStorageInfo(requestDto, storageId, userId);
         return ResponseEntity.ok().build();
     }
@@ -132,7 +132,7 @@ public class StorageController {
      */
     @DeleteMapping("/{storageId}")
     public ResponseEntity<Void> deleteStorage(@PathVariable Long storageId, Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         storageService.deleteStorage(storageId, userId);
         return ResponseEntity.ok().build();
     }

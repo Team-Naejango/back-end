@@ -83,7 +83,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         @DisplayName("그룹 채널 참여 : 이미 채널에 참여되어 있는 경우")
         void test1() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
             BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.of(chat.getId()));
             BDDMockito.given(channelServiceMock.isFull(channel.getId())).willReturn(false);
 
@@ -95,7 +95,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isConflict());
@@ -109,7 +109,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         @DisplayName("그룹 채널 참여 : 정원 초과인 경우")
         void test2() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
             BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.empty());
             BDDMockito.given(channelServiceMock.isFull(channel.getId())).willReturn(true);
 
@@ -121,7 +121,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isConflict());
@@ -133,7 +133,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         @DisplayName("그룹 채널 참여 : 참여 중이지 않은 경우")
         void test3() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
             BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.empty());
             BDDMockito.given(channelServiceMock.isFull(channel.getId())).willReturn(false);
             BDDMockito.given(chatServiceMock.joinGroupChat(channel.getId(), user.getId())).willReturn(chat.getId());
@@ -146,7 +146,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
             verify(chatServiceMock, times(1)).joinGroupChat(channel.getId(), user.getId());
             
@@ -208,7 +208,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         @DisplayName("조회 결과 없음")
         void test2() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
             BDDMockito.given(chatRepositoryMock.findChatByChannelIdAndOwnerId(channel.getId(), user.getId())).willReturn(Optional.empty());
 
             // when
@@ -219,7 +219,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findChatByChannelIdAndOwnerId(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isOk());
@@ -230,7 +230,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         @DisplayName("조회 결과 있음")
         void test1() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
             BDDMockito.given(chatRepositoryMock.findChatByChannelIdAndOwnerId(channel.getId(), user.getId())).willReturn(Optional.of(chat));
 
             // when
@@ -241,7 +241,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findChatByChannelIdAndOwnerId(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isOk());
@@ -288,7 +288,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             // given
             List<ChatInfoDto> dtoList = List.of(chatInfo3, chatInfo2, chatInfo1);
             Page<ChatInfoDto> pagingResult = new PageImpl<>(dtoList, Pageable.unpaged(), dtoList.size());
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
             BDDMockito.given(chatRepositoryMock.findChatByOwnerIdOrderByLastChat(user.getId(), PageRequest.of(0, 10))).willReturn(pagingResult);
 
             // when
@@ -302,7 +302,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findChatByOwnerIdOrderByLastChat(user.getId(), PageRequest.of(0, 10));
 
             resultActions.andExpect(MockMvcResultMatchers.status().isOk())
@@ -361,7 +361,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             // given
             var requestDto = ChangeChatTitleRequestDto.builder().title("변경한 제목").build();
             var responseDTo = ChangeChatTitleResponseDto.builder().chatId(chat.getId()).changedTitle("변경한 제목").build();
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -374,7 +374,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatServiceMock, times(1)).changeChatTitle(user.getId(), chat.getId(), requestDto.getTitle());
 
             resultActions.andExpect(status().isOk());
@@ -420,7 +420,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             DeleteChatResponseDto responseDto = DeleteChatResponseDto.builder().chatId(chat.getId()).message("해당 채팅방을 종료했습니다.").build();
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -430,7 +430,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatServiceMock, times(1)).deleteChat(user.getId(), chat.getId());
 
             resultActions.andExpect(status().isOk());

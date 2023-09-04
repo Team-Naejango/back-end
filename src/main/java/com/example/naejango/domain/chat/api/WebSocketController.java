@@ -31,14 +31,14 @@ public class WebSocketController {
     /** 웹소켓 통신 중 정보를 수신하는 채널을 구독하는 Endpoint */
     @SubscribeMapping("/user/queue/info")
     public SubscribeResponseDto subscribeInfoChannel(SimpMessageHeaderAccessor accessor) {
-        Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+        Long userId = authenticationHandler.getUserId(accessor.getUser());
         return SubscribeResponseDto.builder().userId(userId).message("소켓 통신 정보를 수신합니다.").build();
     }
 
     /** 채팅 Channel 을 구독하는 Endpoint */
     @SubscribeMapping("/topic/channel/{channelId}")
     public SubscribeResponseDto subscribeChatChannel(@DestinationVariable("channelId") Long channelId, SimpMessageHeaderAccessor accessor) {
-        Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+        Long userId = authenticationHandler.getUserId(accessor.getUser());
         // 구독 정보 등록
         String subscriptionId = accessor.getSubscriptionId();
         webSocketService.subscribe(userId, subscriptionId, channelId);
@@ -51,7 +51,7 @@ public class WebSocketController {
     public SendMessageResponseDto sendMessage(@RequestBody SendMessageRequestDto requestDto,
                                               @DestinationVariable("channelId") Long channelId,
                                               SimpMessageHeaderAccessor accessor) {
-        Long userId = authenticationHandler.userIdFromPrincipal(accessor.getUser());
+        Long userId = authenticationHandler.getUserId(accessor.getUser());
         messageService.publishMessage(channelId, userId, requestDto.getContent(), subscribeRepository.findSubscribersByChannelId(channelId));
         return new SendMessageResponseDto(userId, channelId, requestDto.getContent());
     }

@@ -52,7 +52,7 @@ public class ChannelController {
     @PostMapping ("/private/{otherUserId}")
     public ResponseEntity<StartPrivateChannelResponseDto> startPrivateChannel(@PathVariable("otherUserId") Long otherUserId,
                                                                               Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         Optional<PrivateChatDto> result = chatRepository.findPrivateChannelBetweenUsers(userId, otherUserId);
 
         if (result.isPresent()) {
@@ -78,7 +78,7 @@ public class ChannelController {
     @PostMapping("/group")
     public ResponseEntity<StartGroupChannelResponseDto> startGroupChannel(@RequestBody StartGroupChannelRequestDto requestDto,
                                                                           Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         // 이미 채팅이 존재 하는 경우
         channelRepository.findGroupChannelByStorageId(requestDto.getStorageId()).ifPresent(channel -> {
             throw new CustomException(ErrorCode.GROUP_CHANNEL_ALREADY_EXIST);
@@ -116,7 +116,7 @@ public class ChannelController {
     @GetMapping("/{channelId}/participants")
     public ResponseEntity<FindChannelParticipantsResponseDto> findChannelParticipants(@PathVariable("channelId") Long channelId,
                                                                                       Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         List<ParticipantInfoDto> chatParticipants = channelService.findParticipantsInChannel(channelId, userId);
         return ResponseEntity.ok().body(new FindChannelParticipantsResponseDto(chatParticipants.size(), chatParticipants));
     }

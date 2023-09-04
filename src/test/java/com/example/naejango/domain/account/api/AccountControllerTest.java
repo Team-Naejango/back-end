@@ -46,7 +46,7 @@ class AccountControllerTest extends RestDocsSupportTest {
             // given
             String content = objectMapper.writeValueAsString(chargeAccountRequestDto);
 
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
 
             // when

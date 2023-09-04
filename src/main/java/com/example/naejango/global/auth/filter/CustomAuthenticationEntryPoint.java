@@ -31,7 +31,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null && jwtCookieHandler.checkRefreshCookieDuplication(request)) {
+        if (authentication == null && jwtCookieHandler.hasRefreshTokenCookie(request)) {
             jwtCookieHandler.deleteAccessTokenCookie(request, response);
             throw new TokenException(ErrorCode.ACCESS_TOKEN_REISSUE, accessTokenReissuer.reissueAccessToken(request));
         }
