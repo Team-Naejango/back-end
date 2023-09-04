@@ -53,7 +53,7 @@ class WishControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_목록_조회_성공")
         void 관심_목록_조회_성공() throws Exception {
             // given
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
             BDDMockito.given(wishService.findWish(userId))
                     .willReturn(findWishResponseDtoList);
@@ -103,7 +103,7 @@ class WishControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_등록_성공")
         void 관심_등록_성공() throws Exception {
             // given
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
 
             // when
@@ -150,7 +150,7 @@ class WishControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_해제_성공")
         void 관심_해제_성공() throws Exception {
             // given
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
 
             // when

@@ -21,7 +21,7 @@ public class NotificationController {
     /** 알림 구독 요청 */
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(Authentication authentication, @RequestHeader(value="Last-Event-ID", required = false, defaultValue = "") String lastEventId ){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
 
         return notificationService.subscribe(userId, lastEventId);
     }

@@ -30,7 +30,7 @@ public class User extends TimeAuditingEntity {
     @Column(nullable = false)
     private Role role;
     @Column
-    private String signature;
+    private String refreshToken;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userprofile_id")
@@ -39,13 +39,9 @@ public class User extends TimeAuditingEntity {
     @OneToMany(mappedBy = "user")
     private List<Storage> storages;
 
-    public void createUserProfile(UserProfile userProfile) {
+    public void setUserProfile(UserProfile userProfile) {
         this.userProfile = userProfile;
-        this.role = Role.USER;
-    }
-
-    public void refreshSignature(String signature) {
-        this.signature = signature;
+        if(this.role == Role.TEMPORAL) this.role = Role.USER;
     }
 
 }

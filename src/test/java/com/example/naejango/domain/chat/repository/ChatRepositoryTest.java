@@ -74,10 +74,10 @@ class ChatRepositoryTest {
         userProfileRepository.save(userProfile3);
         userProfileRepository.save(userProfile4);
 
-        testUser1.createUserProfile(userProfile1);
-        testUser2.createUserProfile(userProfile2);
-        testUser3.createUserProfile(userProfile3);
-        testUser3.createUserProfile(userProfile4);
+        testUser1.setUserProfile(userProfile1);
+        testUser2.setUserProfile(userProfile2);
+        testUser3.setUserProfile(userProfile3);
+        testUser3.setUserProfile(userProfile4);
 
         // 채팅 채널 생성
         PrivateChannel channel1 = new PrivateChannel();

@@ -1,4 +1,4 @@
-package com.example.naejango.global.auth.api;
+package com.example.naejango.global.auth.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

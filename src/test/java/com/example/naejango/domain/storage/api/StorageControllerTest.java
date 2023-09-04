@@ -92,7 +92,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         );
 
         // then
-        verify(authenticationHandlerMock, only()).userIdFromAuthentication(any());
+        verify(authenticationHandlerMock, only()).getUserId(any());
         verify(storageServiceMock, only()).createStorage(anyString(), any(Coord.class), anyString(), anyString(), anyString(), anyLong());
         resultActions.andExpect(
                 status().isCreated());
@@ -152,7 +152,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         );
 
         // then
-        verify(authenticationHandlerMock, only()).userIdFromAuthentication(any());
+        verify(authenticationHandlerMock, only()).getUserId(any());
         verify(storageServiceMock, only()).myStorageList(anyLong());
         resultActions.andExpect(
                 status().isOk()

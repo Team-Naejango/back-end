@@ -72,7 +72,7 @@ public class DBDateInitializer implements ApplicationRunner {
                     userProfileRepository.save(userProfile);
 
                     // 유저 프로필 연결
-                    testUser.createUserProfile(userProfile);
+                    testUser.setUserProfile(userProfile);
             }
             return null;
         });

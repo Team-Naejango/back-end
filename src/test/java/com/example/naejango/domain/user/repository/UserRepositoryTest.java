@@ -41,7 +41,7 @@ class UserRepositoryTest {
                 .userKey("TEST_1234")
                 .role(Role.USER)
                 .password("NULL")
-                .signature("REFRESH_TOKEN")
+                .refreshToken("REFRESH_TOKEN")
                 .userProfile(null)
                 .build();
 
@@ -62,7 +62,7 @@ class UserRepositoryTest {
                 .userKey("TEST_1234")
                 .role(Role.USER)
                 .password("NULL")
-                .signature("REFRESH_TOKEN")
+                .refreshToken("REFRESH_TOKEN")
                 .userProfile(null)
                 .build();
 
@@ -75,7 +75,7 @@ class UserRepositoryTest {
 
         userRepository.save(testUser);
         userProfileRepository.save(testUserProfile);
-        testUser.createUserProfile(testUserProfile);
+        testUser.setUserProfile(testUserProfile);
 
         em.flush();
         em.clear();
@@ -97,7 +97,7 @@ class UserRepositoryTest {
                 .userKey("TEST_1234")
                 .role(Role.USER)
                 .password("NULL")
-                .signature("REFRESH_TOKEN")
+                .refreshToken("REFRESH_TOKEN")
                 .userProfile(null)
                 .build();
 
