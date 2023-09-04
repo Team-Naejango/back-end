@@ -3,12 +3,10 @@ package com.example.naejango.domain.storage.application;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.ItemStorageRepository;
 import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
-import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
-import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -20,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,18 +27,24 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class StorageService {
     private final StorageRepository storageRepository;
-    private final UserService userService;
     private final ItemRepository itemRepository;
     private final GeomUtil geomUtil;
     private final ItemStorageRepository itemStorageRepository;
+    private final EntityManager em;
 
     @Transactional
-    public Long createStorage(CreateStorageRequestDto requestDto, Long userId) {
-        Point location = geomUtil.createPoint(requestDto.getCoord().getLongitude(), requestDto.getCoord().getLatitude());
-        Storage storage = new Storage(requestDto, location);
+    public Long createStorage(String name, Coord location, String address, String description, String imgUrl,  Long userId) {
+        Point point = geomUtil.createPoint(location.getLongitude(), location.getLatitude());
+        User user = em.getReference(User.class, userId);
+        Storage storage = Storage.builder()
+                .name(name)
+                .location(point)
+                .address(address)
+                .description(description)
+                .imgUrl(imgUrl)
+                .user(user)
+                .build();
         storageRepository.save(storage);
-        User persistenceUser = userService.findUser(userId);
-        storage.assignUser(persistenceUser);
         return storage.getId();
     }
 
@@ -50,14 +55,6 @@ public class StorageService {
 
     public List<Storage> myStorageList(Long userId) {
         return storageRepository.findByUserId(userId);
-    }
-
-    public List<StorageNearbyInfoDto> storageNearby(Point center, int radius, int page, int size) {
-        return storageRepository.findStorageNearby(center, radius, page, size);
-    }
-
-    public int countStorageNearby(Point center, int radius) {
-        return storageRepository.countStorageWithinRadius(center, radius);
     }
 
     @Transactional
@@ -79,4 +76,5 @@ public class StorageService {
         itemStorageRepository.deleteByStorageId(deleteStorage.getId());
         storageRepository.delete(deleteStorage);
     }
+
 }

@@ -9,18 +9,22 @@ import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.repository.CategoryRepository;
+import com.example.naejango.domain.storage.application.SearchingConditionDto;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
+import com.example.naejango.domain.storage.dto.SearchStorageResultDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
+import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
@@ -34,7 +38,6 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -50,10 +53,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(StorageController.class)
 class StorageControllerTest extends RestDocsSupportTest {
+
     @MockBean
     private StorageService storageServiceMock;
     @MockBean
+    private StorageRepository storageRepositoryMock;
+    @MockBean
     private AuthenticationHandler authenticationHandlerMock;
+    @MockBean
+    private CategoryRepository categoryRepositoryMock;
     @MockBean
     private ChannelRepository channelRepository;
     @MockBean
@@ -68,8 +76,8 @@ class StorageControllerTest extends RestDocsSupportTest {
         double testLon = 126.0;
         double testLat = 37.0;
         Coord testCoord = new Coord(testLon, testLat);
-        CreateStorageRequestDto requestDto =
-                new CreateStorageRequestDto("name", "imgUrl", "description", "address", testCoord);
+        CreateStorageRequestDto requestDto = new CreateStorageRequestDto("name", testCoord,
+                "address", "description", "imgUrl");
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
@@ -85,7 +93,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // then
         verify(authenticationHandlerMock, only()).userIdFromAuthentication(any());
-        verify(storageServiceMock, only()).createStorage(any(CreateStorageRequestDto.class), any(Long.class));
+        verify(storageServiceMock, only()).createStorage(anyString(), any(Coord.class), anyString(), anyString(), anyString(), anyLong());
         resultActions.andExpect(
                 status().isCreated());
 
@@ -104,9 +112,14 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("coord.longitude").description("경도"),
                                                 fieldWithPath("coord.latitude").description("위도")
                                         )
-                                        .responseFields()
+                                        .responseFields(
+                                                fieldWithPath("storageId").description("생성된 창고 id"),
+                                                fieldWithPath("message").description("결과 메세지")
+                                        )
                                         .requestSchema(
                                                 Schema.schema("창고 생성 Request")
+                                        ).responseSchema(
+                                                Schema.schema("창고 생성 Response")
                                         ).build()
                         )));
     }
@@ -171,6 +184,107 @@ class StorageControllerTest extends RestDocsSupportTest {
                 )
         );
     }
+
+    @Nested
+    @Tag("api")
+    @DisplayName("창고 검색")
+    class SearchStorageByConditions {
+
+        @Test
+        @DisplayName("모든 조건으로 창고 검색")
+        void test1() throws Exception {
+            // given
+            Point center = geomUtil.createPoint(127.02, 37.49);
+            Category cat1 = new Category(1, "의류");
+            Integer rad = 1000;
+            Integer page = 0;
+            Integer size = 10;
+            Storage testStorage1 = Storage.builder().name("테스트1").location(geomUtil.createPoint(127.021, 37.491)).address("").build();
+            Storage testStorage2 = Storage.builder().name("테스트2").location(geomUtil.createPoint(127.022, 37.492)).address("").build();
+            SearchStorageResultDto result1 = new SearchStorageResultDto(testStorage1, 100);
+            SearchStorageResultDto result2 = new SearchStorageResultDto(testStorage2, 200);
+
+
+            SearchingConditionDto conditions = new SearchingConditionDto(cat1, new String[]{"%유니클로%", "%청바지%"}, ItemType.BUY, true);
+            BDDMockito.given(geomUtilMock.createPoint(127.02, 37.49)).willReturn(center);
+            BDDMockito.given(categoryRepositoryMock.findById(1)).willReturn(Optional.of(cat1));
+            BDDMockito.given(storageRepositoryMock.searchStorageByConditions(center, rad, page, size, conditions))
+                    .willReturn(Arrays.asList(result1, result2));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/storage/search")
+                    .queryParam("lon", "127.02")
+                            .queryParam("lat", "37.49")
+                            .queryParam("rad","1000")
+                            .queryParam("page", "0")
+                            .queryParam("size", "10")
+                            .queryParam("cat", "1")
+                            .queryParam("keyword", "유니클로 청바지")
+                            .queryParam("type", "BUY")
+                            .queryParam("status", "true")
+                    .characterEncoding(StandardCharsets.UTF_8)
+                    .header("Authorization", "엑세스 토큰")
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            verify(geomUtilMock, times(1)).createPoint(127.02, 37.49);
+            verify(categoryRepositoryMock, times(1)).findById(1);
+            verify(storageRepositoryMock, times(1)).searchStorageByConditions(center, rad, page, size, conditions);
+
+            // restDocs
+            resultActions.andDo(restDocs.document(
+                    resource(ResourceSnippetParameters.builder()
+                            .tag("창고")
+                            .summary("창고 검색")
+                            .description("조건에 맞는 창고를 검색합니다.\n\n" +
+                                    "좌표, 반경, 카테고리, 키워드, 타입, 상태를 조건으로 받습니다.\n\n" +
+                                    "창고 정보만 응답합니다. 추후 아이템 정보도 가지고 올 수 있도록 수정하겠습니다.")
+                            .requestParameters(
+                                    parameterWithName("lon").description("중심 경도 좌표"),
+                                    parameterWithName("lat").description("중심 위도 좌표"),
+                                    parameterWithName("rad").description("반경 (1,000~5,000m)"),
+                                    parameterWithName("page").description("페이지"),
+                                    parameterWithName("size").description("사이즈"),
+                                    parameterWithName("cat").description("카테고리ID"),
+                                    parameterWithName("keyword").description("검색 키워드(2~10자)"),
+                                    parameterWithName("type").description("BUY/SELL"),
+                                    parameterWithName("status").description("상태 (true/false)"),
+                                    parameterWithName("_csrf").ignored()
+                            ).responseFields(
+                                    fieldWithPath("message").description("조회 결과 메세지"),
+                                    fieldWithPath("coord").description("중심 좌표"),
+                                    fieldWithPath("coord.longitude").description("중심 경도 좌표"),
+                                    fieldWithPath("coord.latitude").description("중심 위도 좌표"),
+                                    fieldWithPath("radius").description("반경"),
+                                    fieldWithPath("page").description("페이지"),
+                                    fieldWithPath("size").description("조회 결과물 수"),
+                                    fieldWithPath("searchingConditions").description("검색 조건"),
+                                    fieldWithPath("searchingConditions.cat").description("검색 조건 : 카테고리"),
+                                    fieldWithPath("searchingConditions.cat.id").description("카테고리 아이디"),
+                                    fieldWithPath("searchingConditions.cat.name").description("카테고리 이름"),
+                                    fieldWithPath("searchingConditions.keyword[]").description("검색 조건 : 키워드"),
+                                    fieldWithPath("searchingConditions.itemType").description("검색 조건 : 상품 타입"),
+                                    fieldWithPath("searchingConditions.status").description("검색 조건 : 상품 상태"),
+                                    fieldWithPath("searchResult[].storageId").description("창고 Id"),
+                                    fieldWithPath("searchResult[].name").description("창고 이름"),
+                                    fieldWithPath("searchResult[].imgUrl").description("이미지 링크"),
+                                    fieldWithPath("searchResult[].coord").description("창고 좌표"),
+                                    fieldWithPath("searchResult[].address").description("창고 주소"),
+                                    fieldWithPath("searchResult[].distance").description("거리")
+                            ).requestSchema(
+                                    Schema.schema("창고 검색 Request")
+                            ).responseSchema(
+                                    Schema.schema("창고 검색 Response")
+                            )
+                            .build())
+            ));
+        }
+    }
+
+
+
 
     @Test
     @Tag("api")
@@ -299,106 +413,6 @@ class StorageControllerTest extends RestDocsSupportTest {
         ));
     }
 
-
-    @Test
-    @Tag("api")
-    @DisplayName("좌표 및 반경을 기준으로 창고 조회")
-    void storageNearbyTest() throws Exception {
-        // given
-        String centerLongitude ="126.0";
-        String centerLatitude = "37.0";
-        double centerLon = Double.parseDouble(centerLongitude);
-        double centerLat = Double.parseDouble(centerLatitude);
-        Point center = geomUtil.createPoint(centerLon, centerLat);
-
-        int rad = 1000;
-        int page = 0;
-        int size = 10;
-
-        String longitude1 ="126.00001";
-        String latitude1 = "37.00001";
-        double lon1 = Double.parseDouble(longitude1);
-        double lat1 = Double.parseDouble(latitude1);
-        Point testLocation1 = geomUtil.createPoint(lon1, lat1);
-
-        String longitude2 ="126.00002";
-        String latitude2 = "37.00002";
-        double lon2 = Double.parseDouble(longitude2);
-        double lat2 = Double.parseDouble(latitude2);
-        Point testLocation2 = geomUtil.createPoint(lon2, lat2);
-
-        Storage testStorage1 = Storage.builder().id(1L).name("test1").location(testLocation1).address("address1").build();
-        Storage testStorage2 = Storage.builder().id(2L).name("test2").location(testLocation2).address("address2").build();
-        StorageNearbyInfoDto storageNearbyInfo1 = new StorageNearbyInfoDto(testStorage1, geomUtil.calculateDistance(center, testLocation1));
-        StorageNearbyInfoDto storageNearbyInfo2 = new StorageNearbyInfoDto(testStorage2, geomUtil.calculateDistance(center, testLocation2));
-
-        List<StorageNearbyInfoDto> content = new ArrayList<>(Arrays.asList(storageNearbyInfo1, storageNearbyInfo2));
-
-        BDDMockito.given(geomUtilMock.createPoint(centerLon, centerLat)).willReturn(center);
-        BDDMockito.given(storageServiceMock.countStorageNearby(any(Point.class), anyInt())).willReturn(2);
-        BDDMockito.given(storageServiceMock.storageNearby(any(Point.class), anyInt(), anyInt(), anyInt())).willReturn(content);
-        BDDMockito.given(geomUtilMock.calculateDistance(any(Point.class), any(Point.class))).willReturn(0);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                .get("/api/storage/nearby")
-                .characterEncoding(StandardCharsets.UTF_8)
-                .queryParam("lon", centerLongitude)
-                .queryParam("lat", centerLatitude)
-                .queryParam("rad", String.valueOf(rad))
-                .queryParam("page", String.valueOf(page))
-                .queryParam("size", String.valueOf(size))
-                .header("Authorization", "엑세스 토큰")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        // then
-        verify(geomUtilMock, times(1)).createPoint(126.0, 37.0);
-        verify(storageServiceMock, times(1)).countStorageNearby(center, rad);
-        verify(storageServiceMock, times(1)).storageNearby(center, rad, page, size);
-
-        resultActions.andExpect(
-                status().isOk()
-        );
-
-        // RestDocs
-        resultActions.andDo(restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("창고")
-                                        .description("특정 좌표를 중심으로 근처 창고 목록 조회")
-                                        .requestParameters(
-                                                parameterWithName("lon").description("경도"),
-                                                parameterWithName("lat").description("위도"),
-                                                parameterWithName("rad").description("반경"),
-                                                parameterWithName("page").description("요청 페이지(0부터 시작)"),
-                                                parameterWithName("size").description("페이지 당 결과물"),
-                                                parameterWithName("_csrf").ignored()
-                                        )
-                                        .responseFields(
-                                                fieldWithPath("content[]").description("창고 목록"),
-                                                fieldWithPath("content[].id").description("창고 id"),
-                                                fieldWithPath("content[].name").description("창고 이름"),
-                                                fieldWithPath("content[].imgUrl").description("창고 이미지 링크"),
-                                                fieldWithPath("content[].description").description("창고 소개"),
-                                                fieldWithPath("content[].address").description("창고 주소"),
-                                                fieldWithPath("content[].coord").description("창고 좌표"),
-                                                fieldWithPath("content[].coord.longitude").description("경도"),
-                                                fieldWithPath("content[].coord.latitude").description("위도"),
-                                                fieldWithPath("content[].distance").description("중심과의 거리"),
-                                                fieldWithPath("page").description("조회 페이지"),
-                                                fieldWithPath("size").description("조회 창고 수"),
-                                                fieldWithPath("totalCount").description("총 조회 창고 수"),
-                                                fieldWithPath("totalPage").description("총 페이지 수")
-                                        )
-                                        .requestSchema(
-                                                Schema.schema("근처 창고 조회 Request")
-                                        )
-                                        .responseSchema(
-                                                Schema.schema("근처 창고 조회 Response")
-                                        ).build()
-                        )));
-    }
-
     @Test
     @Tag("api")
     @DisplayName("창고 정보 수정")
@@ -475,4 +489,5 @@ class StorageControllerTest extends RestDocsSupportTest {
                 )
         );
     }
+
 }
