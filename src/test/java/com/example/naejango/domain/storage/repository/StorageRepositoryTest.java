@@ -82,7 +82,7 @@ class StorageRepositoryTest {
 
     @Test
     @DisplayName("userId 로 Storage 조회")
-    void findByUserIdTest(){
+    void findByUserIdTest() {
         // given
         User testUser = User.builder()
                 .userKey("test_1234")
@@ -177,7 +177,7 @@ class StorageRepositoryTest {
 
         @Test
         @DisplayName("좌표, 반경 조건 적용")
-        void test1(){
+        void test1() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             SearchingConditionDto conditions = new SearchingConditionDto(null, new String[]{}, null, null);
@@ -192,7 +192,7 @@ class StorageRepositoryTest {
 
         @Test
         @DisplayName("카테고리 조건 적용")
-        void test2(){
+        void test2() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             Category cat1 = categoryRepository.findByName("의류");
@@ -208,7 +208,7 @@ class StorageRepositoryTest {
 
         @Test
         @DisplayName("키워드 조건 적용")
-        void test3(){
+        void test3() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             SearchingConditionDto conditions = new SearchingConditionDto(null, new String[]{"%바지%"}, null, null);
@@ -223,7 +223,7 @@ class StorageRepositoryTest {
 
         @Test
         @DisplayName("타입, 상태 조건 적용")
-        void test4(){
+        void test4() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             SearchingConditionDto conditions = new SearchingConditionDto(null, new String[]{}, ItemType.BUY, true);
@@ -238,7 +238,7 @@ class StorageRepositoryTest {
 
         @Test
         @DisplayName("모든 조건 다 적용")
-        void test5(){
+        void test5() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             Category cat1 = categoryRepository.findByName("의류");
@@ -300,5 +300,54 @@ class StorageRepositoryTest {
         assertEquals(count2, 2);
     }
 
+    @Test
+    @DisplayName("창고 ID로 유저 ID 조회")
+    public void findUserIdByStorageId() {
+        // given
+        User testUser1 = User.builder()
+                .userKey("test_1234")
+                .password("null")
+                .role(Role.USER)
+                .signature("null")
+                .build();
 
+        User testUser2 = User.builder()
+                .userKey("test_5678")
+                .password("null")
+                .role(Role.USER)
+                .signature("null")
+                .build();
+
+        Storage testStorage1 = Storage.builder()
+                .name("남산타워").address("")
+                .location(geomUtil.createPoint(126.98820, 37.55126))
+                .user(testUser1)
+                .build();
+
+        Storage testStorage2 = Storage.builder()
+                .name("경복궁").address("")
+                .location(geomUtil.createPoint(126.97689, 37.57760))
+                .user(testUser2)
+                .build();
+
+        Storage testStorage3 = Storage.builder()
+                .name("광화문 이순신 장군").address("")
+                .location(geomUtil.createPoint(126.97700, 37.57098))
+                .user(testUser2)
+                .build();
+
+        userRepository.save(testUser1);
+        userRepository.save(testUser2);
+        storageRepository.save(testStorage1);
+        storageRepository.save(testStorage2);
+        storageRepository.save(testStorage3);
+
+        // when
+        Long userId1 = storageRepository.findUserIdByStorageId(testStorage1.getId());
+        Long userId2 = storageRepository.findUserIdByStorageId(testStorage2.getId());
+
+        // then
+        assertEquals(testUser1.getId(), userId1);
+        assertEquals(testUser2.getId(), userId2);
+    }
 }

@@ -304,7 +304,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         // when
         BDDMockito.given(storageServiceMock.findItemList(storage.getId(), true, 0, 10)).willReturn(ItemInfoList);
-
+        BDDMockito.given(storageServiceMock.findUserIdByStorageId(storage.getId())).willReturn(1L);
         // then
         ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                 .get("/api/storage/{storageId}/items", 1L)
@@ -339,6 +339,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                                         fieldWithPath("message").description("조회 결과 메세지"),
                                         fieldWithPath("page").description("요청한 페이지"),
                                         fieldWithPath("size").description("페이지당 결과물 수"),
+                                        fieldWithPath("userId").description("창고의 유저 ID"),
                                         fieldWithPath("itemList[].itemId").description("아이템 id"),
                                         fieldWithPath("itemList[].category").description("아이템 카테고리"),
                                         fieldWithPath("itemList[].type").description("아이템 타입(BUY / SELL)"),
