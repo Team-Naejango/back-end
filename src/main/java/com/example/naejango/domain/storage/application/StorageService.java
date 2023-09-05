@@ -53,6 +53,10 @@ public class StorageService {
         return items.getContent();
     }
 
+    public Long findUserIdByStorageId(Long storageId) {
+        return storageRepository.findUserIdByStorageId(storageId);
+    }
+
     public List<Storage> myStorageList(Long userId) {
         return storageRepository.findByUserId(userId);
     }

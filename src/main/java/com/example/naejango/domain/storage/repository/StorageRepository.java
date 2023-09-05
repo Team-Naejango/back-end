@@ -24,4 +24,6 @@ public interface StorageRepository extends JpaRepository<Storage, Long>, Storage
     @Query("select s from Storage s where St_DWithin(:center, s.location, :radius, false) = true")
     List<Storage> findStorageWithinRadius (@Param("center") Point center, @Param("radius") int radius);
 
+    @Query("select s.user.id from Storage s where s.id = :storageId")
+    Long findUserIdByStorageId(@Param("storageId") Long StorageId);
 }
