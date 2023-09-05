@@ -272,7 +272,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                                     fieldWithPath("searchResult[].imgUrl").description("이미지 링크"),
                                     fieldWithPath("searchResult[].coord").description("창고 좌표"),
                                     fieldWithPath("searchResult[].address").description("창고 주소"),
-                                    fieldWithPath("searchResult[].distance").description("거리")
+                                    fieldWithPath("searchResult[].distance").description("거리"),
+                                    fieldWithPath("searchResult[].description").description("창고 설명")
                             ).requestSchema(
                                     Schema.schema("창고 검색 Request")
                             ).responseSchema(
