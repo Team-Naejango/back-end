@@ -1,9 +1,6 @@
 package com.example.naejango.domain.storage.repository;
 
-import com.example.naejango.domain.item.domain.Category;
-import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.item.domain.ItemStorage;
-import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.domain.*;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.ItemStorageRepository;
@@ -145,12 +142,12 @@ class StorageRepositoryTest {
             Category cat2 = categoryRepository.findByName("디지털기기");
             Category cat3 = categoryRepository.findByName("생필품");
 
-            Item item1 = Item.builder().name("청바지").status(true).type(ItemType.BUY).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item2 = Item.builder().name("자켓").status(true).type(ItemType.SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item3 = Item.builder().name("셔츠").status(false).type(ItemType.BUY).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item4 = Item.builder().name("면바지").status(false).type(ItemType.SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item5 = Item.builder().name("모니터").status(true).type(ItemType.BUY).category(cat2).description("").imgUrl("").viewCount(0).build();
-            Item item6 = Item.builder().name("휴지").status(true).type(ItemType.BUY).category(cat3).description("").imgUrl("").viewCount(0).build();
+            Item item1 = Item.builder().name("청바지").status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item2 = Item.builder().name("자켓").status(true).type(ItemType.SELL).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item3 = Item.builder().name("셔츠").status(false).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item4 = Item.builder().name("면바지").status(false).type(ItemType.SELL).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item5 = Item.builder().name("모니터").status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat2).description("").imgUrl("").viewCount(0).build();
+            Item item6 = Item.builder().name("휴지").status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat3).description("").imgUrl("").viewCount(0).build();
 
             itemRepository.save(item1);
             itemRepository.save(item2);

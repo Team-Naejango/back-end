@@ -115,6 +115,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
                                             fieldWithPath("category").description("카테고리"),
                                             fieldWithPath("storageIdList").description("창고 ID 리스트")
                                     )
@@ -124,6 +125,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .requestSchema(Schema.schema("아이템 생성 Request"))
@@ -259,6 +261,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .responseSchema(Schema.schema("아이템 정보 조회 Response"))
@@ -332,6 +335,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .responseFields(
@@ -340,6 +344,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("type").description("아이템 타입 (BUY or SELL)"),
+                                            fieldWithPath("dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .requestSchema(Schema.schema("아이템 정보 수정 Request"))
