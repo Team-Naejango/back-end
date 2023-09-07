@@ -1,8 +1,6 @@
 package com.example.naejango.domain.item.application;
 
-import com.example.naejango.domain.item.domain.Category;
-import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.item.domain.ItemStorage;
+import com.example.naejango.domain.item.domain.*;
 import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
@@ -42,10 +40,9 @@ public class ItemService {
     /** 아이템 생성 */
     @Transactional
     public CreateItemResponseDto createItem(Long userId, CreateItemRequestDto createItemRequestDto) {
-        Category category = categoryRepository.findByName(createItemRequestDto.getCategory());
-        if (category == null) {
-            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
+        Category category = validateCategory(createItemRequestDto.getCategory());
+
+        validateType(createItemRequestDto.getType(), createItemRequestDto.getDealType());
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -59,6 +56,20 @@ public class ItemService {
         return new CreateItemResponseDto(savedItem);
     }
 
+    private Category validateCategory(String categoryName) {
+        Category category = categoryRepository.findByName(categoryName);
+        if (category == null) {
+            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+        return category;
+    }
+
+    private void validateType(ItemType type, ItemDealType dealType) {
+        if (type == ItemType.SELL && dealType == ItemDealType.GROUP) {
+            throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
+        }
+    }
+
     /** 아이템 정보 조회 */
     public FindItemResponseDto findItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
@@ -70,11 +81,10 @@ public class ItemService {
     /** 아이템 정보 수정 */
     @Transactional
     public ModifyItemResponseDto modifyItem(Long userId, Long itemId, ModifyItemRequestDto modifyItemRequestDto) {
-        Category category = categoryRepository.findByName(modifyItemRequestDto.getCategory());
-        if (category == null) {
-            throw new CustomException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
+        Category category = validateCategory(modifyItemRequestDto.getCategory());
 
+        validateType(modifyItemRequestDto.getType(), modifyItemRequestDto.getDealType());
+        
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Item item = itemRepository.findById(itemId)
