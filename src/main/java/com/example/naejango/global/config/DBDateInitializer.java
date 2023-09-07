@@ -80,10 +80,10 @@ public class DBDateInitializer implements ApplicationRunner {
 
     @Transactional
     void createCategory() {
-        Category cat1 = Category.builder().name("생필품").build();
-        Category cat2 = Category.builder().name("의류").build();
-        Category cat3 = Category.builder().name("가구").build();
-        Category cat4 = Category.builder().name("디지털기기").build();
+        Category cat1 = Category.builder().name("주방용품").build();
+        Category cat2 = Category.builder().name("세탁용품").build();
+        Category cat3 = Category.builder().name("화장실").build();
+        Category cat4 = Category.builder().name("청소도구").build();
         categoryRepository.save(cat1);
         categoryRepository.save(cat2);
         categoryRepository.save(cat3);
