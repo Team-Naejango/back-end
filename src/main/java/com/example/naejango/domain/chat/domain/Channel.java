@@ -17,7 +17,7 @@ import javax.persistence.*;
 * SINGLE_TABLE 을 선택하였습니다.
 */
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "channel_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,6 +29,7 @@ public class Channel {
 
     @Enumerated(EnumType.STRING)
     @Column(insertable = false, updatable = false)
-    private ChatType chatType;
+    private ChannelType channelType;
+    private Long lastMessageId;
 }
 

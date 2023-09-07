@@ -18,7 +18,7 @@ public class Chat extends TimeAuditingEntity {
     private Long id;
     private Long ownerId;
     private Long channelId;
-    private ChatType chatType;
+    private ChannelType chatType;
     private String title;
     private String lastMessage;
 

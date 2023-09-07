@@ -57,7 +57,7 @@ class StorageRepositoryTest {
                 .userKey("test_1234")
                 .password("null")
                 .role(Role.USER)
-                .signature("null")
+                .refreshToken("null")
                 .build();
 
         Storage testStorage = Storage.builder()
@@ -88,7 +88,7 @@ class StorageRepositoryTest {
                 .userKey("test_1234")
                 .password("null")
                 .role(Role.USER)
-                .signature("null")
+                .refreshToken("null")
                 .build();
 
         Storage testStorage1 = Storage.builder()

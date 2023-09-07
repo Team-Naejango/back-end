@@ -15,8 +15,17 @@ public class AuthenticationHandler {
         if(authentication == null) {
             throw new CustomException(ErrorCode.NOT_AUTHENTICATED);
         }
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        return principal.getUser().getId();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof PrincipalDetails) {
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+            return principalDetails.getUser().getId();
+        }
+
+        if (principal instanceof Long) {
+            return (Long) principal;
+        }
+
+        return null;
     }
 
     public Long getUserId(Principal principal) {

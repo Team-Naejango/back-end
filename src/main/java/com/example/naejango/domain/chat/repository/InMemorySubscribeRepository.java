@@ -1,11 +1,19 @@
 package com.example.naejango.domain.chat.repository;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 @Repository
+@ConditionalOnProperty(name = "redis-config.websocket", havingValue = "false")
+@RequiredArgsConstructor
 public class InMemorySubscribeRepository implements SubscribeRepository {
 
     /* sessionId 로 UserId 저장합니다. */
@@ -20,10 +28,14 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     /* subscriptionId 가 어떤 channel 을 가르키는지 저장합니다. */
     private final ConcurrentHashMap<String, Long> subscriptionIdInfo = new ConcurrentHashMap<>();
 
+    /* user 의 SubscriptionId 를 저장합니다. */
+    private final ConcurrentHashMap<Long, Set<String>> userIdSubscriptionIdMap = new ConcurrentHashMap<>();
+
     @Override
     public void saveUserIdBySessionId(Long userId, String sessionId) {
         sessionIdUserIdMap.put(sessionId, userId);
     }
+
     @Override
     public Optional<Long> findUserIdBySessionId(String sessionId) {
         return Optional.ofNullable(sessionIdUserIdMap.get(sessionId));
@@ -32,6 +44,11 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     @Override
     public void deleteSessionId(String sessionId) {
         sessionIdUserIdMap.remove(sessionId);
+    }
+
+    @Override
+    public void deleteSubscriptionIdsByUserId(Long userId) {
+        userIdSubscriptionIdMap.remove(userId);
     }
 
     @Override
@@ -49,14 +66,24 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
         return Optional.ofNullable(subscriptionIdInfo.get(subscriptionId));
     }
 
+    @Override
+    public void saveSubscriptionIdByUserId(String subscriptionId, Long userId) {
+        userIdSubscriptionIdMap.computeIfAbsent(userId, k -> new HashSet<>()).add(subscriptionId);
+    }
 
     @Override
-    public void startPublishingToUser(Long userId, Long channelId) {
+    public Set<String> findSubscriptionIdByUserId(Long userId) {
+        return userIdSubscriptionIdMap.getOrDefault(userId, new HashSet<>());
+    }
+
+    @Override
+    public void setSubscriberToChannel(Long userId, Long channelId) {
         Set<Long> usersId = subscribersInfo.get(channelId);
         if (usersId == null) {
             subscribersInfo.put(channelId, new HashSet<>(Collections.singletonList(userId)));
         }
         else usersId.add(userId);
+        System.out.println(subscribersInfo.get(channelId));
     }
 
     @Override
@@ -74,7 +101,7 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     }
 
     @Override
-    public void stopPublishingToUser(Long userId, Long channelId) {
+    public void deleteSubscriberFromChannel(Long userId, Long channelId) {
         Set<Long> subscribersId = subscribersInfo.get(channelId);
         if (subscribersId == null) return;
         else subscribersId.remove(userId);
@@ -85,14 +112,14 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     public void unsubscribeToChannel(Long userId, Long channelId) {
         Set<Long> channelsId = subscribingChannelsInfo.get(userId);
         if (channelsId == null) return;
-        else channelsId.remove(userId);
+        else subscribingChannelsInfo.remove(userId);
         if (channelsId.isEmpty()) subscribingChannelsInfo.remove(channelId);
     }
 
     @Override
     public void unsubscribeToAllChannel(Long userId) {
         Set<Long> channelsId = subscribingChannelsInfo.get(userId);
-        if (channelsId != null) channelsId.forEach(channelId -> startPublishingToUser(userId, channelId));
+        if (channelsId != null) channelsId.forEach(channelId -> setSubscriberToChannel(userId, channelId));
         subscribingChannelsInfo.remove(userId);
     }
 

@@ -47,6 +47,8 @@ dependencies {
 	implementation 'org.hibernate:hibernate-spatial:5.6.15.Final'
 	implementation 'com.auth0:java-jwt:4.4.0'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

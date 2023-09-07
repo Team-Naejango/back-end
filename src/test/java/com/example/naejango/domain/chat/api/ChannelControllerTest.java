@@ -6,7 +6,7 @@ import com.example.naejango.domain.chat.application.ChannelService;
 import com.example.naejango.domain.chat.application.ChatService;
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.CreateGroupChatDto;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
@@ -80,7 +80,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
         Channel channel = Channel.builder().id(3L).build();
         Channel newChannel = Channel.builder().id(4L).build();
 
-        Chat chat1 = Chat.builder().id(4L).chatType(ChatType.PRIVATE).ownerId(sender.getId()).build();
+        Chat chat1 = Chat.builder().id(4L).chatType(ChannelType.PRIVATE).ownerId(sender.getId()).build();
 
         @Test
         @DisplayName("일대일 채널 개설 - 채팅 채널이 이미 존재하는 경우")
@@ -177,7 +177,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         GroupChannel groupChannel = GroupChannel.builder()
                 .id(3L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .ownerId(channelOwner.getId())
                 .storageId(storage.getId())
                 .build();
@@ -186,7 +186,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                 .title(requestDto.getDefaultTitle())
                 .ownerId(channelOwner.getId())
                 .channelId(groupChannel.getId())
-                .chatType(ChatType.GROUP)
+                .chatType(ChannelType.GROUP)
                 .build();
 
         @Test
@@ -291,7 +291,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         GroupChannel channel1 = GroupChannel.builder()
                 .id(4L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .storageId(storage1.getId())
                 .participantsCount(3)
                 .channelLimit(5)
@@ -301,7 +301,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         GroupChannel channel2 = GroupChannel.builder()
                 .id(5L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .storageId(storage2.getId())
                 .participantsCount(2)
                 .channelLimit(10)
@@ -317,7 +317,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             BDDMockito.given(geomUtilMock.createPoint(coord)).willReturn(point);
-            BDDMockito.given(channelRepository.findGroupChannelNearBy(point, radius)).willReturn(Arrays.asList());
+            BDDMockito.given(channelRepository.findGroupChannelNearBy(point, radius)).willReturn(List.of());
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
@@ -330,7 +330,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // then
             resultActions.andExpect(status().isNotFound());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
-                    new FindGroupChannelNearbyResponseDto("근처에 진행중인 그룹 채팅이 없습니다.", coord, radius, Arrays.asList()))));
+                    new FindGroupChannelNearbyResponseDto("근처에 진행중인 그룹 채팅이 없습니다.", coord, radius, List.of()))));
         }
 
         @Test

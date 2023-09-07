@@ -2,7 +2,7 @@ package com.example.naejango.domain.storage.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
@@ -196,9 +196,9 @@ class StorageControllerTest extends RestDocsSupportTest {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             Category cat1 = new Category(1, "의류");
-            Integer rad = 1000;
-            Integer page = 0;
-            Integer size = 10;
+            int rad = 1000;
+            int page = 0;
+            int size = 10;
             Storage testStorage1 = Storage.builder().name("테스트1").location(geomUtil.createPoint(127.021, 37.491)).address("").build();
             Storage testStorage2 = Storage.builder().name("테스트2").location(geomUtil.createPoint(127.022, 37.492)).address("").build();
             SearchStorageResultDto result1 = new SearchStorageResultDto(testStorage1, 100);
@@ -369,7 +369,7 @@ class StorageControllerTest extends RestDocsSupportTest {
 
         GroupChannel channel = GroupChannel.builder()
                 .id(4L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .storageId(storage.getId())
                 .participantsCount(3)
                 .channelLimit(5)

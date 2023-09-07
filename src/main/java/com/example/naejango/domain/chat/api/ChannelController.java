@@ -46,7 +46,7 @@ public class ChannelController {
      * 특정 회원과의 Private Chat 을 시작합니다.
      * 만약 이미 채팅방이 존재한다면 해당 채팅방의 채널 id 값을 반환하고
      * 존재하지 않으면 생성한 뒤 채널 id 값을 반환합니다.
-     * @param otherUserId 상대방 ㅑid
+     * @param otherUserId 상대방 id
      * @return 개설된 채팅 채널(channelId), 채팅방(chatId), 생성 결과(message)
      */
     @PostMapping ("/private/{otherUserId}")

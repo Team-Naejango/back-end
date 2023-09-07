@@ -6,7 +6,7 @@ import com.example.naejango.domain.chat.application.ChannelService;
 import com.example.naejango.domain.chat.application.ChatService;
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.request.ChangeChatTitleRequestDto;
@@ -69,12 +69,12 @@ class ChatControllerTest extends RestDocsSupportTest {
         Channel channel = GroupChannel.builder()
                 .id(2L)
                 .defaultTitle("공동구매")
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .build();
 
         Chat chat = Chat.builder()
                 .id(3L)
-                .chatType(ChatType.GROUP)
+                .chatType(ChannelType.GROUP)
                 .channelId(channel.getId())
                 .ownerId(user.getId())
                 .build();
@@ -192,7 +192,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         GroupChannel channel = GroupChannel.builder()
                 .id(2L)
                 .defaultTitle("공동구매")
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .build();
 
         Chat chat = Chat.builder()
@@ -200,7 +200,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                 .title(channel.getDefaultTitle())
                 .ownerId(user.getId())
                 .channelId(channel.getId())
-                .chatType(ChatType.GROUP)
+                .chatType(ChannelType.GROUP)
                 .build();
 
 
@@ -272,11 +272,11 @@ class ChatControllerTest extends RestDocsSupportTest {
         User user = User.builder().id(1L).role(Role.USER).userKey("test_me").password("").build();
 
         Chat chat1 = Chat.builder().id(2L).title("책상점").channelId(5L)
-                .lastMessage("안녕하세요").ownerId(user.getId()).chatType(ChatType.PRIVATE).build();
+                .lastMessage("안녕하세요").ownerId(user.getId()).chatType(ChannelType.PRIVATE).build();
         Chat chat2 = Chat.builder().id(3L).title("장터").channelId(6L)
-                .lastMessage("물티슈팔아요").ownerId(user.getId()).chatType(ChatType.GROUP).build();
+                .lastMessage("물티슈팔아요").ownerId(user.getId()).chatType(ChannelType.GROUP).build();
         Chat chat3 = Chat.builder().id(4L).title("공동구매방").channelId(7L)
-                .lastMessage("싸네요").ownerId(user.getId()).chatType(ChatType.GROUP).build();
+                .lastMessage("싸네요").ownerId(user.getId()).chatType(ChannelType.GROUP).build();
 
         ChatInfoDto chatInfo1 = new ChatInfoDto(chat1, 1);
         ChatInfoDto chatInfo2 = new ChatInfoDto(chat2, 2);

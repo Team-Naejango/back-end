@@ -17,6 +17,7 @@ public class Message extends TimeAuditingEntity {
     @GeneratedValue
     @Column(name = "message_id")
     private Long id;
+    private MessageType messageType;
     private Long senderId;
     private String content;
 

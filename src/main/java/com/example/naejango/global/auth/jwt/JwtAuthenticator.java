@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -39,16 +40,17 @@ public class JwtAuthenticator {
 
     /**
      * 엑세스 토큰의 검증을 시도하고 authentication 을 반환합니다.
-     * Http Header 에 토큰을 포함할 수 없는 웹소켓 환경에서
-     * STOMP 메세지의 헤더정보를 통해 검증 수행합니다.
+     * Http Header 에 토큰을 포함할 수 없는 웹소켓 환경에서 STOMP 메세지의 헤더정보를 통해 검증 수행합니다.
+     * 참고로 모든 요청에 대하여 interceptor 에서 인증 객체를 로드하고 STOMP 헤더에 주입하는데,
+     * Redis 에서 User 객체가 담긴 Authentication 를 직렬화/역직렬화 하는 것은 어려움이 있으며
+     * UserId 만 저장해두고 간단한 형태의 WebSocket 전용 Authentication 객체를 만들어 주입하도록 하였음
      * @param accessor Stomp 메세지의 헤더 accessor
      * @return Authentication 객체
      */
-
     public Authentication authenticateWebSocketRequest(StompHeaderAccessor accessor) {
         var validationResult = jwtValidator.isValidToken(accessor);
         if(!validationResult.isValidToken()) throw new WebSocketException(ErrorCode.ACCESS_TOKEN_NOT_VALID);
-        return getPrincipal(validationResult.getUserId());
+        return getWebSocketPrincipal(validationResult.getUserId());
     }
 
     /**
@@ -63,8 +65,7 @@ public class JwtAuthenticator {
 
     }
     private Authentication getPrincipal (Long userId){
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         PrincipalDetails principalDetails = new PrincipalDetails(user);
         return new UsernamePasswordAuthenticationToken(
                 principalDetails,
@@ -73,6 +74,13 @@ public class JwtAuthenticator {
         );
     }
 
-
+    private Authentication getWebSocketPrincipal(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        return new UsernamePasswordAuthenticationToken(
+                user.getId(),
+                null,
+                Collections.singletonList(() -> "ROLE_" + user.getRole().toString())
+        );
+    }
 
 }
