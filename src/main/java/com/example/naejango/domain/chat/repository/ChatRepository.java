@@ -6,7 +6,6 @@ import com.example.naejango.domain.chat.dto.PrivateChatDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,7 +24,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
      */
     @Query("SELECT NEW com.example.naejango.domain.chat.dto.PrivateChatDto(cnl.id, c1.id) " +
             "FROM Channel cnl JOIN Chat c1 ON c1.channelId = cnl.id JOIN Chat c2 ON c2.channelId = cnl.id " +
-            "WHERE c2.chatType = com.example.naejango.domain.chat.domain.ChatType.PRIVATE " +
+            "WHERE c2.chatType = com.example.naejango.domain.chat.domain.ChannelType.PRIVATE " +
             "AND c1.ownerId = :ownerId AND c2.ownerId = :theOtherId ")
     Optional<PrivateChatDto> findPrivateChannelBetweenUsers(@Param("ownerId") Long ownerId, @Param("theOtherId") Long theOtherId);
 
@@ -40,15 +39,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Page<ChatInfoDto> findChatByOwnerIdOrderByLastChat(@Param("ownerId") Long ownerId, Pageable pageable);
 
     /**
-     * Channel 과 연관된 모든 Chat 의 마지막 대화 내용을 업데이트 합니다.
-     * @param channelId 채널 id
-     * @param msg 메세지 내용
-     */
-    @Modifying
-    @Query("UPDATE Chat c SET c.lastMessage = :msg WHERE c.channelId = :channelId")
-    void updateLastMessageByChannelId(@Param("channelId") Long channelId, @Param("msg") String msg);
-
-    /**
      * channelId 와 ownerId 로 Chat 을 조회합니다.
      */
     @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId AND c.ownerId = :ownerId")
@@ -57,6 +47,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     List<Chat> findByChannelId(Long channelId);
 
     @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId AND " +
-            "c.ownerId = :userId AND c.chatType = com.example.naejango.domain.chat.domain.ChatType.GROUP")
+            "c.ownerId = :userId AND c.chatType = com.example.naejango.domain.chat.domain.ChannelType.GROUP")
     Optional<Long> findGroupChat(@Param("channelId")Long channelId, @Param("userId") Long userId);
 }

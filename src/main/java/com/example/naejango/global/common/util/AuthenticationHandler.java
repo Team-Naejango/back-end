@@ -1,5 +1,6 @@
 package com.example.naejango.global.common.util;
 
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.auth.principal.PrincipalDetails;
 import com.example.naejango.global.common.exception.CustomException;
@@ -10,24 +11,37 @@ import java.security.Principal;
 
 @Component
 public class AuthenticationHandler {
-    public Long userIdFromAuthentication(Authentication authentication) {
+    public Long getUserId(Authentication authentication) {
         if(authentication == null) {
             throw new CustomException(ErrorCode.NOT_AUTHENTICATED);
         }
-        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-        return principal.getUser().getId();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof PrincipalDetails) {
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+            return principalDetails.getUser().getId();
+        }
+
+        if (principal instanceof Long) {
+            return (Long) principal;
+        }
+
+        return null;
     }
 
-    public Long userIdFromPrincipal(Principal principal) {
+    public Long getUserId(Principal principal) {
         Authentication authentication = (Authentication) principal;
-        return userIdFromAuthentication(authentication);
+        return getUserId(authentication);
     }
 
-    public User userFromAuthentication(Authentication authentication) {
+    public User getUser(Authentication authentication) {
         if(authentication == null) {
             throw new CustomException(ErrorCode.NOT_AUTHENTICATED);
         }
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
         return principal.getUser();
+    }
+
+    public Role getRole(Authentication authentication) {
+        return getUser(authentication).getRole();
     }
 }

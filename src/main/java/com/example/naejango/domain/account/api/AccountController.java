@@ -22,7 +22,7 @@ public class AccountController {
     /** 계좌에 금액 충전 */
     @PatchMapping("")
     public ResponseEntity<BaseResponseDto> chargeAccount(Authentication authentication, @RequestBody ChargeAccountRequestDto chargeAccountRequestDto) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         accountService.chargeAccount(userId, chargeAccountRequestDto);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));

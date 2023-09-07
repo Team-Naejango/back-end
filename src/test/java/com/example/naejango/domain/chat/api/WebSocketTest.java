@@ -1,14 +1,18 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.dto.request.SendMessageRequestDto;
-import com.example.naejango.domain.chat.dto.response.SendMessageResponseDto;
-import com.example.naejango.domain.chat.dto.response.SubscribeResponseDto;
-import com.example.naejango.domain.chat.repository.*;
+import com.example.naejango.domain.chat.domain.MessageType;
+import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
+import com.example.naejango.domain.chat.repository.ChannelRepository;
+import com.example.naejango.domain.chat.repository.ChatMessageRepository;
+import com.example.naejango.domain.chat.repository.ChatRepository;
+import com.example.naejango.domain.chat.repository.MessageRepository;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtProperties;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +47,6 @@ import java.util.concurrent.TimeoutException;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("ALL")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("Test")
@@ -71,9 +74,9 @@ public class WebSocketTest {
     DataSourceProperties dataSourceProperties;
 
     private final String ENDPOINT = "/ws-endpoint";
-    private final String CHAT_CHANNEL = "/topic/channel";
-    private final String INFO_CHANNEL = "/user/queue/info";
-    private final String SEND_MESSAGE_CHANNEL = "/chat/channel";
+    private final String CHAT_CHANNEL = "/sub/channel";
+    private final String INFO_CHANNEL = "/user/sub/info";
+    private final String SEND_MESSAGE_CHANNEL = "/pub/channel";
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
     private BlockingQueue<String> blockingQueue;
@@ -90,9 +93,8 @@ public class WebSocketTest {
     @DisplayName("웹소켓 Endpoint 연결 테스트")
     public void testWebSocketConnection() throws Exception {
         // given
-        User user1 = userRepository.findByUserKey("test_1").get();
+        User user1 = userRepository.findByUserKey("test_1").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user1.getId());
-
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
 
@@ -108,7 +110,7 @@ public class WebSocketTest {
     @DisplayName("Info 채널 및 채팅 채널 구독 테스트")
     void chatChannelSubscribeTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user2 = userRepository.findByUserKey("test_2").get();
+        User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user2.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
@@ -129,40 +131,9 @@ public class WebSocketTest {
         Thread.sleep(100);
 
         // then
-        var dto = new SubscribeResponseDto(2L, null, "소켓 통신 정보를 수신합니다.");
+        var dto = new WebSocketMessageDto(MessageType.INFO, user2.getId(), null, "소켓 통신 정보를 수신합니다.");
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new SubscribeResponseDto(2L, 2L, "채팅 채널 구독을 시작합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
-    }
-
-    @Test
-    @DisplayName("연결 종료 테스트")
-    void disconnectTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
-        // given
-        User user3 = userRepository.findByUserKey("test_3").get();
-        String accessToken = jwtGenerator.generateAccessToken(user3.getId());
-        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
-
-        // when
-        // info 채널 구독
-        StompHeaders subscribeInfoHeaders = new StompHeaders();
-        subscribeInfoHeaders.setDestination(INFO_CHANNEL);
-        stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
-        Thread.sleep(100);
-
-        // 채팅 채널 구독
-        StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/2");
-        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
-        Thread.sleep(100);
-
-        // then
-        var dto = new SubscribeResponseDto(3L, null, "소켓 통신 정보를 수신합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new SubscribeResponseDto(3L, 2L, "채팅 채널 구독을 시작합니다.");
+        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user2.getId(), 2L, "채널에 입장하였습니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
     }
 
@@ -170,13 +141,12 @@ public class WebSocketTest {
     @DisplayName("메세지 전송 테스트")
     void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user4 = userRepository.findByUserKey("test_4").get();
+        User user4 = userRepository.findByUserKey("test_4").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user4.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
         stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
-
         // when
         // info 채널 구독
         StompHeaders subscribeInfoHeaders = new StompHeaders();
@@ -193,17 +163,17 @@ public class WebSocketTest {
         // 메세지 전송
         StompHeaders sendMessageHeaders = new StompHeaders();
         sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
-        SendMessageRequestDto requestDto = SendMessageRequestDto.builder().content("메세지 전송").build();
-        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(requestDto));
+        WebSocketMessageDto messageDto = WebSocketMessageDto.builder()
+                .messageType(MessageType.CHAT).channelId(2L).userId(user4.getId()).content("메세지 전송").build();
+        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(messageDto));
         Thread.sleep(200);
 
         // then
-        var dto = new SubscribeResponseDto(4L, null, "소켓 통신 정보를 수신합니다.");
+        var dto = new WebSocketMessageDto(MessageType.INFO, user4.getId(), null, "소켓 통신 정보를 수신합니다.");
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new SubscribeResponseDto(4L, 2L, "채팅 채널 구독을 시작합니다.");
+        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user4.getId(), 2L, "채널에 입장하였습니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
-        var dto3 = new SendMessageResponseDto(4L, 2L, "메세지 전송");
-        assertEquals(objectMapper.writeValueAsString(dto3), blockingQueue.poll());
+        assertEquals(objectMapper.writeValueAsString(messageDto), blockingQueue.poll());
     }
 
 

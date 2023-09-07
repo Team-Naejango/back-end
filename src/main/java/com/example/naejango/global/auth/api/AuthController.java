@@ -4,14 +4,16 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.auth.dto.response.GuestLoginResponse;
+import com.example.naejango.global.auth.dto.response.LogoutResponseDto;
 import com.example.naejango.global.auth.dto.response.ReissueAccessTokenResponseDto;
 import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtProperties;
+import com.example.naejango.global.auth.jwt.JwtValidator;
+import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.TokenException;
-import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +35,9 @@ import java.time.ZoneOffset;
 public class AuthController {
 
     private final UserService userService;
-    private final AuthenticationHandler authenticationHandler;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtCookieHandler jwtCookieHandler;
+    private final JwtValidator jwtValidator;
     private final AccessTokenReissuer accessTokenReissuer;
 
     /**
@@ -42,14 +45,11 @@ public class AuthController {
      * User 객체의 Signature 도 null로 설정합니다.
      */
     @GetMapping("/logout")
-    public ResponseEntity<LogoutResponseDto> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LogoutResponseDto> logout(HttpServletRequest request, HttpServletResponse response) {
         jwtCookieHandler.deleteAccessTokenCookie(request, response);
         jwtCookieHandler.deleteRefreshTokenCookie(request, response);
-
-        if(authentication != null){
-            Long userId = authenticationHandler.userIdFromAuthentication(authentication);
-            userService.deleteSignature(userId);
-        }
+        Long userId = jwtValidator.isValidRefreshToken(jwtCookieHandler.getRefreshToken(request)).getUserId();
+        if(userId != null) refreshTokenRepository.deleteRefreshToken(userId);
 
         return ResponseEntity.ok().body(new LogoutResponseDto("토큰이 정상 삭제되었습니다."));
     }
@@ -73,7 +73,7 @@ public class AuthController {
      */
     @GetMapping("/guest")
     public ResponseEntity<GuestLoginResponse> guest(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        if (jwtCookieHandler.checkRefreshCookieDuplication(request)){
+        if (jwtCookieHandler.hasRefreshTokenCookie(request)){
             jwtCookieHandler.deleteAccessTokenCookie(request, response);
             String reissueAccessToken = accessTokenReissuer.reissueAccessToken(request);
             jwtCookieHandler.addAccessTokenCookie(reissueAccessToken, response);
@@ -98,9 +98,8 @@ public class AuthController {
                 .withIssuer(JwtProperties.ISS)
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        userService.refreshSignature(guestId, refreshToken);
+        refreshTokenRepository.saveRefreshToken(guestId, refreshToken);
         jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
-
         return ResponseEntity.ok().body(new GuestLoginResponse("게스트용 토큰이 발급되었습니다.", accessToken));
     }
 

@@ -44,7 +44,7 @@ public class ChatController {
     @PostMapping("/group/{channelId}")
     public ResponseEntity<JoinGroupChatResponseDto> joinGroupChat(@PathVariable("channelId") Long channelId,
                                                                   Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         Optional<Long> groupChatOpt = chatRepository.findGroupChat(channelId, userId);
 
         if (groupChatOpt.isPresent()) {
@@ -69,7 +69,7 @@ public class ChatController {
     @GetMapping("/{channelId}/myChat")
     public ResponseEntity<FindChatResponseDto> findChatByChannelId(@PathVariable("channelId") Long channelId,
                                                                    Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         Optional<Chat> chatOpt = chatRepository.findChatByChannelIdAndOwnerId(channelId, userId);
         if(chatOpt.isEmpty()) return ResponseEntity.ok().body(new FindChatResponseDto(null, "채널에 참여하고 있지 않습니다."));
         return ResponseEntity.ok().body(new FindChatResponseDto(chatOpt.get().getId(), "해당 채널의 채팅방을 조회했습니다."));
@@ -89,7 +89,7 @@ public class ChatController {
     public ResponseEntity<MyChatListResponseDto> myChatList(@RequestParam(value = "page", defaultValue = "0") int page,
                                                             @RequestParam(value = "size", defaultValue = "10") int size,
                                                             Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(userId, PageRequest.of(page, size));
         return ResponseEntity.ok().body(new MyChatListResponseDto(page, size, result.hasNext(), result.getContent()));
     }
@@ -104,7 +104,7 @@ public class ChatController {
     public ResponseEntity<ChangeChatTitleResponseDto> changeChatTitle(@RequestBody ChangeChatTitleRequestDto requestDto,
                                                                       @PathVariable("chatId") Long chatId,
                                                                       Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         chatService.changeChatTitle(userId, chatId, requestDto.getTitle());
         var responseDto = ChangeChatTitleResponseDto.builder().chatId(chatId).changedTitle(requestDto.getTitle()).build();
         return ResponseEntity.ok().body(responseDto);
@@ -122,7 +122,7 @@ public class ChatController {
     @DeleteMapping("/{chatId}")
     public ResponseEntity<DeleteChatResponseDto> deleteChat(@PathVariable("chatId") Long chatId,
                                                             Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         chatService.deleteChat(userId, chatId);
         var responseDto = new DeleteChatResponseDto(chatId, "해당 채팅방을 종료했습니다.");
         return ResponseEntity.ok().body(responseDto);

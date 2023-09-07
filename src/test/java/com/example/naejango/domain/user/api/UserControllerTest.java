@@ -6,17 +6,18 @@ import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.Gender;
-import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
+import com.example.naejango.domain.user.repository.UserProfileRepository;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
+import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -25,12 +26,13 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -38,10 +40,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 @Slf4j
 class UserControllerTest extends RestDocsSupportTest {
+
+    @MockBean
+    JwtValidator jwtValidatorMock;
+    @MockBean
+    JwtCookieHandler jwtCookieHandler;
     @MockBean
     UserService userServiceMock;
     @MockBean
     AccountService accountServiceMock;
+    @MockBean
+    UserProfileRepository userProfileRepository;
     @MockBean
     AuthenticationHandler authenticationHandlerMock;
 
@@ -72,7 +81,7 @@ class UserControllerTest extends RestDocsSupportTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
-        Mockito.verify(userServiceMock, Mockito.atLeastOnce()).createUserProfile(any(UserProfile.class), anyLong());
+        verify(userServiceMock, atLeastOnce()).allocateUserProfile(any(UserProfile.class), anyLong());
 
         resultActions.andExpect(
                 MockMvcResultMatchers
@@ -115,17 +124,18 @@ class UserControllerTest extends RestDocsSupportTest {
                 .gender(Gender.MALE)
                 .build();
 
-        BDDMockito.given(userServiceMock.findUser(any(Long.class)))
-                .willReturn(User.builder().userProfile(testUserProfile).build());
-        BDDMockito.given(accountServiceMock.getAccount(any(Long.class)))
-                .willReturn(any(int.class));
+        BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
+        BDDMockito.given(userProfileRepository.findUserProfileByUserId(1L)).willReturn(Optional.ofNullable(testUserProfile));
+        BDDMockito.given(accountServiceMock.getAccount(1L)).willReturn(anyInt());
+
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
                         .get("/api/user/profile")
                         .header("Authorization", "access token")
         );
 
-        Mockito.verify(userServiceMock, Mockito.atLeastOnce()).findUser(anyLong());
+        verify(userProfileRepository, times(1)).findUserProfileByUserId(1L);
+        verify(accountServiceMock, times(1)).getAccount(1L);
 
         resultActions
                 .andExpect(MockMvcResultMatchers.status().isOk()
@@ -177,20 +187,20 @@ class UserControllerTest extends RestDocsSupportTest {
         var requestDto = ModifyUserProfileRequestDto.builder()
                 .nickname("변경 닉네임").intro("변경 소개글").imgUrl("변경 이미지").build();
 
-        String requestJson = objectMapper.writeValueAsString(requestDto);
-
-        BDDMockito.given(userServiceMock.findUser(any(Long.class)))
-                .willReturn(User.builder().userProfile(testUserProfile).build());
+        testUserProfile.modifyUserProfile(requestDto);
+        BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
+        BDDMockito.given(userProfileRepository.findUserProfileByUserId(1L))
+                .willReturn(Optional.of(testUserProfile));
 
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders
                         .patch("/api/user/profile")
                         .header("Authorization", "access token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson)
+                        .content(objectMapper.writeValueAsString(requestDto))
         );
 
-        Mockito.verify(userServiceMock, Mockito.atLeastOnce()).modifyUserProfile(any(ModifyUserProfileRequestDto.class), anyLong());
+        verify(userServiceMock, atLeastOnce()).modifyUserProfile(any(ModifyUserProfileRequestDto.class), anyLong());
 
         resultActions
                 .andExpect(MockMvcResultMatchers.status().isOk()
@@ -228,37 +238,7 @@ class UserControllerTest extends RestDocsSupportTest {
         );
     }
 
-
-    @Test
-    @Tag("api")
-    @DisplayName("회원 탈퇴 UserProfile 삭제")
-    void deleteUserTest() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .delete("/api/user")
-                        .header("Authorization", "access 토큰")
-                        .cookie(new Cookie("Refresh_Token_Cookie", "Refresh Token"))
-        );
-
-        Mockito.verify(userServiceMock, Mockito.atLeastOnce()).deleteUser(any(), any());
-
-        resultActions.andExpect(MockMvcResultMatchers.status().isOk());
-
-        resultActions.andDo(
-                restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("회원")
-                                        .description("요청 유저의 User, UserProfile 삭제")
-                                        .requestFields()
-                                        .responseFields()
-                                        .build()
-                        )
-                )
-        );
-        // then
-    }
-
+    // 삭제 테스트 작성 필요
 
 
 

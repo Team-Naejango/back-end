@@ -12,8 +12,8 @@ public interface SubscribeRepository {
 
     /* 채널의 구독자를 관리하는 메서드 */
     Set<Long> findSubscribersByChannelId(Long channelId);
-    void startPublishingToUser(Long userId, Long channelId);
-    void stopPublishingToUser(Long userId, Long channelId);
+    void setSubscriberToChannel(Long userId, Long channelId);
+    void deleteSubscriberFromChannel(Long userId, Long channelId);
 
     /* 유저의 구독 채널을 관리하는 메서드 */
     Set<Long> findSubscribeChannelIdByUserId(Long userId);
@@ -21,7 +21,12 @@ public interface SubscribeRepository {
     void unsubscribeToChannel(Long userId, Long channelId);
     void unsubscribeToAllChannel(Long userId);
 
-    /* 구독 id 정보를 관리하는 메서드 */
+    /* 세션의 구독 id 를 관리하는 메서드 */
+    void saveSubscriptionIdByUserId(String subscriptionId, Long userId);
+    Set<String> findSubscriptionIdByUserId(Long userId);
+    void deleteSubscriptionIdsByUserId(Long userId);
+
+    /* 구독 id 의 채널 정보를 관리하는 메서드 */
     Optional<Long> findChannelIdBySubscriptionId(String subscriptionId);
     void setSubscriptionIdToChannel(String subscriptionId, Long channelId);
     void deleteSubscriptionId(String subscriptionId);

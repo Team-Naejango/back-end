@@ -53,7 +53,7 @@ class FollowControllerTest extends RestDocsSupportTest {
         @DisplayName("팔로우_목록_조회_성공")
         void 팔로우_목록_조회_성공() throws Exception {
             // given
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
             BDDMockito.given(followService.findFollow(userId))
                     .willReturn(findFollowResponseDtoList);
@@ -101,7 +101,7 @@ class FollowControllerTest extends RestDocsSupportTest {
         @DisplayName("팔로우_등록_성공")
         void 팔로우_등록_성공() throws Exception {
             // given
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
 
             // when
@@ -148,7 +148,7 @@ class FollowControllerTest extends RestDocsSupportTest {
         @DisplayName("관심_해제_성공")
         void 관심_해제_성공() throws Exception {
             // given
-            BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+            BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
 
             // when

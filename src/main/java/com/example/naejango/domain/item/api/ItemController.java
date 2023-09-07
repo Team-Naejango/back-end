@@ -25,7 +25,7 @@ public class ItemController {
     /** 아이템 생성 */
     @PostMapping("")
     public ResponseEntity<CreateItemResponseDto> createItem(Authentication authentication, @RequestBody CreateItemRequestDto createItemRequestDto) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, createItemRequestDto);
         return ResponseEntity.created(URI.create("/api/item/"+createItemResponseDto.getId())).body(createItemResponseDto);
     }
@@ -41,7 +41,7 @@ public class ItemController {
     /** 아이템 정보 수정 */
     @PatchMapping("/{itemId}")
     public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, itemId, modifyItemRequestDto);
 
         return ResponseEntity.ok().body(modifyItemResponseDto);
@@ -50,7 +50,7 @@ public class ItemController {
     /** 아이템 창고 등록 수정 */
     @PatchMapping("/connect/{itemId}")
     public ResponseEntity<BaseResponseDto> connectItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ConnectItemRequestDto connectItemRequestDto) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         itemService.connectItem(userId, itemId, connectItemRequestDto);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));

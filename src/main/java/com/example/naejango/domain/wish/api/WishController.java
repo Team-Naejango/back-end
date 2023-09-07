@@ -21,7 +21,7 @@ public class WishController {
     /** 관심 목록 조회 */
     @GetMapping("")
     public ResponseEntity<List<FindWishResponseDto>> findWish(Authentication authentication){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         List<FindWishResponseDto> findWishResponseDtoList = wishService.findWish(userId);
 
         return ResponseEntity.ok().body(findWishResponseDtoList);
@@ -30,7 +30,7 @@ public class WishController {
     /** 아이템 관심 등록 */
     @PostMapping("/{itemId}")
     public ResponseEntity<BaseResponseDto> addWish(Authentication authentication, @PathVariable Long itemId){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         wishService.addWish(userId, itemId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
@@ -39,7 +39,7 @@ public class WishController {
     /** 아이템 관심 해제 */
     @DeleteMapping("/{itemId}")
     public ResponseEntity<BaseResponseDto> deleteWish(Authentication authentication, @PathVariable Long itemId){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         wishService.deleteWish(userId, itemId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
