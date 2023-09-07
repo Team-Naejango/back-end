@@ -62,8 +62,8 @@ public class JwtAuthenticator {
     private void authenticate (Long userId){
         Authentication principal = getPrincipal(userId);
         SecurityContextHolder.getContext().setAuthentication(principal);
-
     }
+
     private Authentication getPrincipal (Long userId){
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         PrincipalDetails principalDetails = new PrincipalDetails(user);

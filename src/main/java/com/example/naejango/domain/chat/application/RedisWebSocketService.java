@@ -23,7 +23,6 @@ public class RedisWebSocketService implements WebSocketService {
                 .userId(userId)
                 .channelId(Long.valueOf(channelId))
                 .content("채널에 입장하였습니다.").build();
-        System.out.println("RedisWebSocketService.subscribeChannel");
         redisTemplate.convertAndSend("chat", messageDto);
     }
 }

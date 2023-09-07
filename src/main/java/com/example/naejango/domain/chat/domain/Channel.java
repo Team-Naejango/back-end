@@ -28,7 +28,7 @@ public class Channel {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(insertable = false, updatable = false)
+    @Column(name = "channel_type", insertable = false, updatable = false)
     private ChannelType channelType;
     private Long lastMessageId;
 }

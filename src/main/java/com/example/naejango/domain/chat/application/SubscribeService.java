@@ -19,7 +19,6 @@ public class SubscribeService {
     private final SubscribeRepository subscribeRepository;
 
     public void disconnect(Long userId, String sessionId) {
-        System.out.println("SubscribeService.disconnect");
         // 유저가 구독한 채널을 조회합니다.
         Set<Long> channelIds = subscribeRepository.findSubscribeChannelIdByUserId(userId);
 

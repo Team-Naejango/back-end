@@ -83,7 +83,6 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
             subscribersInfo.put(channelId, new HashSet<>(Collections.singletonList(userId)));
         }
         else usersId.add(userId);
-        System.out.println(subscribersInfo.get(channelId));
     }
 
     @Override
