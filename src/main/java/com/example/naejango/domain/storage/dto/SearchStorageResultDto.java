@@ -15,6 +15,7 @@ public class SearchStorageResultDto {
     private String address; // 창고 주소
     private Coord coord; // 창고 좌표
     private int distance; // 요청 좌표와 창고 좌표 사이의 거리
+    private String description; // 창고 설명
 
     public SearchStorageResultDto(Storage storage, double distance) {
         this.storageId = storage.getId();
@@ -22,6 +23,7 @@ public class SearchStorageResultDto {
         this.imgUrl = storage.getImgUrl();
         this.address = storage.getAddress();
         this.distance = (int) Math.round(distance);
+        this.description = storage.getDescription();
     }
 
 }

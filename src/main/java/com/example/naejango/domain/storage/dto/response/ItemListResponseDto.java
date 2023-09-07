@@ -14,5 +14,6 @@ public class ItemListResponseDto {
     private String message;
     private int page;
     private int size;
+    private Long userId;
     private List<ItemInfoDto> itemList;
 }

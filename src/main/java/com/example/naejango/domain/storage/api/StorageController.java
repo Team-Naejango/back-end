@@ -89,9 +89,10 @@ public class StorageController {
                                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                                         @RequestParam(value = "size", defaultValue = "10") int size) {
         List<ItemInfoDto> itemList = storageService.findItemList(storageId, status, page, size);
+        Long userId = storageService.findUserIdByStorageId(storageId);
         if (itemList.size() == 0)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ItemListResponseDto("등록된 아이템이 없습니다.", page, size, itemList));
-        return ResponseEntity.ok().body(new ItemListResponseDto("창고 내의 아이템을 조회했습니다.", page, size, itemList));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ItemListResponseDto("등록된 아이템이 없습니다.", page, size, userId, itemList));
+        return ResponseEntity.ok().body(new ItemListResponseDto("창고 내의 아이템을 조회했습니다.", page, size, userId, itemList));
     }
 
     /**
