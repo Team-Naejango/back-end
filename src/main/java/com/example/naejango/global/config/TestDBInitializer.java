@@ -68,10 +68,10 @@ public class TestDBInitializer implements ApplicationRunner {
             userProfileRepository.save(userProfile3);
             userProfileRepository.save(userProfile4);
 
-            testUser1.createUserProfile(userProfile1);
-            testUser2.createUserProfile(userProfile2);
-            testUser3.createUserProfile(userProfile3);
-            testUser3.createUserProfile(userProfile4);
+            testUser1.setUserProfile(userProfile1);
+            testUser2.setUserProfile(userProfile2);
+            testUser3.setUserProfile(userProfile3);
+            testUser3.setUserProfile(userProfile4);
 
             // 창고 1개 생성
             Storage storage = Storage.builder()
@@ -100,23 +100,23 @@ public class TestDBInitializer implements ApplicationRunner {
             // 채팅 채널 2 = chat3, chat4, chat5
             Chat chat1 = Chat.builder().ownerId(testUser1.getId())
                     .title(testUser2.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
+                    .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
 
             Chat chat2 = Chat.builder().ownerId(testUser2.getId())
                     .title(testUser1.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
+                    .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
 
             Chat chat3 = Chat.builder().ownerId(testUser2.getId())
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
+                    .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
 
             Chat chat4 = Chat.builder().ownerId(testUser3.getId())
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
+                    .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
 
             Chat chat5 = Chat.builder().ownerId(testUser4.getId())
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
+                    .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
 
             chatRepository.save(chat1);
             chatRepository.save(chat2);

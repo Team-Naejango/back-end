@@ -21,7 +21,7 @@ public class FollowController {
     /** 팔로우 목록 조회 */
     @GetMapping("")
     public ResponseEntity<List<FindFollowResponseDto>> findFollow(Authentication authentication){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         List<FindFollowResponseDto> findFollowResponseDtoList = followService.findFollow(userId);
 
         return ResponseEntity.ok().body(findFollowResponseDtoList);
@@ -30,7 +30,7 @@ public class FollowController {
     /** 창고 팔로우 등록 */
     @PostMapping("/{storageId}")
     public ResponseEntity<BaseResponseDto> addFollow(Authentication authentication, @PathVariable Long storageId){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         followService.addFollow(userId, storageId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
@@ -39,7 +39,7 @@ public class FollowController {
     /** 창고 팔로우 해제 */
     @DeleteMapping("/{storageId}")
     public ResponseEntity<BaseResponseDto> deleteFollow(Authentication authentication, @PathVariable Long storageId){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         followService.deleteFollow(userId, storageId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));

@@ -34,7 +34,7 @@ class NotificationControllerTest extends RestDocsSupportTest {
     void 알림_구독_요청() throws Exception {
         // given
         Long userId = 1L;
-        BDDMockito.given(authenticationHandler.userIdFromAuthentication(any()))
+        BDDMockito.given(authenticationHandler.getUserId(any()))
                 .willReturn(userId);
         BDDMockito.given(notificationService.subscribe(any(), any()))
                 .willReturn(new SseEmitter());

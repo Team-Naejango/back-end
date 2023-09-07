@@ -26,7 +26,7 @@ public class TransactionController {
     /** 거래 내역 조회 */
     @GetMapping("")
     public ResponseEntity<List<FindTransactionResponseDto>> findTransaction(Authentication authentication) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         List<FindTransactionResponseDto> findTransactionResponseDtoList = transactionService.findTransaction(userId);
 
         return ResponseEntity.ok().body(findTransactionResponseDtoList);
@@ -35,7 +35,7 @@ public class TransactionController {
     /** 거래 예약 등록 */
     @PostMapping("")
     public ResponseEntity<CreateTransactionResponseDto> createTransaction(Authentication authentication, @RequestBody CreateTransactionRequestDto createTransactionRequestDto){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         CreateTransactionResponseDto createTransactionResponseDto = transactionService.createTransaction(userId, createTransactionRequestDto);
 
         return ResponseEntity.created(URI.create("/api/transaction/"+createTransactionResponseDto.getId())).body(createTransactionResponseDto);
@@ -44,7 +44,7 @@ public class TransactionController {
     /** 송금 완료 요청 */
     @PatchMapping("/remittance/{transactionId}")
     public ResponseEntity<BaseResponseDto> waitTransaction(Authentication authentication, @PathVariable Long transactionId){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         transactionService.waitTransaction(userId, transactionId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
@@ -53,7 +53,7 @@ public class TransactionController {
     /** 거래 완료 요청 */
     @PatchMapping("/completion/{transactionId}")
     public ResponseEntity<BaseResponseDto> completeTransaction(Authentication authentication, @PathVariable Long transactionId){
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         transactionService.completeTransaction(userId, transactionId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
@@ -62,7 +62,7 @@ public class TransactionController {
     /** 거래 정보 수정(거래일시, 거래 금액) 거래 예약 상태에서만 가능 */
     @PatchMapping("/{transactionId}")
     public ResponseEntity<ModifyTransactionResponseDto> modifyTransaction(Authentication authentication, @PathVariable Long transactionId, @RequestBody ModifyTransactionRequestDto modifyTransactionRequestDto) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         ModifyTransactionResponseDto modifyTransactionResponseDto = transactionService.modifyTransaction(userId, transactionId, modifyTransactionRequestDto);
 
         return ResponseEntity.ok().body(modifyTransactionResponseDto);
@@ -71,7 +71,7 @@ public class TransactionController {
     /** 거래 삭제 */
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<BaseResponseDto> deleteTransaction(Authentication authentication, @PathVariable Long transactionId) {
-        Long userId = authenticationHandler.userIdFromAuthentication(authentication);
+        Long userId = authenticationHandler.getUserId(authentication);
         transactionService.deleteTransaction(userId, transactionId);
 
         return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));

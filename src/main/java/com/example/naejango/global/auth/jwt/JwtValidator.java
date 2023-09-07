@@ -4,9 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.auth.dto.ValidateTokenResponseDto;
+import com.example.naejango.global.auth.dto.response.ValidateTokenResponseDto;
+import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +19,13 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class JwtValidator {
 
-    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public ValidateTokenResponseDto validateTokenInRequest(HttpServletRequest request) {
+    public ValidateTokenResponseDto isValidToken(HttpServletRequest request) {
         return validateAccessToken(getAccessToken(request));
     }
 
-    public ValidateTokenResponseDto validateTokenInRequest(StompHeaderAccessor headerAccessor) {
+    public ValidateTokenResponseDto isValidToken(StompHeaderAccessor headerAccessor) {
         return validateAccessToken(getAccessToken(headerAccessor));
     }
 
@@ -34,6 +33,7 @@ public class JwtValidator {
         if (accessToken == null) {
             return new ValidateTokenResponseDto(null, false);
         }
+
         DecodedJWT decodedAccessToken = decodeJwt(accessToken);
         if (isExpiredToken(decodedAccessToken)) {
             return new ValidateTokenResponseDto(null, false);
@@ -41,25 +41,15 @@ public class JwtValidator {
         return new ValidateTokenResponseDto(decodedAccessToken.getClaim("userId").asLong(), true);
     }
 
-
-    public ValidateTokenResponseDto validateRefreshToken(String refreshToken) {
-        if (refreshToken == null) {
-            return new ValidateTokenResponseDto(null, false);
-        }
+    public ValidateTokenResponseDto isValidRefreshToken(String refreshToken) {
+        if (refreshToken == null) return new ValidateTokenResponseDto(null, false);
 
         DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
-
-        if(isExpiredToken(decodedRefreshToken)) {
-            return new ValidateTokenResponseDto(null, false);
-        }
+        if(isExpiredToken(decodedRefreshToken)) return new ValidateTokenResponseDto(null, false);
 
         Long userId = decodedRefreshToken.getClaim("userId").asLong();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (!isVerifiedSignature(decodedRefreshToken, user)) {
-            return new ValidateTokenResponseDto(null, false);
-        }
+        String storedToken = refreshTokenRepository.getRefreshToken(userId);
+        if (!refreshToken.equals(storedToken)) return new ValidateTokenResponseDto(null, false);
 
         return new ValidateTokenResponseDto(userId, true);
     }
@@ -74,14 +64,14 @@ public class JwtValidator {
         return getAccessToken(authorizationHeader);
     }
 
-    private static String getAccessToken(String authorizationHeader) {
+    private String getAccessToken(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith(JwtProperties.ACCESS_TOKEN_PREFIX)) {
             return authorizationHeader.replace(JwtProperties.ACCESS_TOKEN_PREFIX, "");
         }
         return null;
     }
 
-    public DecodedJWT decodeJwt(String token){
+    private DecodedJWT decodeJwt(String token){
         try {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token);
         } catch (JWTVerificationException | IllegalArgumentException e) {
@@ -90,15 +80,9 @@ public class JwtValidator {
         }
     }
 
-    public boolean isExpiredToken(DecodedJWT decodedToken){
+    private boolean isExpiredToken(DecodedJWT decodedToken){
         Instant exp = decodedToken.getClaim("exp").asInstant();
         return exp.isBefore(Instant.now());
-    }
-
-
-    public boolean isVerifiedSignature(DecodedJWT decodedRefreshToken, User user) {
-        if(user.getSignature() == null) return false;
-        return user.getSignature().equals(decodedRefreshToken.getSignature());
     }
 
 }

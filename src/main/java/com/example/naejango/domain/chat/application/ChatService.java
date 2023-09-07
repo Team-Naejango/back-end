@@ -2,7 +2,7 @@ package com.example.naejango.domain.chat.application;
 
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.CreateGroupChatDto;
 import com.example.naejango.domain.chat.dto.PrivateChatDto;
@@ -40,14 +40,14 @@ public class ChatService {
         User otherUser = userRepository.findUserWithProfileById(otherUserId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 채팅 채널 개설
-        Channel newPrivateChannel = Channel.builder().chatType(ChatType.PRIVATE).build();
+        Channel newPrivateChannel = Channel.builder().channelType(ChannelType.PRIVATE).build();
         channelRepository.save(newPrivateChannel);
 
         // 채팅방을 생성합니다. 방 제목을 상대방 닉네임으로 설정합니다.
         Chat requesterChat = Chat.builder()
                 .ownerId(requesterId)
                 .channelId(newPrivateChannel.getId())
-                .chatType(ChatType.PRIVATE)
+                .chatType(ChannelType.PRIVATE)
                 .title(otherUser.getUserProfile().getNickname())
                 .lastMessage(null)
                 .build();
@@ -55,7 +55,7 @@ public class ChatService {
         Chat otherUserChat = Chat.builder()
                 .ownerId(otherUserId)
                 .channelId(newPrivateChannel.getId())
-                .chatType(ChatType.PRIVATE)
+                .chatType(ChannelType.PRIVATE)
                 .title(requester.getUserProfile().getNickname())
                 .lastMessage(null)
                 .build();
@@ -86,7 +86,7 @@ public class ChatService {
         Chat chat = Chat.builder()
                 .ownerId(userId)
                 .channelId(newGroupChannel.getId())
-                .chatType(ChatType.GROUP)
+                .chatType(ChannelType.GROUP)
                 .title(defaultTitle)
                 .lastMessage(null)
                 .build();
@@ -111,7 +111,7 @@ public class ChatService {
         if(!userId.equals(chat.getOwnerId())) throw new CustomException(ErrorCode.UNAUTHORIZED_MODIFICATION_REQUEST);
         chatMessageRepository.deleteChatMessageByChatId(chatId);
 
-        if(chat.getChatType().equals(ChatType.PRIVATE)){
+        if(chat.getChatType().equals(ChannelType.PRIVATE)){
             int i = channelRepository.countChatMessageByChannelId(chat.getChannelId());
             if(i == 0) {
                 chatRepository.delete(chat);
@@ -120,7 +120,7 @@ public class ChatService {
             }
         }
 
-        if (chat.getChatType().equals(ChatType.GROUP)) {
+        if (chat.getChatType().equals(ChannelType.GROUP)) {
             chatRepository.delete(chat);
             channelRepository.decreaseParticipantsCount(chat.getChannelId());
             int i = channelRepository.countChatMessageByChannelId(chat.getChannelId());
@@ -137,7 +137,7 @@ public class ChatService {
         Chat newChat = Chat.builder()
                 .ownerId(userId)
                 .channelId(channelId)
-                .chatType(ChatType.GROUP)
+                .chatType(ChannelType.GROUP)
                 .title(channel.getDefaultTitle())
                 .lastMessage(null)
                 .build();

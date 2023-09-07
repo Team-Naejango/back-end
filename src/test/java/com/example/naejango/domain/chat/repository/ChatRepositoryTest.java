@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,10 +73,10 @@ class ChatRepositoryTest {
         userProfileRepository.save(userProfile3);
         userProfileRepository.save(userProfile4);
 
-        testUser1.createUserProfile(userProfile1);
-        testUser2.createUserProfile(userProfile2);
-        testUser3.createUserProfile(userProfile3);
-        testUser3.createUserProfile(userProfile4);
+        testUser1.setUserProfile(userProfile1);
+        testUser2.setUserProfile(userProfile2);
+        testUser3.setUserProfile(userProfile3);
+        testUser3.setUserProfile(userProfile4);
 
         // 채팅 채널 생성
         PrivateChannel channel1 = new PrivateChannel();
@@ -96,23 +95,23 @@ class ChatRepositoryTest {
         // 채팅 채널 2 = chat3, chat4, chat5
         Chat chat1 = Chat.builder().ownerId(testUser1.getId())
                 .title(testUser2.getUserProfile().getNickname())
-                .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
+                .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
 
         Chat chat2 = Chat.builder().ownerId(testUser2.getId())
                 .title(testUser1.getUserProfile().getNickname())
-                .channelId(channel1.getId()).chatType(ChatType.PRIVATE).build();
+                .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
 
         Chat chat3 = Chat.builder().ownerId(testUser2.getId())
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
+                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
 
         Chat chat4 = Chat.builder().ownerId(testUser3.getId())
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
+                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
 
         Chat chat5 = Chat.builder().ownerId(testUser4.getId())
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChatType.GROUP).build();
+                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
 
         chatRepository.save(chat1);
         chatRepository.save(chat2);
@@ -214,28 +213,6 @@ class ChatRepositoryTest {
             assertEquals(2, result.getTotalElements());
             ChatInfoDto chatInfoDto = result.getContent().get(0);
             assertEquals("메세지2", chatInfoDto.getLastMessage());
-        }
-    }
-
-    @Nested
-    class updateLastMessageByChannelId {
-        @Test
-        @Transactional
-        @DisplayName("업데이트 성공")
-        void test1() {
-            // given
-            User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel channel = channelRepository.findGroupChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-            String testMessage = "마지막 대화가 업데이트 되었습니다.";
-
-            // when
-            chatRepository.updateLastMessageByChannelId(channel.getId(), testMessage);
-            em.flush(); em.clear();
-
-            // then
-            List<Chat> result = chatRepository.findByChannelId(channel.getId());
-            assertEquals(3, result.size());
-            result.forEach(chat -> assertEquals(testMessage, chat.getLastMessage()));
         }
     }
 

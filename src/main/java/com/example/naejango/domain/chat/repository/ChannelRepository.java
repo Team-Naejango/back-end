@@ -36,9 +36,13 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
     @Query("SELECT gc FROM GroupChannel gc WHERE gc.ownerId = :ownerId")
     Optional<GroupChannel> findGroupChannelByOwnerId(@Param("ownerId") Long ownerId);
 
-    @Query("SELECT gc FROM GroupChannel gc WHERE gc.id = :channelId AND gc.chatType = com.example.naejango.domain.chat.domain.ChatType.GROUP")
+    @Query("SELECT gc FROM GroupChannel gc WHERE gc.id = :channelId AND gc.channelType = com.example.naejango.domain.chat.domain.ChannelType.GROUP")
     Optional<GroupChannel> findGroupChannelById(@Param("channelId") Long channelId);
 
     @Query("SELECT gc FROM GroupChannel gc WHERE gc.storageId = :storageId")
     Optional<GroupChannel> findGroupChannelByStorageId(Long storageId);
+
+    @Modifying
+    @Query("UPDATE Channel c SET c.lastMessageId = :messageId WHERE c.id = :channelId")
+    void setLastMessage(@Param("channelId") Long channelId, @Param("messageId") Long messageId);
 }

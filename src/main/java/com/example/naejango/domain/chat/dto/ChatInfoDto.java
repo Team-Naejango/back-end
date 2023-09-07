@@ -1,7 +1,7 @@
 package com.example.naejango.domain.chat.dto;
 
 import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.ChannelType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class ChatInfoDto {
     private Long channelId;
     private Long chatId;
-    private ChatType chatType;
+    private ChannelType chatType;
     private String title;
     private String lastMessage;
     private long unreadCount;

@@ -1,5 +1,5 @@
 package com.example.naejango.domain.chat.domain;
 
-public enum ChatType {
+public enum ChannelType {
     PRIVATE, GROUP
 }

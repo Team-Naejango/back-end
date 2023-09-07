@@ -6,7 +6,7 @@ import com.example.naejango.domain.chat.application.ChannelService;
 import com.example.naejango.domain.chat.application.ChatService;
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.ChatType;
+import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.CreateGroupChatDto;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
@@ -80,13 +80,13 @@ class ChannelControllerTest extends RestDocsSupportTest {
         Channel channel = Channel.builder().id(3L).build();
         Channel newChannel = Channel.builder().id(4L).build();
 
-        Chat chat1 = Chat.builder().id(4L).chatType(ChatType.PRIVATE).ownerId(sender.getId()).build();
+        Chat chat1 = Chat.builder().id(4L).chatType(ChannelType.PRIVATE).ownerId(sender.getId()).build();
 
         @Test
         @DisplayName("일대일 채널 개설 - 채팅 채널이 이미 존재하는 경우")
         void test1() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(sender.getId());
             BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
                     .willReturn(Optional.of(new PrivateChatDto(channel.getId(), chat1.getId())));
 
@@ -98,7 +98,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
             verify(chatServiceMock, never()).createPrivateChannel(anyLong(), anyLong());
 
@@ -114,7 +114,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
         @DisplayName("일대일 채널 개설 - 채팅방이 존재하지 않는 경우")
         void test2() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(sender.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(sender.getId());
             BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
                     .willReturn(Optional.empty());
             BDDMockito.given(chatServiceMock.createPrivateChannel(sender.getId(), receiver.getId()))
@@ -128,7 +128,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
             verify(chatServiceMock, times(1)).createPrivateChannel(sender.getId(), receiver.getId());
 
@@ -177,7 +177,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         GroupChannel groupChannel = GroupChannel.builder()
                 .id(3L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .ownerId(channelOwner.getId())
                 .storageId(storage.getId())
                 .build();
@@ -186,14 +186,14 @@ class ChannelControllerTest extends RestDocsSupportTest {
                 .title(requestDto.getDefaultTitle())
                 .ownerId(channelOwner.getId())
                 .channelId(groupChannel.getId())
-                .chatType(ChatType.GROUP)
+                .chatType(ChannelType.GROUP)
                 .build();
 
         @Test
         @DisplayName("그룹 채널 개설 실패 : 이미 채널이 존재하는 경우")
         void test1() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(channelOwner.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(channelOwner.getId());
             BDDMockito.given(channelRepository.findGroupChannelByStorageId(requestDto.getStorageId())).willReturn(Optional.of(groupChannel));
 
             // when
@@ -207,7 +207,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatServiceMock, times(0)).createGroupChannel(any(), any(), any(), anyInt());
             resultActions.andExpect(status().isConflict());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(ErrorResponse.toResponseEntity(ErrorCode.GROUP_CHANNEL_ALREADY_EXIST).getBody())));
@@ -219,7 +219,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
         @DisplayName("그룹 채널 개설 성공")
         void test2() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(channelOwner.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(channelOwner.getId());
             BDDMockito.given(channelRepository.findGroupChannelByStorageId(requestDto.getStorageId())).willReturn(Optional.empty());
             BDDMockito.given(chatServiceMock.createGroupChannel(channelOwner.getId(), storage.getId(), requestDto.getDefaultTitle(), requestDto.getLimit()))
                     .willReturn(new CreateGroupChatDto(groupChannel.getId(), chat.getId()));
@@ -235,7 +235,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(chatServiceMock, times(1)).createGroupChannel(channelOwner.getId(), storage.getId(), requestDto.getDefaultTitle(), requestDto.getLimit());
 
             resultActions.andExpect(status().isCreated())
@@ -291,7 +291,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         GroupChannel channel1 = GroupChannel.builder()
                 .id(4L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .storageId(storage1.getId())
                 .participantsCount(3)
                 .channelLimit(5)
@@ -301,7 +301,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         GroupChannel channel2 = GroupChannel.builder()
                 .id(5L)
-                .chatType(ChatType.GROUP)
+                .channelType(ChannelType.GROUP)
                 .storageId(storage2.getId())
                 .participantsCount(2)
                 .channelLimit(10)
@@ -317,7 +317,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             BDDMockito.given(geomUtilMock.createPoint(coord)).willReturn(point);
-            BDDMockito.given(channelRepository.findGroupChannelNearBy(point, radius)).willReturn(Arrays.asList());
+            BDDMockito.given(channelRepository.findGroupChannelNearBy(point, radius)).willReturn(List.of());
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
@@ -330,7 +330,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // then
             resultActions.andExpect(status().isNotFound());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
-                    new FindGroupChannelNearbyResponseDto("근처에 진행중인 그룹 채팅이 없습니다.", coord, radius, Arrays.asList()))));
+                    new FindGroupChannelNearbyResponseDto("근처에 진행중인 그룹 채팅이 없습니다.", coord, radius, List.of()))));
         }
 
         @Test
@@ -408,7 +408,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     new ParticipantInfoDto(participant1.getId(), participant1.getUserProfile().getNickname(), participant1.getUserProfile().getImgUrl()),
                     new ParticipantInfoDto(participant2.getId(), participant2.getUserProfile().getNickname(), participant2.getUserProfile().getImgUrl()),
                     new ParticipantInfoDto(participant3.getId(), participant3.getUserProfile().getNickname(), participant3.getUserProfile().getImgUrl()));
-            BDDMockito.given(authenticationHandlerMock.userIdFromAuthentication(any())).willReturn(participant1.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(participant1.getId());
             BDDMockito.given(channelServiceMock.findParticipantsInChannel(groupChannel.getId(), participant1.getId()))
                     .willReturn(infoListDto);
 
@@ -419,7 +419,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
             // then
-            verify(authenticationHandlerMock, times(1)).userIdFromAuthentication(any());
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(channelServiceMock, times(1)).findParticipantsInChannel(groupChannel.getId(), participant1.getId());
 
             resultActions.andExpect(status().isOk());
