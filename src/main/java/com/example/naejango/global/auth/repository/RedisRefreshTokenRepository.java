@@ -2,12 +2,14 @@ package com.example.naejango.global.auth.repository;
 
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
 @Repository
+@ConditionalOnProperty(name = "redis-config.refresh-token", havingValue = "true")
 @RequiredArgsConstructor
 public class RedisRefreshTokenRepository implements RefreshTokenRepository {
 
