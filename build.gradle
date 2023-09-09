@@ -12,6 +12,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
 	id 'org.hidetake.swagger.generator' version '2.18.2'
+	id 'jacoco'
 }
 
 group = 'com.example'
@@ -66,34 +67,105 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 }
 
-tasks.named('test') { // build 할 때 'unitTest' Task 포함시키고 싶으면 dependsOn 주석 해제
-//	dependsOn 'unitTest'
-	useJUnitPlatform() {
-		includeTags 'api'
+// jacoco 결과에 포함하지 않을 클래스 파일 명시
+private excludedClassFilesForReport(classDirectories) {
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, exclude: [
+				"**/domain/common/*Entity.*",
+				"**/dto/**",
+				"**/global/**",
+				"**/NaejangoApplication.class"
+		])
+	}))
+}
+
+test {
+	jacoco {
+		destinationFile = file("$buildDir/jacoco/unitTest.exec")
 	}
-	testLogging { // 테스트 결과 출력
-		afterSuite { testDescriptor, testResult ->
-			if (testDescriptor.parent == null) {
-				println "Test Results: ${testResult.resultType} (${testResult.testCount} tests, ${testResult.successfulTestCount} successes, ${testResult.failedTestCount} failures, ${testResult.skippedTestCount} skipped)"
+}
+
+jacocoTestReport {
+	reports {
+		html.enabled true
+		xml.enabled false
+		csv.enabled false
+
+  		// 리포트 저장 경로를 설정
+  		html.destination file("$buildDir/jacoco")
+	}
+
+	afterEvaluate {
+		excludedClassFilesForReport(classDirectories)
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			enabled = true
+
+			element = 'CLASS'
+			// 추후 조건 설정
+//			limit {
+//				counter = 'LINE'
+//				value = 'COVEREDRATIO'
+//				minimum = 0.0
+//			}
+
+//			limit {
+//				counter = 'BRANCH'
+//				value = 'COVEREDRATIO'
+//				minimum = 0.0
+//			}
+
+			afterEvaluate {
+				excludedClassFilesForReport(classDirectories)
 			}
 		}
 	}
+
+}
+
+tasks.register('testCoverage', Test) {
+	group 'verification'
+	description 'Runs the unit tests with coverage'
+
+	dependsOn('unitTest',
+			'jacocoTestReport',
+			'jacocoTestCoverageVerification')
+
+	tasks['jacocoTestReport'].mustRunAfter(tasks['unitTest'])
+	tasks['jacocoTestCoverageVerification'].mustRunAfter(tasks['jacocoTestReport'])
 }
 
 tasks.register('unitTest', Test){
-	useJUnitPlatform(){
-		excludeTags 'api'
+	useJUnitPlatform() {
+
 	}
-	testLogging { // 테스트 결과 출력
-		afterSuite { testDescriptor, testResult ->
-			if (testDescriptor.parent == null) {
-				println "Test Results: ${testResult.resultType} (${testResult.testCount} tests, ${testResult.successfulTestCount} successes, ${testResult.failedTestCount} failures, ${testResult.skippedTestCount} skipped)"
-			}
+	 // 테스트 결과 출력
+	afterSuite { testDescriptor, testResult ->
+		if (testDescriptor.parent == null) {
+			println "Test Results: ${testResult.resultType} (${testResult.testCount} tests, ${testResult.successfulTestCount} successes, ${testResult.failedTestCount} failures, ${testResult.skippedTestCount} skipped)"
+		}
+	}
+
+
+}
+
+tasks.named('test', Test) {
+	useJUnitPlatform() {
+		includeTags 'api'
+	}
+	// 테스트 결과 출력
+	afterSuite { testDescriptor, testResult ->
+		if (testDescriptor.parent == null) {
+			println "Test Results: ${testResult.resultType} (${testResult.testCount} tests, ${testResult.successfulTestCount} successes, ${testResult.failedTestCount} failures, ${testResult.skippedTestCount} skipped)"
 		}
 	}
 }
 
-task copyPrivateConfig(type: Copy) {
+tasks.register('copyPrivateConfig', Copy) {
 	copy {
 		from './submodule-data'
 		include "*.yml"
@@ -101,20 +173,21 @@ task copyPrivateConfig(type: Copy) {
 		into 'src/main/resources'
 	}
 }
-task copyTestConfig(type: Copy) {
+tasks.register('copyTestConfig', Copy) {
 	copy {
 		from './submodule-data'
-		include"application-test.yml"
+		include "application-test.yml"
 		into 'src/test/resources'
 	}
 }
-task sqlData(type: Copy) {
+tasks.register('sqlData', Copy) {
 	copy {
 		from './submodule-data/sql'
 		include "data.sql"
 		into 'src/main/resources/sql'
 	}
 }
+
 // plain jar 생성 제외
 jar {
 	enabled = false
