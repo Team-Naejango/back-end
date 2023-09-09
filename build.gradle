@@ -165,7 +165,7 @@ tasks.named('test', Test) {
 	}
 }
 
-tasks.register('copyPrivateConfig', Copy) {
+task copyPrivateConfig(type: Copy) {
 	copy {
 		from './submodule-data'
 		include "*.yml"
@@ -173,14 +173,14 @@ tasks.register('copyPrivateConfig', Copy) {
 		into 'src/main/resources'
 	}
 }
-tasks.register('copyTestConfig', Copy) {
+task copyTestConfig(type: Copy) {
 	copy {
 		from './submodule-data'
-		include "application-test.yml"
+		include"application-test.yml"
 		into 'src/test/resources'
 	}
 }
-tasks.register('sqlData', Copy) {
+task sqlData(type: Copy) {
 	copy {
 		from './submodule-data/sql'
 		include "data.sql"
