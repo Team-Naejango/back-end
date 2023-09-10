@@ -210,6 +210,7 @@ openapi3 {
 
 tasks.register('setSecuritySchemes'){
 	dependsOn 'openapi3'
+	dependsOn 'bootJarMainClassName'
 
 	doFirst{
 		File file = new File("${project.buildDir}/api-spec/openapi3.yaml")
