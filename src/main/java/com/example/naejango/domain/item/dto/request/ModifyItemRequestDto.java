@@ -2,7 +2,6 @@ package com.example.naejango.domain.item.dto.request;
 
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.item.domain.ItemDealType;
 import com.example.naejango.domain.item.domain.ItemType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,12 +21,10 @@ public class ModifyItemRequestDto {
 
     private ItemType type;
 
-    private ItemDealType dealType;
-
     private String category;
 
     public void toEntity(Item item, Category category) {
-        item.modifyItem(name, description, imgUrl, type, dealType, category);
+        item.modifyItem(name, description, imgUrl, type, category);
     }
 
 }

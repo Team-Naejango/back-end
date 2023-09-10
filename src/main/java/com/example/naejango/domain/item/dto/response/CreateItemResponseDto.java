@@ -1,7 +1,6 @@
 package com.example.naejango.domain.item.dto.response;
 
 import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.item.domain.ItemDealType;
 import com.example.naejango.domain.item.domain.ItemType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,8 +22,6 @@ public class CreateItemResponseDto {
 
     private ItemType type;
 
-    private ItemDealType dealType;
-
     private String category;
 
     public CreateItemResponseDto(Item item) {
@@ -33,7 +30,6 @@ public class CreateItemResponseDto {
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
         this.type = item.getType();
-        this.dealType = item.getDealType();
         this.category = item.getCategory().toString();
     }
 }

@@ -41,8 +41,8 @@ public class SearchStorageRequestDto {
     @Size(min = 2, max = 10, message = "검색어가 너무 길거나 짧습니다. (2자 ~ 10자)")
     private String keyword; // 검색 키워드
 
-    @EnumConstraint(enumClass = ItemType.class, message = "아이템 타입이 올바르지 않습니다. (BUY / SELL")
-    private ItemType type; // 타입 (BUY / SELL)
+    @EnumConstraint(enumClass = ItemType.class, message = "아이템 타입이 올바르지 않습니다. (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)")
+    private ItemType type; // 타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)
 
     private Boolean status; // 상태 (거래중 / 거래완료)
 

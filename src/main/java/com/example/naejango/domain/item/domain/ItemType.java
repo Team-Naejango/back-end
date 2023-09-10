@@ -3,7 +3,7 @@ package com.example.naejango.domain.item.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum ItemType {
-    BUY, SELL;
+    INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY;
 
     @JsonCreator
     public static ItemType from(String value) {

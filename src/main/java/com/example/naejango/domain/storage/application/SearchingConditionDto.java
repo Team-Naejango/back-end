@@ -13,6 +13,6 @@ import lombok.*;
 public class SearchingConditionDto {
     private Category cat; // 카테고리
     private String[] keyword; // 검색 키워드
-    private ItemType itemType; // 타입 (BUY / SELL)
+    private ItemType itemType; // 타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)
     private Boolean status; // 상태 (거래중 / 거래완료)
 }

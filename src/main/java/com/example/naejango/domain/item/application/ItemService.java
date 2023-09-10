@@ -42,8 +42,6 @@ public class ItemService {
     public CreateItemResponseDto createItem(Long userId, CreateItemRequestDto createItemRequestDto) {
         Category category = validateCategory(createItemRequestDto.getCategory());
 
-        validateType(createItemRequestDto.getType(), createItemRequestDto.getDealType());
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -64,12 +62,6 @@ public class ItemService {
         return category;
     }
 
-    private void validateType(ItemType type, ItemDealType dealType) {
-        if (type == ItemType.SELL && dealType == ItemDealType.GROUP) {
-            throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
-        }
-    }
-
     /** 아이템 정보 조회 */
     public FindItemResponseDto findItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
@@ -83,8 +75,6 @@ public class ItemService {
     public ModifyItemResponseDto modifyItem(Long userId, Long itemId, ModifyItemRequestDto modifyItemRequestDto) {
         Category category = validateCategory(modifyItemRequestDto.getCategory());
 
-        validateType(modifyItemRequestDto.getType(), modifyItemRequestDto.getDealType());
-        
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Item item = itemRepository.findById(itemId)

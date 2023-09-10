@@ -51,15 +51,15 @@ public class RandomDataGenerateUtil {
     }
 
     public String getItemDescription(String itemName, ItemType type) {
-        if (type.equals(ItemType.BUY)) {
+        if (type.equals(ItemType.INDIVIDUAL_BUY)) {
             return itemName + "필요해요.";
         }
         return itemName + "팔아요.";
     }
 
     public ItemType getRandomItemType() {
-        if (random.nextBoolean()) return ItemType.BUY;
-        return ItemType.SELL;
+        if (random.nextBoolean()) return ItemType.INDIVIDUAL_BUY;
+        return ItemType.INDIVIDUAL_SELL;
     }
 
     public boolean getRandomBoolean() {

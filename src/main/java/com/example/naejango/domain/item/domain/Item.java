@@ -33,11 +33,8 @@ public class Item extends TimeAuditingEntity {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private ItemType type; // BUY, SELL
+    private ItemType type; // INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY
 
-    @Column(nullable = false)
-    @Enumerated(value = EnumType.STRING)
-    private ItemDealType dealType; // INDIVIDUAL, GROUP
 
     @Column(nullable = false)
     private int viewCount;
@@ -53,12 +50,11 @@ public class Item extends TimeAuditingEntity {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public void modifyItem(String name, String description, String imgUrl, ItemType type, ItemDealType dealType, Category category) {
+    public void modifyItem(String name, String description, String imgUrl, ItemType type, Category category) {
         this.name = name;
         this.description = description;
         this.imgUrl = imgUrl;
         this.type = type;
-        this.dealType = dealType;
         this.category = category;
     }
 }
