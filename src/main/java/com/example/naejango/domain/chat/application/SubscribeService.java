@@ -1,5 +1,7 @@
 package com.example.naejango.domain.chat.application;
 
+import com.example.naejango.domain.chat.domain.MessageType;
+import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.Set;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
+    private final WebSocketService webSocketService;
+    private final MessageService messageService;
 
     public void disconnect(Long userId, String sessionId) {
         // 유저가 구독한 채널을 조회합니다.
@@ -49,6 +53,16 @@ public class SubscribeService {
 
         // 구독 id 삭제
         subscribeRepository.deleteSubscriptionId(subscriptionId);
+
+        // 퇴장 메세지
+        var messageDto = WebSocketMessageDto.builder()
+                .channelId(channelId)
+                .messageType(MessageType.EXIT)
+                .userId(userId)
+                .content("")
+                .build();
+        webSocketService.publishMessage(String.valueOf(channelId), messageDto);
+        messageService.publishMessage(channelId, userId, MessageType.EXIT, messageDto.getContent());
     }
 
     public void subscribe(Long userId, String subscriptionId, Long channelId) {

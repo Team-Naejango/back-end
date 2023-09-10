@@ -2,11 +2,9 @@ package com.example.naejango.global.config;
 
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.item.domain.ItemStorage;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
-import com.example.naejango.domain.item.repository.ItemStorageRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.Role;
@@ -39,7 +37,6 @@ public class DBDateInitializer implements ApplicationRunner {
     private final StorageRepository storageRepository;
     private final TransactionTemplate transactionTemplate;
     private final ItemRepository itemRepository;
-    private final ItemStorageRepository itemStorageRepository;
     private final RandomDataGenerateUtil randomUtil;
 
     private final List<Long> userIdList = new ArrayList<>();
@@ -115,7 +112,7 @@ public class DBDateInitializer implements ApplicationRunner {
                         String randomItemName = randomUtil.getRandomItemName();
                         ItemType randomItemType = randomUtil.getRandomItemType();
                         Item testItem = Item.builder().category(category)
-                                .type(randomUtil.getRandomItemType())
+                                .itemType(randomUtil.getRandomItemType())
                                 .user(testUser)
                                 .status(randomUtil.getRandomBoolean())
                                 .name(randomItemName)
@@ -124,9 +121,6 @@ public class DBDateInitializer implements ApplicationRunner {
                                 .user(testUser)
                                 .viewCount(randomUtil.getRandomInt(100)).build();
                         itemRepository.save(testItem);
-
-                        ItemStorage itemStorage = ItemStorage.builder().item(testItem).storage(testStorage).build();
-                        itemStorageRepository.save(itemStorage);
                     }
 
                 }

@@ -2,18 +2,26 @@ package com.example.naejango.domain.item.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.example.naejango.domain.chat.domain.ChannelType;
+import com.example.naejango.domain.chat.domain.GroupChannel;
+import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.application.ItemService;
+import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.dto.request.ConnectItemRequestDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
+import com.example.naejango.domain.item.repository.CategoryRepository;
+import com.example.naejango.domain.storage.domain.Storage;
+import com.example.naejango.domain.user.domain.Role;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
+import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,14 +33,15 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ItemController.class)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -42,6 +51,14 @@ class ItemControllerTest extends RestDocsSupportTest {
     ItemService itemService;
     @MockBean
     AuthenticationHandler authenticationHandler;
+    @MockBean
+    CategoryRepository categoryRepository;
+    @MockBean
+    ChannelRepository channelRepositoryMock;
+    @MockBean
+    GeomUtil geomUtilMock;
+
+    GeomUtil geomUtil = new GeomUtil();
 
     @Nested
     @Order(1)
@@ -58,7 +75,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .imgUrl("이미지 URL")
                         .type(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
-                        .storageIdList(new ArrayList<>(List.of(1L, 2L)))
+                        .storageId(1L)
                         .build();
 
         CreateItemResponseDto createItemResponseDto =
@@ -112,7 +129,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("type").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("category").description("카테고리"),
-                                            fieldWithPath("storageIdList").description("창고 ID 리스트")
+                                            fieldWithPath("storageId").description("창고 ID")
                                     )
                                     .responseFields(
                                             fieldWithPath("id").description("아이템 ID"),
@@ -154,33 +171,9 @@ class ItemControllerTest extends RestDocsSupportTest {
 
         }
 
+
         @Test
         @Order(3)
-        @DisplayName("실패_창고_생성_전에_아이템_등록_요청_400_발생")
-        void 실패_창고_생성_전에_아이템_등록_요청_400_발생() throws Exception {
-            // given
-            String content = objectMapper.writeValueAsString(createItemRequestDto);
-
-            BDDMockito.given(authenticationHandler.getUserId(any()))
-                    .willReturn(userId);
-            BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
-                    .willThrow(new CustomException(ErrorCode.STORAGE_NOT_EXIST));
-
-            // when
-            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .post("/api/item")
-                    .header("Authorization", "JWT")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
-            );
-
-            // then
-            resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest());
-        }
-
-        @Test
-        @Order(4)
         @DisplayName("실패_등록되지_않은_창고_ID_값으로_요청_404_발생")
         void 실패_등록되지_않은_창고_ID_값으로_요청_404_발생() throws Exception {
             // given
@@ -217,7 +210,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .type(ItemType.INDIVIDUAL_SELL)
+                        .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
                         .build();
 
@@ -254,7 +247,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("type").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .responseSchema(Schema.schema("아이템 정보 조회 Response"))
@@ -263,8 +256,186 @@ class ItemControllerTest extends RestDocsSupportTest {
         }
     }
 
+//    @Nested
+//    @Tag("api")
+//    @DisplayName("창고 검색")
+//    class SearchStorageByConditions {
+//
+//        @Test
+//        @DisplayName("모든 조건으로 창고 검색")
+//        void test1() throws Exception {
+//            // given
+//            Point center = geomUtil.createPoint(127.02, 37.49);
+//            Category cat1 = new Category(1, "의류");
+//            int rad = 1000;
+//            int page = 0;
+//            int size = 10;
+//            Storage testStorage1 = Storage.builder().name("테스트1").location(geomUtil.createPoint(127.021, 37.491)).address("").build();
+//            Storage testStorage2 = Storage.builder().name("테스트2").location(geomUtil.createPoint(127.022, 37.492)).address("").build();
+//            StorageAndDistanceDto result1 = new StorageAndDistanceDto(testStorage1, 100);
+//            StorageAndDistanceDto result2 = new StorageAndDistanceDto(testStorage2, 200);
+//
+//
+//            SearchingConditionDto conditions = new SearchingConditionDto(cat1, new String[]{"%유니클로%", "%청바지%"}, ItemType.INDIVIDUAL_BUY, true);
+//            BDDMockito.given(geomUtilMock.createPoint(127.02, 37.49)).willReturn(center);
+//            BDDMockito.given(categoryRepositoryMock.findById(1)).willReturn(Optional.of(cat1));
+//            BDDMockito.given(storageRepositoryMock.searchItemsByConditions(center, rad, page, size, conditions))
+//                    .willReturn(Arrays.asList(result1, result2));
+//
+//            // when
+//            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+//                    .get("/api/storage/search")
+//                    .queryParam("lon", "127.02")
+//                    .queryParam("lat", "37.49")
+//                    .queryParam("rad","1000")
+//                    .queryParam("page", "0")
+//                    .queryParam("size", "10")
+//                    .queryParam("cat", "1")
+//                    .queryParam("keyword", "유니클로 청바지")
+//                    .queryParam("type", "INDIVIDUAL_BUY")
+//                    .queryParam("status", "true")
+//                    .characterEncoding(StandardCharsets.UTF_8)
+//                    .header("Authorization", "엑세스 토큰")
+//                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+//            );
+//
+//            // then
+//            verify(geomUtilMock, times(1)).createPoint(127.02, 37.49);
+//            verify(categoryRepositoryMock, times(1)).findById(1);
+//            verify(storageRepositoryMock, times(1)).searchItemsByConditions(center, rad, page, size, conditions);
+//
+//            // restDocs
+//            resultActions.andDo(restDocs.document(
+//                    resource(ResourceSnippetParameters.builder()
+//                            .tag("창고")
+//                            .summary("창고 검색")
+//                            .description("조건에 맞는 창고를 검색합니다.\n\n" +
+//                                    "좌표, 반경, 카테고리, 키워드, 타입, 상태를 조건으로 받습니다.\n\n" +
+//                                    "창고 정보만 응답합니다. 추후 아이템 정보도 가지고 올 수 있도록 수정하겠습니다.")
+//                            .requestParameters(
+//                                    parameterWithName("lon").description("중심 경도 좌표"),
+//                                    parameterWithName("lat").description("중심 위도 좌표"),
+//                                    parameterWithName("rad").description("반경 (1,000~5,000m)"),
+//                                    parameterWithName("page").description("페이지"),
+//                                    parameterWithName("size").description("사이즈"),
+//                                    parameterWithName("cat").description("카테고리 ID"),
+//                                    parameterWithName("keyword").description("검색 키워드(2~10자)"),
+//                                    parameterWithName("type").description("BUY/SELL"),
+//                                    parameterWithName("status").description("상태 (true/false)"),
+//                                    parameterWithName("_csrf").ignored()
+//                            ).responseFields(
+//                                    fieldWithPath("message").description("조회 결과 메세지"),
+//                                    fieldWithPath("coord").description("중심 좌표"),
+//                                    fieldWithPath("coord.longitude").description("중심 경도 좌표"),
+//                                    fieldWithPath("coord.latitude").description("중심 위도 좌표"),
+//                                    fieldWithPath("radius").description("반경"),
+//                                    fieldWithPath("page").description("페이지"),
+//                                    fieldWithPath("size").description("조회 결과물 수"),
+//                                    fieldWithPath("searchingConditions").description("검색 조건"),
+//                                    fieldWithPath("searchingConditions.cat").description("검색 조건 : 카테고리"),
+//                                    fieldWithPath("searchingConditions.cat.id").description("카테고리 아이디"),
+//                                    fieldWithPath("searchingConditions.cat.name").description("카테고리 이름"),
+//                                    fieldWithPath("searchingConditions.keyword[]").description("검색 조건 : 키워드"),
+//                                    fieldWithPath("searchingConditions.itemType").description("검색 조건 : 상품 타입"),
+//                                    fieldWithPath("searchingConditions.status").description("검색 조건 : 상품 상태"),
+//                                    fieldWithPath("searchResult[].storageId").description("창고 Id"),
+//                                    fieldWithPath("searchResult[].name").description("창고 이름"),
+//                                    fieldWithPath("searchResult[].imgUrl").description("이미지 링크"),
+//                                    fieldWithPath("searchResult[].coord").description("창고 좌표"),
+//                                    fieldWithPath("searchResult[].address").description("창고 주소"),
+//                                    fieldWithPath("searchResult[].distance").description("거리"),
+//                                    fieldWithPath("searchResult[].description").description("창고 설명")
+//                            ).requestSchema(
+//                                    Schema.schema("창고 검색 Request")
+//                            ).responseSchema(
+//                                    Schema.schema("창고 검색 Response")
+//                            )
+//                            .build())
+//            ));
+//        }
+//    }
+
     @Nested
     @Order(3)
+    @DisplayName("Controller 공동 구매 아이템의 그룹 채널 조회")
+    @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class findGroupChannel {
+        User user = User.builder().id(1L).role(Role.USER).userKey("test_1").password("").build();
+
+        Storage storage = Storage.builder()
+                .id(2L)
+                .name("테스트 창고1")
+                .location(geomUtil.createPoint(127.0371, 37.4951))
+                .address("서울시 강남구")
+                .build();
+
+        Item item = Item.builder()
+                .id(3L)
+                .itemType(ItemType.INDIVIDUAL_BUY)
+                .name("테스트 아이템2")
+                .description("")
+                .status(true)
+                .imgUrl("")
+                .viewCount(0)
+                .storage(storage)
+                .build();
+
+        GroupChannel channel = GroupChannel.builder()
+                .id(4L)
+                .channelType(ChannelType.GROUP)
+                .item(item)
+                .participantsCount(3)
+                .channelLimit(5)
+                .owner(user)
+                .defaultTitle("그룹채널 1")
+                .build();
+
+        @Test
+        @Tag("api")
+        @DisplayName("공동 구매 아이템의 그룹 채널 조회")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(channelRepositoryMock.findGroupChannelByItemId(item.getId()))
+                    .willReturn(Optional.of(channel));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/item/{itemId}/channel", item.getId())
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(jsonPath("message").value("해당 창고의 그룹 채널 정보가 조회되었습니다."));
+
+            // restDocs
+            resultActions.andDo(restDocs.document(
+                    resource(ResourceSnippetParameters.builder()
+                            .tag("창고")
+                            .summary("창고 그룹 채널 조회")
+                            .pathParameters(
+                                    parameterWithName("itemId").description("공동 구매 아이템 id")
+                            ).responseFields(
+                                    fieldWithPath("message").description("조회 결과 메세지"),
+                                    fieldWithPath("channelInfo").description("조회된 채널"),
+                                    fieldWithPath("channelInfo.channelId").description("채널 id"),
+                                    fieldWithPath("channelInfo.ownerId").description("채널장 id"),
+                                    fieldWithPath("channelInfo.itemId").description("공동구매 아이템 id"),
+                                    fieldWithPath("channelInfo.participantsCount").description("채널 참가자 수"),
+                                    fieldWithPath("channelInfo.defaultTitle").description("기본 설정된 방제목"),
+                                    fieldWithPath("channelInfo.channelLimit").description("채널 최대 참여자 수")
+                            ).responseSchema(
+                                    Schema.schema("창고 채널 조회 Response")
+                            )
+                            .build())
+            ));
+        }
+    }
+
+
+    @Nested
+    @Order(4)
     @DisplayName("Controller 아이템 정보 수정")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -340,64 +511,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     )
                                     .requestSchema(Schema.schema("아이템 정보 수정 Request"))
                                     .responseSchema(Schema.schema("아이템 정보 수정 Response"))
-                                    .build()
-                    )));
-        }
-    }
-
-    @Nested
-    @Order(4)
-    @DisplayName("Controller 아이템 창고 등록 수정")
-    @WithMockUser()
-    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class connectItem {
-        Long userId;
-        Long itemId=1L;
-        ConnectItemRequestDto connectItemRequestDto =
-                ConnectItemRequestDto.builder()
-                        .storageIdList(new ArrayList<>(List.of(1L, 2L)))
-                        .build();
-
-        @Test
-        @Order(1)
-        @Tag("api")
-        @DisplayName("아이템_창고_등록_수정_성공")
-        void 아이템_창고_등록_수정_성공() throws Exception {
-            // given
-            String content = objectMapper.writeValueAsString(connectItemRequestDto);
-
-            BDDMockito.given(authenticationHandler.getUserId(any()))
-                    .willReturn(userId);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .patch("/api/item/connect/{itemId}", itemId)
-                    .header("Authorization", "JWT")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
-            );
-
-            // then
-            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
-
-            resultActions.andDo(restDocs.document(
-                    resource(
-                            ResourceSnippetParameters.builder()
-                                    .tag("아이템")
-                                    .description("아이템 창고 등록 수정")
-                                    .pathParameters(
-                                            parameterWithName("itemId").description("아이템 ID")
-                                    )
-                                    .requestFields(
-                                            fieldWithPath("storageIdList").description("창고 ID 리스트")
-                                    )
-                                    .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
-                                    )
-                                    .requestSchema(Schema.schema("아이템 창고 등록 수정 Request"))
-                                    .responseSchema(Schema.schema("아이템 창고 등록 수정 Response"))
                                     .build()
                     )));
         }

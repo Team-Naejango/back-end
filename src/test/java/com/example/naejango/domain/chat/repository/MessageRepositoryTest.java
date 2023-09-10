@@ -47,7 +47,6 @@ class MessageRepositoryTest {
     @PersistenceContext
     EntityManager em;
     @BeforeEach
-    @Transactional
     void setup() {
         // 테스트 유저 4명 등록
         User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
@@ -81,7 +80,7 @@ class MessageRepositoryTest {
                 .channelType(ChannelType.GROUP)
                 .channelLimit(5)
                 .defaultTitle("기본 설정 방제")
-                .ownerId(testUser2.getId())
+                .owner(testUser2)
                 .build();
 
         channelRepository.save(channel1);
@@ -90,25 +89,25 @@ class MessageRepositoryTest {
         // 채팅 생성
         // 채팅 채널 1 = chat1, chat2
         // 채팅 채널 2 = chat3, chat4, chat5
-        Chat chat1 = Chat.builder().ownerId(testUser1.getId())
+        Chat chat1 = Chat.builder().owner(testUser1)
                 .title(testUser2.getUserProfile().getNickname())
-                .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
+                .channel(channel1).build();
 
-        Chat chat2 = Chat.builder().ownerId(testUser2.getId())
+        Chat chat2 = Chat.builder().owner(testUser2)
                 .title(testUser1.getUserProfile().getNickname())
-                .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
+                .channel(channel1).build();
 
-        Chat chat3 = Chat.builder().ownerId(testUser2.getId())
+        Chat chat3 = Chat.builder().owner(testUser2)
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                .channel(channel2).build();
 
-        Chat chat4 = Chat.builder().ownerId(testUser3.getId())
+        Chat chat4 = Chat.builder().owner(testUser3)
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                .channel(channel2).build();
 
-        Chat chat5 = Chat.builder().ownerId(testUser4.getId())
+        Chat chat5 = Chat.builder().owner(testUser4)
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                .channel(channel2).build();
 
         chatRepository.save(chat1);
         chatRepository.save(chat2);
@@ -116,14 +115,11 @@ class MessageRepositoryTest {
         chatRepository.save(chat4);
         chatRepository.save(chat5);
 
-
         // Message 생성
         Message msg1 = Message.builder().content("처음 뵙겠습니다.").senderId(testUser2.getId()).channel(channel2).build();
         Message msg2 = Message.builder().content("두번째 인데요.").senderId(testUser3.getId()).channel(channel2).build();
         messageRepository.save(msg1);
         messageRepository.save(msg2);
-
-
 
         // Chat - Message 연결
         ChatMessage chatMessage1 = ChatMessage.builder().message(msg1).isRead(false).chat(chat3).build();
@@ -133,7 +129,6 @@ class MessageRepositoryTest {
         ChatMessage chatMessage5 = ChatMessage.builder().message(msg2).isRead(true).chat(chat4).build();
         ChatMessage chatMessage6 = ChatMessage.builder().message(msg2).isRead(true).chat(chat5).build();
 
-
         chatMessageRepository.save(chatMessage1);
         chatMessageRepository.save(chatMessage2);
         chatMessageRepository.save(chatMessage3);
@@ -141,9 +136,8 @@ class MessageRepositoryTest {
         chatMessageRepository.save(chatMessage5);
         chatMessageRepository.save(chatMessage6);
 
-        chat3.updateLastMessage(msg2.getContent());
-        chat4.updateLastMessage(msg2.getContent());
-        chat5.updateLastMessage(msg2.getContent());
+        channel1.updateLastMessage(msg1.getContent());
+        channel2.updateLastMessage(msg2.getContent());
 
         em.flush();
     }

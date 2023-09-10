@@ -1,9 +1,9 @@
-package com.example.naejango.domain.storage.repository;
+package com.example.naejango.domain.item.repository;
 
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.dto.SearchItemsDto;
 import com.example.naejango.domain.storage.application.SearchingConditionDto;
-import com.example.naejango.domain.storage.dto.SearchStorageResultDto;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Repository;
 
@@ -11,19 +11,22 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
+/**
+ * 검색 쿼리를 동적으로 생성하기 위한 Repository 입니다.
+ */
 @Repository
-public class StorageJPQLRepositoryImpl implements StorageJPQLRepository {
+public class ItemJPQLRepositoryImpl implements ItemJPQLRepository {
 
     @PersistenceContext
     EntityManager em;
 
     @Override
-    public List<SearchStorageResultDto> searchStorageByConditions(Point center, int radius, int page, int size, SearchingConditionDto conditionDto) {
-        var query = em.createQuery(searchingQueryBuilder(conditionDto), SearchStorageResultDto.class);
+    public List<SearchItemsDto> findItemsByConditions(Point center, int radius, int page, int size, SearchingConditionDto conditionDto) {
+        var query = em.createQuery(searchingQueryBuilder(conditionDto), SearchItemsDto.class);
         query.setParameter("center", center);
         query.setParameter("radius", radius);
         if (conditionDto.getCat() != null) query.setParameter("cat", conditionDto.getCat());
-        if (conditionDto.getItemType() != null) query.setParameter("type", conditionDto.getItemType());
+        if (conditionDto.getItemType() != null) query.setParameter("itemType", conditionDto.getItemType());
         for (int i = 1; i <= conditionDto.getKeyword().length; i++) {
             query.setParameter("keyword" + i, conditionDto.getKeyword()[i - 1]);
         }
@@ -34,15 +37,15 @@ public class StorageJPQLRepositoryImpl implements StorageJPQLRepository {
     }
 
     private static String searchingQueryBuilder (SearchingConditionDto conditions) {
-        String SELECT = "SELECT NEW com.example.naejango.domain.storage.dto.SearchStorageResultDto";
-        String PROJECTION = "(st, ROUND(CAST(ST_DistanceSphere(:center, st.location) AS double)) AS distance) ";
+        String SELECT = "SELECT NEW com.example.naejango.domain.storage.dto.SearchItemsDto";
+        String PROJECTION = "(it, st, c, ROUND(CAST(ST_DistanceSphere(:center, st.location) AS double)) AS distance) ";
         String FROM = "FROM Storage st ";
-        String JOIN_ITEM = "JOIN st.itemStorages itst JOIN itst.item it ";
-        String JOIN_ITEM_CAT = "JOIN st.itemStorages itst JOIN itst.item it JOIN it.category c ";
+        String JOIN_ITEM_CAT = "JOIN st.items it JOIN it.category c ";
+        String JOIN_ITEM = "JOIN st.items it ";
         String WHERE_DISTANCE_CONDITION = "WHERE ST_DWithin(:center, st.location, :radius, FALSE) = TRUE ";
         String AND_CAT = "AND c = :cat ";
         String AND_KEYWORD = "AND it.name LIKE :keyword";
-        String AND_TYPE = "AND it.type = :type ";
+        String AND_TYPE = "AND it.itemType = :itemType ";
         String AND_STATUS = "AND it.status = :status ";
         String ORDER_DISTANCE = "ORDER BY distance ASC";
         Category cat = conditions.getCat();
@@ -51,17 +54,17 @@ public class StorageJPQLRepositoryImpl implements StorageJPQLRepository {
         Boolean status = conditions.getStatus();
 
         StringBuilder sb = new StringBuilder();
-
+        // SELECT
         sb.append(SELECT);
         sb.append(PROJECTION);
+        // FROM
         sb.append(FROM);
         // JOIN
         if(cat != null){
             sb.append(JOIN_ITEM_CAT);
-        } else if (type != null || keywords != null || status != null) {
+        } else if (!(type == null && keywords.length == 0 && status == null)) {
             sb.append(JOIN_ITEM);
         }
-
         // WHERE
         sb.append(WHERE_DISTANCE_CONDITION);
         if (cat != null) sb.append(AND_CAT);

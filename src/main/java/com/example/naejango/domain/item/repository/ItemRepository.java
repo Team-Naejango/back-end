@@ -1,20 +1,23 @@
 package com.example.naejango.domain.item.repository;
 
 import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.storage.dto.ItemInfoDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long> {
+public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepository {
 
-    @Query("SELECT NEW com.example.naejango.domain.storage.dto.ItemInfoDto(i.id, c.name, i.type, i.name, i.imgUrl, i.description) " +
-            "FROM Item i JOIN i.category c WHERE i.id IN (SELECT itst.item.id FROM ItemStorage itst WHERE itst.storage.id = :storageId) " +
-            "AND i.status = :status ORDER BY i.id DESC")
-    Page<ItemInfoDto> findByStorageId(@Param("storageId") Long storageId, @Param("status") Boolean status, Pageable pageable);
+    @EntityGraph(attributePaths = {"category"})
+    @Query("SELECT i FROM Item i WHERE i.storage.id = :storageId AND i.status = :status")
+    Page<Item> findItemWithCategoryByStorageIdAndStatus(@Param("storageId") Long storageId, @Param("status") boolean status, Pageable pageable);
 
+    @Query("DELETE FROM Item i WHERE i.storage.id = :storageId")
+    void deleteByStorageId(@Param("storageId") Long storageId);
+
+    Long findUserIdById(Long itemId);
 }

@@ -3,9 +3,14 @@ package com.example.naejango.domain.chat.config;
 import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RedisMessageListener implements MessageListener {
+public class ChatMessageListener implements MessageListener {
 
     private final RedisTemplate<String, WebSocketMessageDto> redisTemplate;
 
@@ -32,4 +37,20 @@ public class RedisMessageListener implements MessageListener {
         WebSocketMessageDto messageDto = (WebSocketMessageDto) redisTemplate.getValueSerializer().deserialize(message.getBody());
         messageSender.convertAndSend("/sub/channel/" + messageDto.getChannelId(), messageDto);
     }
+
+    /**
+     * RedisMessageListenerContainer 를 구성합니다.
+     * RedisMessageListenerContainer 는 Redis 의 Pub/Sub 을 관리하는 컨테이너로,
+     * 구독 대상이 되는 채널 (ChannelTopic 클래스) 과 해당 채널에 메세지가 발행되었을 때
+     * 이를 핸들링 하는 메서드(MessageListener) 를 등록해 줄 수 있습니다.
+     * @param redisConnectionFactory Redis 서버와의 연결 정보
+     */
+    @Bean
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
+        RedisMessageListenerContainer listenerContainer = new RedisMessageListenerContainer();
+        listenerContainer.setConnectionFactory(redisConnectionFactory);
+        listenerContainer.addMessageListener(new MessageListenerAdapter(this), new PatternTopic("chat"));
+        return listenerContainer;
+    }
+
 }

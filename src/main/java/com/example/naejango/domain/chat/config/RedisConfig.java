@@ -6,35 +6,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.PatternTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @RequiredArgsConstructor
 public class RedisConfig {
-    /**
-     * RedisMessageListenerContainer 를 구성합니다.
-     * RedisMessageListenerContainer 는 Redis 의 Pub/Sub 을 관리하는 컨테이너로,
-     * 구독 대상이 되는 채널 (ChannelTopic 클래스) 과 해당 채널에 메세지가 발행되었을 때
-     * 이를 핸들링 하는 메서드(MessageListener) 를 등록해 줄 수 있습니다.
-     * @param redisConnectionFactory Redis 서버와의 연결 정보
-     */
-    @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory,
-                                                                       MessageListenerAdapter listenerAdapter) {
-        RedisMessageListenerContainer listenerContainer = new RedisMessageListenerContainer();
-        listenerContainer.setConnectionFactory(redisConnectionFactory);
-        listenerContainer.addMessageListener(listenerAdapter, new PatternTopic("chat"));
-        return listenerContainer;
-    }
-
-    @Bean
-    MessageListenerAdapter listenerAdapter(RedisMessageListener listener) {
-        return new MessageListenerAdapter(listener);
-    }
 
     /**
      * RedisTemplate 를 등록합니다.

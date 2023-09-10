@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,7 +24,7 @@ public class CreateItemRequestDto {
 
     private String category;
 
-    private List<Long> storageIdList;
+    private Long storageId;
 
     public Item toEntity(User user, Category category) {
         return Item.builder()
@@ -34,7 +32,7 @@ public class CreateItemRequestDto {
                 .name(name)
                 .description(description)
                 .imgUrl(imgUrl)
-                .type(type)
+                .itemType(type)
                 .viewCount(0)
                 .status(true)
                 .user(user)

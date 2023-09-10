@@ -15,5 +15,5 @@ public class FindGroupChannelNearbyResponseDto {
     private String message;
     private Coord center;
     private int radius;
-    private List<GroupChannelDto> groupChannelsNearby;
+    private List<GroupChannelDto> result;
 }

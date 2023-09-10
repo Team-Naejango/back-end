@@ -45,16 +45,18 @@ public class ChatController {
     public ResponseEntity<JoinGroupChatResponseDto> joinGroupChat(@PathVariable("channelId") Long channelId,
                                                                   Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        Optional<Long> groupChatOpt = chatRepository.findGroupChat(channelId, userId);
+        Optional<Chat> groupChatOpt = chatRepository.findChatByChannelIdAndOwnerId(channelId, userId);
 
+        // 이미 참여중인 그룹 채널인지 확인 합니다.
         if (groupChatOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new JoinGroupChatResponseDto(channelId, groupChatOpt.get(), "이미 참여중인 채널입니다."));
+                    .body(new JoinGroupChatResponseDto(channelId, groupChatOpt.get().getId(), "이미 참여중인 채널입니다."));
         }
 
         // 정원 초과 로직
         if(channelService.isFull(channelId)) throw new CustomException(ErrorCode.CHANNEL_IS_FULL);
 
+        // 그룹 채널에 입장합니다.
         Long chatId = chatService.joinGroupChat(channelId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(new JoinGroupChatResponseDto(channelId, chatId, "그룹 채팅이 시작되었습니다."));
 
@@ -76,7 +78,7 @@ public class ChatController {
     }
 
     /**
-     * 내가 참여하고 있는 chatroom 목록을 가장 최근 대화한 순으로 조회합니다.
+     * 나의 chat 목록을 가장 최근 대화한 순으로 조회합니다.
      * @param page 요청 페이지
      * @param size 요청 결과 개수
      * @return 요청 유저 id(ownerId),
@@ -123,7 +125,13 @@ public class ChatController {
     public ResponseEntity<DeleteChatResponseDto> deleteChat(@PathVariable("chatId") Long chatId,
                                                             Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        chatService.deleteChat(userId, chatId);
+        // 보안 검증
+        chatRepository.findById(chatId).stream().filter(chat -> chat.getOwner().getId().equals(userId)).findAny()
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
+
+        // Chat 삭제
+        chatService.deleteChat(chatId);
+
         var responseDto = new DeleteChatResponseDto(chatId, "해당 채팅방을 종료했습니다.");
         return ResponseEntity.ok().body(responseDto);
     }

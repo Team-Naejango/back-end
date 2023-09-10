@@ -11,15 +11,15 @@ import lombok.*;
 public class GroupChannelDto {
     private Long channelId;
     private Long ownerId;
-    private Long storageId;
+    private Long itemId;
     private int participantsCount;
     private String defaultTitle;
-    private int channelLimit; // 방 정원 : 기능 추가 예정
+    private int channelLimit;
 
     public GroupChannelDto(GroupChannel channel) {
         this.channelId = channel.getId();
-        this.ownerId = channel.getOwnerId();
-        this.storageId = channel.getStorageId();
+        this.ownerId = channel.getOwner().getId();
+        this.itemId = channel.getItem().getId();
         this.participantsCount = channel.getParticipantsCount();
         this.defaultTitle = channel.getDefaultTitle();
         this.channelLimit = channel.getChannelLimit();

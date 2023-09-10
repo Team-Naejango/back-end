@@ -1,7 +1,8 @@
 package com.example.naejango.domain.chat.dto;
 
-import com.example.naejango.domain.chat.domain.Chat;
+import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.ChannelType;
+import com.example.naejango.domain.chat.domain.Chat;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,20 +15,20 @@ import java.time.LocalDateTime;
 public class ChatInfoDto {
     private Long channelId;
     private Long chatId;
-    private ChannelType chatType;
+    private ChannelType channelType;
     private String title;
-    private String lastMessage;
     private long unreadCount;
+    private String lastMessage;
     private LocalDateTime lastChatAt;
 
-    public ChatInfoDto(Chat chat, long unreadCount) {
+    public ChatInfoDto(Chat chat, Channel channel, long unreadCount) {
+        this.channelId = chat.getChannel().getId();
         this.chatId = chat.getId();
-        this.channelId = chat.getChannelId();
-        this.chatType = chat.getChatType();
+        this.channelType = chat.getChannel().getChannelType();
         this.title = chat.getTitle();
-        this.lastMessage = chat.getLastMessage();
         this.unreadCount = unreadCount;
-        this.lastChatAt = LocalDateTime.now();
+        this.lastMessage = channel.getLastMessage();
+        this.lastChatAt = channel.getLastModifiedDate();
     }
 
 }

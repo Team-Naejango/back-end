@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class FindChannelParticipantsResponseDto {
+public class findParticipantsResponseDto {
     private String message;
     private int participantsCount;
     private List<ParticipantInfoDto> result;

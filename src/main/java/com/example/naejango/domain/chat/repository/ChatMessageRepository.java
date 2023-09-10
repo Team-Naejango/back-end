@@ -13,6 +13,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Modifying
     void deleteChatMessageByChatId(Long chatId);
 
+    boolean existsByChatId(Long chatId);
+
     @Modifying
     @Query("UPDATE ChatMessage cm SET cm.isRead = true WHERE cm.chat.id = :chatId")
     void readMessage(@Param("chatId") Long chatId);
