@@ -221,7 +221,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                             .queryParam("size", "10")
                             .queryParam("cat", "1")
                             .queryParam("keyword", "유니클로 청바지")
-                            .queryParam("type", "BUY")
+                            .queryParam("type", "INDIVIDUAL_BUY")
                             .queryParam("status", "true")
                     .characterEncoding(StandardCharsets.UTF_8)
                     .header("Authorization", "엑세스 토큰")
