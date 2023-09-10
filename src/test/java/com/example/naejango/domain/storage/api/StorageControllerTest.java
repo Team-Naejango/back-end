@@ -205,7 +205,7 @@ class StorageControllerTest extends RestDocsSupportTest {
             SearchStorageResultDto result2 = new SearchStorageResultDto(testStorage2, 200);
 
 
-            SearchingConditionDto conditions = new SearchingConditionDto(cat1, new String[]{"%유니클로%", "%청바지%"}, ItemType.BUY, true);
+            SearchingConditionDto conditions = new SearchingConditionDto(cat1, new String[]{"%유니클로%", "%청바지%"}, ItemType.INDIVIDUAL_BUY, true);
             BDDMockito.given(geomUtilMock.createPoint(127.02, 37.49)).willReturn(center);
             BDDMockito.given(categoryRepositoryMock.findById(1)).willReturn(Optional.of(cat1));
             BDDMockito.given(storageRepositoryMock.searchStorageByConditions(center, rad, page, size, conditions))
@@ -249,7 +249,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                                     parameterWithName("size").description("사이즈"),
                                     parameterWithName("cat").description("카테고리ID"),
                                     parameterWithName("keyword").description("검색 키워드(2~10자)"),
-                                    parameterWithName("type").description("BUY/SELL"),
+                                    parameterWithName("type").description("INDIVIDUAL_BUY/INDIVIDUAL_SELL/GROUP_BUY"),
                                     parameterWithName("status").description("상태 (true/false)"),
                                     parameterWithName("_csrf").ignored()
                             ).responseFields(
@@ -293,11 +293,11 @@ class StorageControllerTest extends RestDocsSupportTest {
     void findItems() throws Exception {
         // given
         Storage storage = Storage.builder().id(1L).name("테스트 창고").build();
-        Item item1 = Item.builder().id(2L).status(true).type(ItemType.BUY).name("item1").imgUrl("imgUrl").description("아이템 설명").build();
-        Item item2 = Item.builder().id(3L).status(true).type(ItemType.SELL).name("item2").imgUrl("imgUrl").description("아이템 설명").build();
-        Item item3 = Item.builder().id(4L).status(false).type(ItemType.BUY).name("item3").imgUrl("imgUrl").description("아이템 설명").build();
-        Item item4 = Item.builder().id(5L).status(true).type(ItemType.SELL).name("item4").imgUrl("imgUrl").description("아이템 설명").build();
-        Item item5 = Item.builder().id(6L).status(true).type(ItemType.SELL).name("item5").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item1 = Item.builder().id(2L).status(true).type(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item2 = Item.builder().id(3L).status(true).type(ItemType.INDIVIDUAL_SELL).name("item2").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item3 = Item.builder().id(4L).status(false).type(ItemType.INDIVIDUAL_BUY).name("item3").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item4 = Item.builder().id(5L).status(true).type(ItemType.INDIVIDUAL_SELL).name("item4").imgUrl("imgUrl").description("아이템 설명").build();
+        Item item5 = Item.builder().id(6L).status(true).type(ItemType.INDIVIDUAL_SELL).name("item5").imgUrl("imgUrl").description("아이템 설명").build();
         Category category = Category.builder().id(7).name("생필품").build();
         List<Item> itemList = List.of(item1, item2, item3, item4, item5);
         List<ItemInfoDto> ItemInfoList = itemList.stream().filter(Item::getStatus)
@@ -343,8 +343,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                                         fieldWithPath("userId").description("창고의 유저 ID"),
                                         fieldWithPath("itemList[].itemId").description("아이템 id"),
                                         fieldWithPath("itemList[].category").description("아이템 카테고리"),
-                                        fieldWithPath("itemList[].type").description("아이템 타입(BUY / SELL)"),
-                                        fieldWithPath("itemList[].dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
+                                        fieldWithPath("itemList[].type").description("아이템 타입(INDIVIDUAL_BUY/INDIVIDUAL_SELL/GROUP_BUY)"),
                                         fieldWithPath("itemList[].name").description("아이템 제목"),
                                         fieldWithPath("itemList[].imgUrl").description("아이템 이미지 링크"),
                                         fieldWithPath("itemList[].description").description("아이템 설명")

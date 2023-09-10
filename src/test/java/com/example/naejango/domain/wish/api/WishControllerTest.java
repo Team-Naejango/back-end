@@ -3,7 +3,6 @@ package com.example.naejango.domain.wish.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.config.RestDocsSupportTest;
-import com.example.naejango.domain.item.domain.ItemDealType;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.wish.application.WishService;
 import com.example.naejango.domain.wish.dto.response.FindWishResponseDto;
@@ -44,8 +43,8 @@ class WishControllerTest extends RestDocsSupportTest {
         Long userId;
         List<FindWishResponseDto> findWishResponseDtoList =
                 new ArrayList<>(List.of(
-                        new FindWishResponseDto(1L, "아이템1 이름", "아이템1 설명", "이미지1 Url", ItemType.BUY, ItemDealType.INDIVIDUAL, "카테고리"),
-                        new FindWishResponseDto(2L, "아이템2 이름", "아이템2 설명", "이미지2 Url", ItemType.BUY, ItemDealType.INDIVIDUAL, "카테고리")
+                        new FindWishResponseDto(1L, "아이템1 이름", "아이템1 설명", "이미지1 Url", ItemType.INDIVIDUAL_BUY, "카테고리"),
+                        new FindWishResponseDto(2L, "아이템2 이름", "아이템2 설명", "이미지2 Url", ItemType.INDIVIDUAL_BUY, "카테고리")
                 ));
 
         @Test
@@ -81,7 +80,6 @@ class WishControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("[].description").description("아이템 설명"),
                                             fieldWithPath("[].imgUrl").description("이미지 URL"),
                                             fieldWithPath("[].type").description("아이템 타입"),
-                                            fieldWithPath("[].dealType").description("아이템 거래 타입 (INDIVIDUAL or GROUP"),
                                             fieldWithPath("[].category").description("카테고리")
                                     )
                                     .responseSchema(Schema.schema("관심 목록 조회 Response"))

@@ -1,7 +1,6 @@
 package com.example.naejango.domain.item.repository;
 
 import com.example.naejango.domain.item.domain.Item;
-import com.example.naejango.domain.item.domain.ItemDealType;
 import com.example.naejango.domain.item.domain.ItemStorage;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.storage.domain.Storage;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -40,8 +40,8 @@ class ItemStorageRepositoryTest {
         // given
         Storage storage1 = Storage.builder().name("test1").description("").address("").imgUrl("").location(geomUtil.createPoint(1, 1)).build();
         Storage storage2 = Storage.builder().name("test2").description("").address("").imgUrl("").location(geomUtil.createPoint(1, 1)).build();
-        Item item1 = Item.builder().status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).name("item1").imgUrl("").viewCount(0).description("").build();
-        Item item2 = Item.builder().status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).name("item1").imgUrl("").viewCount(0).description("").build();
+        Item item1 = Item.builder().status(true).type(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("").viewCount(0).description("").build();
+        Item item2 = Item.builder().status(true).type(ItemType.INDIVIDUAL_SELL).name("item1").imgUrl("").viewCount(0).description("").build();
         storageRepository.save(storage1);
         storageRepository.save(storage2);
         itemRepository.save(item1);

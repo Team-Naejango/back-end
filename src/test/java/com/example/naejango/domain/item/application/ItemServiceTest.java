@@ -67,7 +67,7 @@ class ItemServiceTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .type(ItemType.SELL)
+                        .type(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
                         .storageIdList(new ArrayList<>(List.of(1L, 2L)))
                         .build();

@@ -142,12 +142,12 @@ class StorageRepositoryTest {
             Category cat2 = categoryRepository.findByName("디지털기기");
             Category cat3 = categoryRepository.findByName("생필품");
 
-            Item item1 = Item.builder().name("청바지").status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item2 = Item.builder().name("자켓").status(true).type(ItemType.SELL).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item3 = Item.builder().name("셔츠").status(false).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item4 = Item.builder().name("면바지").status(false).type(ItemType.SELL).dealType(ItemDealType.INDIVIDUAL).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item5 = Item.builder().name("모니터").status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat2).description("").imgUrl("").viewCount(0).build();
-            Item item6 = Item.builder().name("휴지").status(true).type(ItemType.BUY).dealType(ItemDealType.INDIVIDUAL).category(cat3).description("").imgUrl("").viewCount(0).build();
+            Item item1 = Item.builder().name("청바지").status(true).type(ItemType.INDIVIDUAL_BUY).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item2 = Item.builder().name("자켓").status(true).type(ItemType.INDIVIDUAL_SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item3 = Item.builder().name("셔츠").status(false).type(ItemType.INDIVIDUAL_BUY).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item4 = Item.builder().name("면바지").status(false).type(ItemType.INDIVIDUAL_SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item5 = Item.builder().name("모니터").status(true).type(ItemType.INDIVIDUAL_BUY).category(cat2).description("").imgUrl("").viewCount(0).build();
+            Item item6 = Item.builder().name("휴지").status(true).type(ItemType.INDIVIDUAL_BUY).category(cat3).description("").imgUrl("").viewCount(0).build();
 
             itemRepository.save(item1);
             itemRepository.save(item2);
@@ -223,7 +223,7 @@ class StorageRepositoryTest {
         void test4() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
-            SearchingConditionDto conditions = new SearchingConditionDto(null, new String[]{}, ItemType.BUY, true);
+            SearchingConditionDto conditions = new SearchingConditionDto(null, new String[]{}, ItemType.INDIVIDUAL_BUY, true);
 
             // when
             List<SearchStorageResultDto> searchStorageResultDtos = storageRepository.searchStorageByConditions(center, 1000, 0, 5, conditions);
@@ -239,7 +239,7 @@ class StorageRepositoryTest {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
             Category cat1 = categoryRepository.findByName("의류");
-            SearchingConditionDto conditions = new SearchingConditionDto(cat1, new String[]{"%청바지%"}, ItemType.BUY, true);
+            SearchingConditionDto conditions = new SearchingConditionDto(cat1, new String[]{"%청바지%"}, ItemType.INDIVIDUAL_BUY, true);
 
             // when
             List<SearchStorageResultDto> searchStorageResultDtos = storageRepository.searchStorageByConditions(center, 1000, 0, 5, conditions);
