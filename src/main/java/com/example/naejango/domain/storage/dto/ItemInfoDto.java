@@ -12,15 +12,15 @@ import lombok.*;
 public class ItemInfoDto {
     private Long itemId;
     private String category;
-    private ItemType type;
+    private ItemType itemType;
     private String name;
     private String imgUrl;
     private String description;
 
-    public ItemInfoDto(Item item, String category) {
+    public ItemInfoDto(Item item) {
         this.itemId = item.getId();
-        this.category = category;
-        this.type = item.getType();
+        this.category = item.getCategory().getName();
+        this.itemType = item.getItemType();
         this.name = item.getName();
         this.imgUrl = item.getImgUrl();
         this.description = item.getDescription();

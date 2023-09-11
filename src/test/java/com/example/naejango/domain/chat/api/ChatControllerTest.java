@@ -4,10 +4,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.chat.application.ChannelService;
 import com.example.naejango.domain.chat.application.ChatService;
-import com.example.naejango.domain.chat.domain.Channel;
-import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.ChannelType;
-import com.example.naejango.domain.chat.domain.GroupChannel;
+import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.request.ChangeChatTitleRequestDto;
 import com.example.naejango.domain.chat.dto.request.DeleteChatResponseDto;
@@ -74,9 +71,8 @@ class ChatControllerTest extends RestDocsSupportTest {
 
         Chat chat = Chat.builder()
                 .id(3L)
-                .chatType(ChannelType.GROUP)
-                .channelId(channel.getId())
-                .ownerId(user.getId())
+                .channel(channel)
+                .owner(user)
                 .build();
 
         @Test
@@ -84,7 +80,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
-            BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.of(chat.getId()));
+            BDDMockito.given(chatRepositoryMock.findChatByChannelIdAndOwnerId(channel.getId(), user.getId())).willReturn(Optional.of(chat));
             BDDMockito.given(channelServiceMock.isFull(channel.getId())).willReturn(false);
 
             // when
@@ -96,7 +92,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
+            verify(chatRepositoryMock, times(1)).findChatByChannelIdAndOwnerId(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isConflict());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
@@ -110,7 +106,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         void test2() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
-            BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.empty());
+            BDDMockito.given(chatRepositoryMock.findChatByChannelIdAndOwnerId(channel.getId(), user.getId())).willReturn(Optional.empty());
             BDDMockito.given(channelServiceMock.isFull(channel.getId())).willReturn(true);
 
             // when
@@ -122,7 +118,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
+            verify(chatRepositoryMock, times(1)).findChatByChannelIdAndOwnerId(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isConflict());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(ErrorResponse.toResponseEntity(ErrorCode.CHANNEL_IS_FULL).getBody())));
@@ -134,7 +130,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         void test3() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
-            BDDMockito.given(chatRepositoryMock.findGroupChat(channel.getId(), user.getId())).willReturn(Optional.empty());
+            BDDMockito.given(chatRepositoryMock.findChatByChannelIdAndOwnerId(channel.getId(), user.getId())).willReturn(Optional.empty());
             BDDMockito.given(channelServiceMock.isFull(channel.getId())).willReturn(false);
             BDDMockito.given(chatServiceMock.joinGroupChat(channel.getId(), user.getId())).willReturn(chat.getId());
 
@@ -147,7 +143,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatRepositoryMock, times(1)).findGroupChat(channel.getId(), user.getId());
+            verify(chatRepositoryMock, times(1)).findChatByChannelIdAndOwnerId(channel.getId(), user.getId());
             verify(chatServiceMock, times(1)).joinGroupChat(channel.getId(), user.getId());
             
             resultActions.andExpect(status().isCreated());
@@ -198,9 +194,7 @@ class ChatControllerTest extends RestDocsSupportTest {
         Chat chat = Chat.builder()
                 .id(3L)
                 .title(channel.getDefaultTitle())
-                .ownerId(user.getId())
-                .channelId(channel.getId())
-                .chatType(ChannelType.GROUP)
+                .owner(user)
                 .build();
 
 
@@ -271,16 +265,29 @@ class ChatControllerTest extends RestDocsSupportTest {
     class myChatList {
         User user = User.builder().id(1L).role(Role.USER).userKey("test_me").password("").build();
 
-        Chat chat1 = Chat.builder().id(2L).title("책상점").channelId(5L)
-                .lastMessage("안녕하세요").ownerId(user.getId()).chatType(ChannelType.PRIVATE).build();
-        Chat chat2 = Chat.builder().id(3L).title("장터").channelId(6L)
-                .lastMessage("물티슈팔아요").ownerId(user.getId()).chatType(ChannelType.GROUP).build();
-        Chat chat3 = Chat.builder().id(4L).title("공동구매방").channelId(7L)
-                .lastMessage("싸네요").ownerId(user.getId()).chatType(ChannelType.GROUP).build();
+        Channel channel1 = GroupChannel.builder()
+                .id(2L)
+                .defaultTitle("공동구매")
+                .channelType(ChannelType.GROUP)
+                .build();
 
-        ChatInfoDto chatInfo1 = new ChatInfoDto(chat1, 1);
-        ChatInfoDto chatInfo2 = new ChatInfoDto(chat2, 2);
-        ChatInfoDto chatInfo3 = new ChatInfoDto(chat3,3);
+        Channel channel2 = PrivateChannel.builder()
+                .id(3L)
+                .channelType(ChannelType.PRIVATE)
+                .build();
+
+        Channel channel3 = PrivateChannel.builder()
+                .id(4L)
+                .channelType(ChannelType.PRIVATE)
+                .build();
+
+        Chat chat1 = Chat.builder().id(3L).title("자바의정석").channel(channel2).owner(user).build();
+        Chat chat2 = Chat.builder().id(4L).title("책공구").channel(channel1).owner(user).build();
+        Chat chat3 = Chat.builder().id(5L).title("스프링").channel(channel3).owner(user).build();
+
+        ChatInfoDto chatInfo1 = new ChatInfoDto(chat1, channel2, 1);
+        ChatInfoDto chatInfo2 = new ChatInfoDto(chat2, channel1, 2);
+        ChatInfoDto chatInfo3 = new ChatInfoDto(chat3, channel3, 3);
         @Test
         @Tag("api")
         @DisplayName("채팅방 조회 성공")
@@ -309,9 +316,9 @@ class ChatControllerTest extends RestDocsSupportTest {
                     .andExpect(MockMvcResultMatchers.jsonPath("page").value(0))
                     .andExpect(MockMvcResultMatchers.jsonPath("size").value(10))
                     .andExpect(MockMvcResultMatchers.jsonPath("hasNext").value(false))
-                    .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[0].chatId").value(4L))
-                    .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[1].chatId").value(3L))
-                    .andExpect( MockMvcResultMatchers.jsonPath("chatInfoList[2].chatId").value(2L));
+                    .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[0].chatId").value(5L))
+                    .andExpect(MockMvcResultMatchers.jsonPath("chatInfoList[1].chatId").value(4L))
+                    .andExpect( MockMvcResultMatchers.jsonPath("chatInfoList[2].chatId").value(3L));
 
             // restDocs
             resultActions.andDo(
@@ -328,7 +335,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                                                     fieldWithPath("chatInfoList[].chatId").description("채팅 Id"),
                                                     fieldWithPath("chatInfoList[].channelId").description("채널 Id"),
                                                     fieldWithPath("chatInfoList[].title").description("제목"),
-                                                    fieldWithPath("chatInfoList[].chatType").description("채팅 타입(개인, 그룹)"),
+                                                    fieldWithPath("chatInfoList[].channelType").description("채널 타입(개인, 그룹)"),
                                                     fieldWithPath("chatInfoList[].lastMessage").description("마지막 대화 내용"),
                                                     fieldWithPath("chatInfoList[].unreadCount").description("안읽은 메세지 수"),
                                                     fieldWithPath("chatInfoList[].lastChatAt").description("마지막 대화 시각")
@@ -405,6 +412,7 @@ class ChatControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
+    @DisplayName("채팅 종료, Chat 삭제")
     class deleteChat {
         User user = User.builder()
                 .id(1L)
@@ -412,6 +420,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
         Chat chat = Chat.builder()
                 .id(2L)
+                .owner(user)
                 .title("변경 전 제목")
                 .build();
         @Test
@@ -421,6 +430,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             // given
             DeleteChatResponseDto responseDto = DeleteChatResponseDto.builder().chatId(chat.getId()).message("해당 채팅방을 종료했습니다.").build();
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
+            BDDMockito.given(chatRepositoryMock.findById(chat.getId())).willReturn(Optional.of(chat));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -431,7 +441,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatServiceMock, times(1)).deleteChat(user.getId(), chat.getId());
+            verify(chatServiceMock, times(1)).deleteChat(chat.getId());
 
             resultActions.andExpect(status().isOk());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(responseDto)));
@@ -443,7 +453,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                                     .tag("채팅")
                                     .summary("채팅방을 종료합니다.")
                                     .description("채팅방을 종료합니다.\n\n" +
-                                            "일대일 채팅의 경우, Chat 과 연관된 ChatMessage 가 삭제 됩니다.\n\n" +
+                                            "일대일 채팅의 경우, Chat은 삭제되지 않고 연관된 ChatMessage 가 삭제됩니다.\n\n" +
                                             "그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제됩니다.\n\n" +
                                             "Channel 과 연관된 ChatMessage 가 없으면 채널에 아무도 남지 않았다고 판단합니다.\n\n" +
                                             "채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.\n\n")

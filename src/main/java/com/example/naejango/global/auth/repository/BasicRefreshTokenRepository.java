@@ -1,7 +1,7 @@
 package com.example.naejango.global.auth.repository;
 
 import com.example.naejango.domain.user.domain.User;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Primary
+@ConditionalOnProperty(name = "redis-config.refresh-token", havingValue = "false")
 public interface BasicRefreshTokenRepository extends RefreshTokenRepository, JpaRepository<User, Long> {
     @Override
     @Modifying

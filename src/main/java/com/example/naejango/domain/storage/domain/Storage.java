@@ -1,7 +1,7 @@
 package com.example.naejango.domain.storage.domain;
 
 import com.example.naejango.domain.common.TimeAuditingEntity;
-import com.example.naejango.domain.item.domain.ItemStorage;
+import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.user.domain.User;
 import lombok.*;
@@ -20,7 +20,6 @@ import java.util.List;
 @Getter
 @Table(name = "storage")
 public class Storage extends TimeAuditingEntity implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "storage_id")
@@ -41,12 +40,12 @@ public class Storage extends TimeAuditingEntity implements Serializable {
     @Column(columnDefinition = "Geometry(Point, 4326)", nullable = false)
     private Point location;
 
+    @OneToMany(mappedBy = "storage")
+    private List<Item> items = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @OneToMany(mappedBy = "storage")
-    List<ItemStorage> itemStorages = new ArrayList<>();
 
     public void modify(ModifyStorageInfoRequestDto requestDto) {
         this.description = requestDto.getDescription();

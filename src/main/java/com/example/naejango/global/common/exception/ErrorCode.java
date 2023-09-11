@@ -6,8 +6,8 @@ public enum ErrorCode {
     /** 400 BAD_REQUEST : 잘못된 요청 */
     FORGED_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     ALREADY_LOGGED_IN(HttpStatus.BAD_REQUEST, "이미 로그인 된 회원입니다."),
-    STORAGE_NOT_EXIST(HttpStatus.BAD_REQUEST, "창고가 등록되어있지 않습니다."),
     UNIDENTIFIED_DESTINATION(HttpStatus.BAD_REQUEST, "채널 지정이 잘못되었습니다."),
+    CANNOT_GENERATE_GROUP_CHANNEL(HttpStatus.BAD_REQUEST, "그룹 채널을 생성할 수 없습니다."),
     TRANSACTION_NOT_MODIFICATION(HttpStatus.BAD_REQUEST, "수정 할 수 없는 거래입니다."),
     TRANSACTION_NOT_DELETE(HttpStatus.BAD_REQUEST, "삭제 할 수 없는 거래입니다."),
     REISSUE_TOKEN_FAILURE(HttpStatus.BAD_REQUEST, "토큰 발급에 실패했습니다."),
@@ -34,7 +34,7 @@ public enum ErrorCode {
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
     USERPROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 프로필을 찾을 수 없습니다."),
     CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Chat 을 찾을 수 없습니다."),
-    CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 창고의 채널을 찾을 수 없습니다."),
+    CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "채널을 찾을 수 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 User 를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Category를 찾을 수 없습니다."),
     STORAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Storage를 찾을 수 없습니다."),
@@ -46,7 +46,7 @@ public enum ErrorCode {
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 진행중인 채팅이 있습니다."),
     CHANNEL_IS_FULL(HttpStatus.CONFLICT, "해당 채널의 정원이 가득 찼습니다."),
-    GROUP_CHANNEL_ALREADY_EXIST(HttpStatus.CONFLICT, "해당 창고에 할당된 그룹 채널이 이미 있습니다."),
+    GROUP_CHANNEL_ALREADY_EXIST(HttpStatus.CONFLICT, "해당 아이템에 할당된 그룹 채널이 이미 있습니다."),
     TOKEN_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 리프레시 토큰을 가지고 있습니다. 엑세스 토큰을 재발급 합니다."),
     WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다."),
     FOLLOW_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 팔로우 등록 되어있습니다.")

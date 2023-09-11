@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class PrivateChatDto {
+public class ChannelAndChatDto {
     private Long channelId;
     private Long chatId;
 }

@@ -6,9 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ public class ValidationResponse {
     private String error;
     private List<ValidationError> exceptions;
 
-    public static ResponseEntity<ValidationResponse> toResponseEntity (MethodArgumentNotValidException e) {
+    public static ResponseEntity<ValidationResponse> toResponseEntity (BindException e) {
         ValidationResponse response = ValidationResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.name())

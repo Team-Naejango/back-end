@@ -1,7 +1,6 @@
 package com.example.naejango.domain.chat.repository;
 
 import com.example.naejango.domain.chat.domain.*;
-import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
@@ -12,7 +11,6 @@ import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @EnableJpaAuditing
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DisplayName("ChannelRepository")
 class ChannelRepositoryTest {
     @Autowired
     ChatRepository chatRepository;
@@ -76,7 +74,7 @@ class ChannelRepositoryTest {
         testUser1.setUserProfile(userProfile1);
         testUser2.setUserProfile(userProfile2);
         testUser3.setUserProfile(userProfile3);
-        testUser3.setUserProfile(userProfile4);
+        testUser4.setUserProfile(userProfile4);
 
         // 채팅 채널 생성
         PrivateChannel channel1 = PrivateChannel.builder().build();
@@ -84,7 +82,7 @@ class ChannelRepositoryTest {
                 .channelType(ChannelType.GROUP)
                 .channelLimit(5)
                 .defaultTitle("기본 설정 방제")
-                .ownerId(testUser2.getId())
+                .owner(testUser2)
                 .build();
 
         channelRepository.save(channel1);
@@ -93,25 +91,25 @@ class ChannelRepositoryTest {
         // 채팅 생성
         // 채팅 채널 1 = chat1, chat2
         // 채팅 채널 2 = chat3, chat4, chat5
-        Chat chat1 = Chat.builder().ownerId(testUser1.getId())
+        Chat chat1 = Chat.builder().owner(testUser1)
                 .title(testUser2.getUserProfile().getNickname())
-                .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
+                .channel(channel1).build();
 
-        Chat chat2 = Chat.builder().ownerId(testUser2.getId())
+        Chat chat2 = Chat.builder().owner(testUser2)
                 .title(testUser1.getUserProfile().getNickname())
-                .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
+                .channel(channel1).build();
 
-        Chat chat3 = Chat.builder().ownerId(testUser2.getId())
+        Chat chat3 = Chat.builder().owner(testUser2)
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                .channel(channel2).build();
 
-        Chat chat4 = Chat.builder().ownerId(testUser3.getId())
+        Chat chat4 = Chat.builder().owner(testUser3)
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                .channel(channel2).build();
 
-        Chat chat5 = Chat.builder().ownerId(testUser4.getId())
+        Chat chat5 = Chat.builder().owner(testUser4)
                 .title(channel2.getDefaultTitle())
-                .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                .channel(channel2).build();
 
         chatRepository.save(chat1);
         chatRepository.save(chat2);
@@ -140,32 +138,26 @@ class ChannelRepositoryTest {
         chatMessageRepository.save(chatMessage4);
         chatMessageRepository.save(chatMessage5);
 
-        chat1.updateLastMessage(msg1.getContent());
-        chat2.updateLastMessage(msg1.getContent());
-        chat3.updateLastMessage(msg2.getContent());
-        chat4.updateLastMessage(msg2.getContent());
-        chat5.updateLastMessage(msg2.getContent());
+        // channel 의 lastMessage 변경
+        channel1.updateLastMessage(msg1.getContent());
+        channel2.updateLastMessage(msg2.getContent());
 
         em.flush();
     }
 
-    @Nested
-    class findParticipantsByChannelId {
-        @Test
-        @DisplayName("조회 성공")
-        void test1(){
-            // given
-            User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel channel = channelRepository.findGroupChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+    @Test
+    @DisplayName("채널 참여자 조회")
+    void findParticipantsByChannelId(){
+        // given
+        User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Channel channel = channelRepository.findGroupChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
-            // when
-            List<ParticipantInfoDto> result = channelRepository.findParticipantsByChannelId(channel.getId());
+        // when
+        List<User> participants = channelRepository.findParticipantsByChannelId(channel.getId());
+        System.out.println("participants = " + participants);
 
-            // then
-            assertEquals(3, result.size());
-        }
+        // then
+        assertEquals(3, participants.size());
     }
-
-
 
 }

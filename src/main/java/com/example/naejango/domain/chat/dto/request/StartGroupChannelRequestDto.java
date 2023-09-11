@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class StartGroupChannelRequestDto {
-    private Long storageId;
+    private Long itemId;
     private String defaultTitle;
     private int limit;
 }

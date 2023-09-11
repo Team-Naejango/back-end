@@ -13,4 +13,5 @@ public @interface EnumConstraint {
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
     Class<? extends Enum<?>> enumClass();
+    String defaultValue() default "";
 }

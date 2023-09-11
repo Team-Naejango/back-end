@@ -1,16 +1,19 @@
 package com.example.naejango.global.config;
 
 import com.example.naejango.domain.chat.domain.*;
-import com.example.naejango.domain.chat.repository.*;
-import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.storage.repository.StorageRepository;
+import com.example.naejango.domain.chat.repository.ChannelRepository;
+import com.example.naejango.domain.chat.repository.ChatMessageRepository;
+import com.example.naejango.domain.chat.repository.ChatRepository;
+import com.example.naejango.domain.chat.repository.MessageRepository;
+import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -28,8 +31,7 @@ import javax.persistence.PersistenceContext;
 public class TestDBInitializer implements ApplicationRunner {
 
     private final UserRepository userRepository;
-    private final GeomUtil geomUtil;
-    private final StorageRepository storageRepository;
+    private final ItemRepository itemRepository;
     private final UserProfileRepository userProfileRepository;
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
@@ -73,20 +75,22 @@ public class TestDBInitializer implements ApplicationRunner {
             testUser3.setUserProfile(userProfile3);
             testUser3.setUserProfile(userProfile4);
 
-            // 창고 1개 생성
-            Storage storage = Storage.builder()
-                    .location(geomUtil.createPoint(127.02, 37.49))
-                    .address("주소")
-                    .name("창고")
-                    .build();
+            // 아이템 1개 생성
+            Item testItem = Item.builder()
+                    .name("테스트 아이템")
+                    .itemType(ItemType.INDIVIDUAL_BUY)
+                    .viewCount(0)
+                    .imgUrl("")
+                    .status(true)
+                    .description("").build();
 
-            storageRepository.save(storage);
+            itemRepository.save(testItem);
 
             // 채팅 채널 생성
             PrivateChannel channel1 = new PrivateChannel();
             GroupChannel channel2 = GroupChannel.builder()
-                    .ownerId(testUser2.getId())
-                    .storageId(storage.getId())
+                    .owner(em.getReference(User.class, testUser2.getId()))
+                    .item(em.getReference(Item.class, testItem.getId()))
                     .channelLimit(5)
                     .defaultTitle("공동 구매")
                     .build();
@@ -98,32 +102,31 @@ public class TestDBInitializer implements ApplicationRunner {
             // 채팅 생성
             // 채팅 채널 1 = chat1, chat2
             // 채팅 채널 2 = chat3, chat4, chat5
-            Chat chat1 = Chat.builder().ownerId(testUser1.getId())
+            Chat chat1 = Chat.builder().owner(testUser1)
                     .title(testUser2.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
+                    .channel(channel1).build();
 
-            Chat chat2 = Chat.builder().ownerId(testUser2.getId())
+            Chat chat2 = Chat.builder().owner(testUser2)
                     .title(testUser1.getUserProfile().getNickname())
-                    .channelId(channel1.getId()).chatType(ChannelType.PRIVATE).build();
+                    .channel(channel1).build();
 
-            Chat chat3 = Chat.builder().ownerId(testUser2.getId())
+            Chat chat3 = Chat.builder().owner(testUser2)
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                    .channel(channel2).build();
 
-            Chat chat4 = Chat.builder().ownerId(testUser3.getId())
+            Chat chat4 = Chat.builder().owner(testUser3)
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                    .channel(channel2).build();
 
-            Chat chat5 = Chat.builder().ownerId(testUser4.getId())
+            Chat chat5 = Chat.builder().owner(testUser4)
                     .title(channel2.getDefaultTitle())
-                    .channelId(channel2.getId()).chatType(ChannelType.GROUP).build();
+                    .channel(channel2).build();
 
             chatRepository.save(chat1);
             chatRepository.save(chat2);
             chatRepository.save(chat3);
             chatRepository.save(chat4);
             chatRepository.save(chat5);
-
 
             // Message 생성
             Message msg1 = Message.builder().content("메세지1").senderId(testUser2.getId()).build();
@@ -145,11 +148,8 @@ public class TestDBInitializer implements ApplicationRunner {
             chatMessageRepository.save(chatMessage4);
             chatMessageRepository.save(chatMessage5);
 
-            chat1.updateLastMessage(msg1.getContent());
-            chat2.updateLastMessage(msg1.getContent());
-            chat3.updateLastMessage(msg2.getContent());
-            chat4.updateLastMessage(msg2.getContent());
-            chat5.updateLastMessage(msg2.getContent());
+            channel1.updateLastMessage(msg1.getContent());
+            channel2.updateLastMessage(msg2.getContent());
 
             em.flush();
             return null;

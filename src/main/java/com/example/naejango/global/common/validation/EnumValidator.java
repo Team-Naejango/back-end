@@ -5,14 +5,18 @@ import javax.validation.ConstraintValidatorContext;
 
 public class EnumValidator implements ConstraintValidator<EnumConstraint, Enum<?>> {
 
+    private String defaultValue;
+
     @Override
     public void initialize(EnumConstraint constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
+        defaultValue = constraintAnnotation.defaultValue();
     }
 
     @Override
     public boolean isValid(Enum enumValue, ConstraintValidatorContext context) {
-        return enumValue != null;
+        if (enumValue != null) return true;
+        return !defaultValue.isEmpty();
     }
 }
 

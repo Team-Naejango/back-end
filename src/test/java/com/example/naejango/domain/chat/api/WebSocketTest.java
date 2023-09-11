@@ -30,7 +30,6 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -50,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("Test")
-@Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Slf4j
 public class WebSocketTest {
@@ -133,7 +131,7 @@ public class WebSocketTest {
         // then
         var dto = new WebSocketMessageDto(MessageType.INFO, user2.getId(), null, "소켓 통신 정보를 수신합니다.");
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user2.getId(), 2L, "채널에 입장하였습니다.");
+        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user2.getId(), 2L, "채널을 구독 합니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
     }
 
@@ -171,7 +169,7 @@ public class WebSocketTest {
         // then
         var dto = new WebSocketMessageDto(MessageType.INFO, user4.getId(), null, "소켓 통신 정보를 수신합니다.");
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user4.getId(), 2L, "채널에 입장하였습니다.");
+        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user4.getId(), 2L, "채널을 구독 합니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
         assertEquals(objectMapper.writeValueAsString(messageDto), blockingQueue.poll());
     }

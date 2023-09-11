@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "channel")
@@ -30,6 +33,17 @@ public class Channel {
     @Enumerated(EnumType.STRING)
     @Column(name = "channel_type", insertable = false, updatable = false)
     private ChannelType channelType;
-    private Long lastMessageId;
+    private String lastMessage;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime lastModifiedDate;
+
+    public void updateLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
+    }
 }
 

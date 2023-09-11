@@ -1,7 +1,10 @@
 package com.example.naejango.domain.storage.dto.response;
 
 import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,17 +13,15 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StorageNearbyListResponseDto {
+    private String message;
     private int page;
     private int size;
-    private int totalCount;
-    private int totalPage;
-    private List<StorageNearbyInfoDto> content;
+    private List<StorageNearbyInfoDto> result;
 
-    public StorageNearbyListResponseDto(int page, int size, int totalCount, List<StorageNearbyInfoDto> content) {
+    public StorageNearbyListResponseDto(int page, int size, List<StorageNearbyInfoDto> result) {
+        this.message = result.size() == 0? "근처에 창고가 없습니다." : result.size() + "건 조회 되었습니다.";
         this.page = page;
         this.size = size;
-        this.totalCount = totalCount;
-        this.totalPage = (totalCount - 1) / size + 1;
-        this.content = content;
+        this.result = result;
     }
 }

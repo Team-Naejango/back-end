@@ -29,7 +29,7 @@ public class FindWishResponseDto {
         this.name = item.getName();
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
-        this.type = item.getType();
+        this.type = item.getItemType();
         this.category = item.getCategory().toString();
     }
 }
