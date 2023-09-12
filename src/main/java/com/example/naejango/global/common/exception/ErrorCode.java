@@ -42,6 +42,7 @@ public enum ErrorCode {
     WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Wish를 찾을 수 없습니다."),
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Follow를 찾을 수 없습니다."),
     TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Transaction을 찾을 수 없습니다."),
+    ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Account 를 찾을 수 없습니다."),
 
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 진행중인 채팅이 있습니다."),
