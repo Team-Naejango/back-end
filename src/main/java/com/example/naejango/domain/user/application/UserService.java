@@ -10,6 +10,7 @@ import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.oauth.OAuth2UserInfo;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.exception.WebSocketException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,9 +99,19 @@ public class UserService {
     @Transactional
     public User login(Long userId) {
         User user = userRepository.findUserWithProfileById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         if (!user.getRole().equals(Role.TEMPORAL)) {
             user.getUserProfile().setLastLogin();
+        }
+        return user;
+    }
+
+    @Transactional
+    public User webSocketlogin(Long userId) {
+        User user = userRepository.findUserWithProfileById(userId)
+                .orElseThrow(() -> new WebSocketException(ErrorCode.USER_NOT_FOUND));
+        if (user.getRole().equals(Role.TEMPORAL)) {
+            throw new WebSocketException(ErrorCode.UNAUTHORIZED);
         }
         return user;
     }
