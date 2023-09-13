@@ -1,7 +1,8 @@
 package com.example.naejango.domain.chat.dto.request;
 
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
@@ -9,6 +10,6 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @ToString
 public class ChangeChatTitleRequestDto {
-    @Length(min = 2, max = 15)
+    @Size(min = 2, max = 15)
     private String title;
 }

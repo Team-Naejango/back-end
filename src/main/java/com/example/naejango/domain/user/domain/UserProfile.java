@@ -2,10 +2,10 @@ package com.example.naejango.domain.user.domain;
 
 import com.example.naejango.domain.common.TimeAuditingEntity;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,10 +23,10 @@ public class UserProfile extends TimeAuditingEntity {
     @Column(nullable = false)
     private String nickname;
     @Column
-    @Length(max = 1500)
+    @Size(max = 1500)
     private String intro;
     @Column
-    @Length(max = 100)
+    @Size(max = 100)
     private String imgUrl;
 
     @Enumerated(value = EnumType.STRING)

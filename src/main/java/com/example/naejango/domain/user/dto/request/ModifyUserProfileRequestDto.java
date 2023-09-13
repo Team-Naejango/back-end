@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 
 @Getter
@@ -17,15 +17,15 @@ import javax.validation.constraints.NotNull;
 public class ModifyUserProfileRequestDto {
 
     @NotBlank
-    @Length(min = 2, max = 10)
+    @Size(min = 2, max = 10)
     private String nickname;
 
     @NotNull
-    @Length(max = 200)
+    @Size(max = 200)
     private String intro;
 
     @NotNull
-    @Length(max = 100)
+    @Size(max = 100)
     private String imgUrl;
 
 }
