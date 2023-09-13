@@ -14,12 +14,11 @@ import java.time.Duration;
 public class RedisRefreshTokenRepository implements RefreshTokenRepository {
 
     private final StringRedisTemplate rt;
-    private Duration expire = Duration.ofDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME);
 
     @Override
     public void saveRefreshToken(Long userId, String refreshToken) {
         String key = getRefreshTokenKey(userId);
-        rt.opsForValue().set(key, refreshToken, expire);
+        rt.opsForValue().set(key, refreshToken, Duration.ofDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME));
     }
 
     @Override
