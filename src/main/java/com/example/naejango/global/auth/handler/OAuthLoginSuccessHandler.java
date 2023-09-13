@@ -33,7 +33,10 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String refreshToken = jwtCookieHandler.getRefreshToken(request);
-        if (refreshToken != null) response.sendRedirect(localRedirectUrl + "?loginStatus=already_logged_in");
+        if (refreshToken != null){
+            response.sendRedirect(localRedirectUrl + "?loginStatus=already_logged_in");
+            return;
+        }
         generateAndSetTokenCookies(authentication, response);
     }
 
