@@ -1,5 +1,6 @@
-package com.example.naejango.domain.chat.application;
+package com.example.naejango.domain.chat.application.websocket;
 
+import com.example.naejango.domain.chat.application.http.MessageService;
 import com.example.naejango.domain.chat.domain.MessageType;
 import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;

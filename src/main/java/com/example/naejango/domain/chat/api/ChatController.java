@@ -1,37 +1,27 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.application.ChannelService;
-import com.example.naejango.domain.chat.application.ChatService;
-import com.example.naejango.domain.chat.domain.Chat;
+import com.example.naejango.domain.chat.application.http.ChatService;
+import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
+import com.example.naejango.domain.chat.dto.JoinGroupChannelDto;
 import com.example.naejango.domain.chat.dto.request.ChangeChatTitleRequestDto;
-import com.example.naejango.domain.chat.dto.request.DeleteChatResponseDto;
-import com.example.naejango.domain.chat.dto.response.ChangeChatTitleResponseDto;
-import com.example.naejango.domain.chat.dto.response.FindChatResponseDto;
-import com.example.naejango.domain.chat.dto.response.JoinGroupChatResponseDto;
-import com.example.naejango.domain.chat.dto.response.MyChatListResponseDto;
-import com.example.naejango.domain.chat.repository.ChatRepository;
-import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
 public class ChatController {
-
-    private final ChatRepository chatRepository;
     private final ChatService chatService;
-    private final ChannelService channelService;
     private final AuthenticationHandler authenticationHandler;
 
     /**
@@ -42,39 +32,24 @@ public class ChatController {
      * @return 채널 id(channelId), 채팅방 id(chatId), 생성 결과(message)
      */
     @PostMapping("/group/{channelId}")
-    public ResponseEntity<JoinGroupChatResponseDto> joinGroupChat(@PathVariable("channelId") Long channelId,
-                                                                  Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<ChannelAndChatDto>> joinGroupChat(@PathVariable("channelId") Long channelId,
+                                                                              Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        Optional<Chat> groupChatOpt = chatRepository.findChatByChannelIdAndOwnerId(channelId, userId);
 
-        // 이미 참여중인 그룹 채널인지 확인 합니다.
-        if (groupChatOpt.isPresent()) {
+        // 그룹 채널 입장
+        JoinGroupChannelDto serviceDto = chatService.joinGroupChannel(channelId, userId);
+
+        // 결과 생성
+        ChannelAndChatDto result = new ChannelAndChatDto(channelId, serviceDto.getChatId());
+
+        // 결과 반환
+        if (serviceDto.isCreated()) {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new CommonResponseDto<>("그룹 채팅이 시작되었습니다.", result));
+        } else {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new JoinGroupChatResponseDto(channelId, groupChatOpt.get().getId(), "이미 참여중인 채널입니다."));
+                    .body(new CommonResponseDto<>("이미 참여중인 채널입니다.", result));
         }
-
-        // 정원 초과 로직
-        if(channelService.isFull(channelId)) throw new CustomException(ErrorCode.CHANNEL_IS_FULL);
-
-        // 그룹 채널에 입장합니다.
-        Long chatId = chatService.joinGroupChat(channelId, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new JoinGroupChatResponseDto(channelId, chatId, "그룹 채팅이 시작되었습니다."));
-
-    }
-
-    /**
-     * 요청 회원이 참여한 채널의 채팅방 id 를 찾습니다.
-     * 채널에 참여 중이면 Chat 을 반환 합니다.
-     * @param channelId 채널 id
-     * @return 채널 참여 여부(hasChat), 챗 id(chatId)
-     */
-    @GetMapping("/{channelId}/myChat")
-    public ResponseEntity<FindChatResponseDto> findChatByChannelId(@PathVariable("channelId") Long channelId,
-                                                                   Authentication authentication) {
-        Long userId = authenticationHandler.getUserId(authentication);
-        Optional<Chat> chatOpt = chatRepository.findChatByChannelIdAndOwnerId(channelId, userId);
-        if(chatOpt.isEmpty()) return ResponseEntity.ok().body(new FindChatResponseDto(null, "채널에 참여하고 있지 않습니다."));
-        return ResponseEntity.ok().body(new FindChatResponseDto(chatOpt.get().getId(), "해당 채널의 채팅방을 조회했습니다."));
     }
 
     /**
@@ -88,12 +63,34 @@ public class ChatController {
      *          마지막 대화나눈 시간(lastChatAt)
      */
     @GetMapping("")
-    public ResponseEntity<MyChatListResponseDto> myChatList(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                            @RequestParam(value = "size", defaultValue = "10") int size,
-                                                            Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<List<ChatInfoDto>>> myChatList(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                           @RequestParam(value = "size", defaultValue = "10") int size,
+                                                                           Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(userId, PageRequest.of(page, size));
-        return ResponseEntity.ok().body(new MyChatListResponseDto(page, size, result.hasNext(), result.getContent()));
+
+        // 조회
+        Page<ChatInfoDto> serviceDto = chatService.myChatList(userId, page, size);
+
+        return ResponseEntity.ok().body(
+                new CommonResponseDto<>("조회 성공", serviceDto.getContent())
+        );
+    }
+
+    /**
+     * 요청 회원이 참여한 채널의 채팅방 id 를 찾습니다.
+     * 채널에 참여 중이면 Chat 을 반환 합니다.
+     * @param channelId 채널 id
+     * @return 채널 참여 여부(hasChat), 챗 id(chatId)
+     */
+    @GetMapping("/{channelId}/myChat")
+    public ResponseEntity<CommonResponseDto<Long>> findChatByChannelId(@PathVariable("channelId") Long channelId,
+                                                                   Authentication authentication) {
+        Long userId = authenticationHandler.getUserId(authentication);
+
+        // 조회
+        Long chatId = chatService.myChatId(channelId, userId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", chatId));
     }
 
     /**
@@ -103,36 +100,18 @@ public class ChatController {
      * @return 변경된 채팅방 id, 새로운 채팅방 제목(changedTitle)
      */
     @PatchMapping("/{chatId}")
-    public ResponseEntity<ChangeChatTitleResponseDto> changeChatTitle(@RequestBody ChangeChatTitleRequestDto requestDto,
+    public ResponseEntity<CommonResponseDto<String>> changeChatTitle(@RequestBody @Valid ChangeChatTitleRequestDto requestDto,
                                                                       @PathVariable("chatId") Long chatId,
                                                                       Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        chatService.changeChatTitle(userId, chatId, requestDto.getTitle());
-        var responseDto = ChangeChatTitleResponseDto.builder().chatId(chatId).changedTitle(requestDto.getTitle()).build();
-        return ResponseEntity.ok().body(responseDto);
+
+        // 요청 정보 조회
+        String title = requestDto.getTitle();
+
+        // 변경
+        chatService.changeChatTitle(userId, chatId, title);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("변경 완료", title));
     }
 
-    /**
-     * 채팅방을 종료합니다.
-     * 일대일 채팅의 경우, Chat 과 연관된 ChatMessage 가 삭제 됩니다.
-     * 그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제되며, channel 의 participantsCount 가 감소합니다.
-     * Channel 과 연관된 ChatMessage 가 없으면 채널에 아무도 남지 않았다고 판단합니다.
-     * 채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.
-     * @param chatId 나가고자 하는 채팅방 id(chatId)
-     * @return 삭제된 채팅방 id(chatId), 삭제 메세지(message)
-     */
-    @DeleteMapping("/{chatId}")
-    public ResponseEntity<DeleteChatResponseDto> deleteChat(@PathVariable("chatId") Long chatId,
-                                                            Authentication authentication) {
-        Long userId = authenticationHandler.getUserId(authentication);
-        // 보안 검증
-        chatRepository.findById(chatId).stream().filter(chat -> chat.getOwner().getId().equals(userId)).findAny()
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
-
-        // Chat 삭제
-        chatService.deleteChat(chatId);
-
-        var responseDto = new DeleteChatResponseDto(chatId, "해당 채팅방을 종료했습니다.");
-        return ResponseEntity.ok().body(responseDto);
-    }
 }

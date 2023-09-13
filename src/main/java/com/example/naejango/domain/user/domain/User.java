@@ -29,6 +29,7 @@ public class User extends TimeAuditingEntity {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
     @Column
     private String refreshToken;
 

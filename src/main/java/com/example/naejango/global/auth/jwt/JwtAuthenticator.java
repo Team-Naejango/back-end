@@ -1,10 +1,9 @@
 package com.example.naejango.global.auth.jwt;
 
+import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.dto.response.ValidateTokenResponseDto;
 import com.example.naejango.global.auth.principal.PrincipalDetails;
-import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.WebSocketException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ import java.util.Collections;
 @Slf4j
 public class JwtAuthenticator {
     private final JwtValidator jwtValidator;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
 
     /**
@@ -65,7 +64,7 @@ public class JwtAuthenticator {
     }
 
     private Authentication getPrincipal (Long userId){
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.login(userId);
         PrincipalDetails principalDetails = new PrincipalDetails(user);
         return new UsernamePasswordAuthenticationToken(
                 principalDetails,
@@ -75,7 +74,7 @@ public class JwtAuthenticator {
     }
 
     private Authentication getWebSocketPrincipal(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.webSocketLogin(userId);
         return new UsernamePasswordAuthenticationToken(
                 user.getId(),
                 null,

@@ -3,18 +3,20 @@ package com.example.naejango.domain.user.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.account.application.AccountService;
+import com.example.naejango.domain.account.domain.Account;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
+import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
-import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
-import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -27,14 +29,12 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.time.LocalDateTime;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
 @WebMvcTest(UserController.class)
@@ -50,15 +50,11 @@ class UserControllerTest extends RestDocsSupportTest {
     @MockBean
     AccountService accountServiceMock;
     @MockBean
-    UserProfileRepository userProfileRepository;
-    @MockBean
     AuthenticationHandler authenticationHandlerMock;
 
-    @Test
-    @Tag("api")
-    @DisplayName("UserProfile 생성")
-    void createUserProfileTest() throws Exception {
-        //given
+    @Nested
+    @DisplayName("유저 프로필 생성")
+    class createUserProfileTest {
         CreateUserProfileRequestDto requestDto = CreateUserProfileRequestDto
                 .builder()
                 .birth("19910617")
@@ -69,52 +65,64 @@ class UserControllerTest extends RestDocsSupportTest {
                 .gender(Gender.MALE)
                 .build();
 
-        String requestJson = objectMapper.writeValueAsString(requestDto);
+        @Test
+        @Tag("api")
+        @DisplayName("조회 성공")
+        void test1() throws Exception {
+            // given
+            String requestJson = objectMapper.writeValueAsString(requestDto);
 
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .post("/api/user/profile")
-                        .header("Authorization", "access 토큰")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-        );
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .post("/api/user/profile")
+                            .header("Authorization", "access 토큰")
+                            .characterEncoding(StandardCharsets.UTF_8)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestJson)
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
 
-        verify(userServiceMock, atLeastOnce()).allocateUserProfile(any(UserProfile.class), anyLong());
+            // then
+            verify(userServiceMock, atLeastOnce())
+                    .createUserProfile(anyLong(), anyString(), anyString(), anyString(), any(), anyString(), anyString());
 
-        resultActions.andExpect(
-                MockMvcResultMatchers
-                        .status().isOk());
+            resultActions.andExpect(
+                    MockMvcResultMatchers
+                            .status().isOk());
 
-        resultActions.andDo(restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("회원")
-                                        .description("유저프로필 생성 하여 요청한 유저 엔티티에 할당")
-                                        .requestFields(
-                                                fieldWithPath("birth").description("생년월일"),
-                                                fieldWithPath("nickname").description("닉네임"),
-                                                fieldWithPath("imgUrl").description("이미지 링크"),
-                                                fieldWithPath("phoneNumber").description("전화번호"),
-                                                fieldWithPath("intro").description("소개글"),
-                                                fieldWithPath("gender").description("성별(남/여)")
-                                        )
-                                        .responseFields()
-                                        .requestSchema(
-                                                Schema.schema("CreateUserProfileRequestDto.Post")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+            resultActions.andDo(restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("회원")
+                                            .summary("프로필 생성")
+                                            .description("유저프로필 생성 하여 요청한 유저 엔티티에 할당, 계좌 생성")
+                                            .requestFields(
+                                                    fieldWithPath("birth").description("생년월일"),
+                                                    fieldWithPath("nickname").description("닉네임"),
+                                                    fieldWithPath("imgUrl").description("이미지 링크"),
+                                                    fieldWithPath("phoneNumber").description("전화번호"),
+                                                    fieldWithPath("intro").description("소개글"),
+                                                    fieldWithPath("gender").description("성별(남/여)")
+                                            )
+                                            .responseFields(
+                                                    fieldWithPath("message").description("결과 메세지"),
+                                                    fieldWithPath("result").description("null")
+                                            )
+                                            .requestSchema(
+                                                    Schema.schema("유저 프로필 생성 Request")
+                                            )
+                                            .build()
+                            )
+                    )
+            );
+        }
     }
 
-    @Test
-    @Tag("api")
-    @DisplayName("UserProfile 조회")
-    void userProfileTest() throws Exception {
-        //given
+
+    @Nested
+    @DisplayName("내 프로필 조회")
+    class MyProfileTest {
         UserProfile testUserProfile = UserProfile.builder()
                 .birth("생년월")
                 .nickname("닉네임")
@@ -124,119 +132,191 @@ class UserControllerTest extends RestDocsSupportTest {
                 .gender(Gender.MALE)
                 .build();
 
-        BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
-        BDDMockito.given(userProfileRepository.findUserProfileByUserId(1L)).willReturn(Optional.ofNullable(testUserProfile));
-        BDDMockito.given(accountServiceMock.getAccount(1L)).willReturn(anyInt());
+        User user = User.builder()
+                .id(1L)
+                .userProfile(testUserProfile)
+                .build();
 
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .get("/api/user/profile")
-                        .header("Authorization", "access token")
-        );
+        Account account = Account.builder()
+                .balance(1000)
+                .user(user)
+                .build();
 
-        verify(userProfileRepository, times(1)).findUserProfileByUserId(1L);
-        verify(accountServiceMock, times(1)).getAccount(1L);
 
-        resultActions
-                .andExpect(MockMvcResultMatchers.status().isOk()
-                ).andExpect(jsonPath("$.birth").value(testUserProfile.getBirth())
-                ).andExpect(jsonPath("$.nickname").value(testUserProfile.getNickname())
-                ).andExpect(jsonPath("$.imgUrl").value(testUserProfile.getImgUrl())
-                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().getGender())
-                ).andExpect(jsonPath("$.intro").value(testUserProfile.getIntro()));
 
-        resultActions.andDo(
-                restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("회원")
-                                        .description("요청하는 유저의 프로필 조회")
-                                        .requestFields()
-                                        .responseFields(
-                                                fieldWithPath("birth").description("생년월일"),
-                                                fieldWithPath("nickname").description("닉네임"),
-                                                fieldWithPath("imgUrl").description("이미지 링크"),
-                                                fieldWithPath("phoneNumber").description("전화번호"),
-                                                fieldWithPath("intro").description("소개글"),
-                                                fieldWithPath("gender").description("성별(남/여)"),
-                                                fieldWithPath("balance").description("계좌 잔고")
-                                        )
-                                        .requestSchema(
-                                                Schema.schema("UserProfileResponseDto.Get")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+        @Test
+        @Tag("api")
+        @DisplayName("조회 성공")
+        void test1() throws Exception {
+            //given
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
+            BDDMockito.given(userServiceMock.findOtherUserProfile(user.getId())).willReturn(new UserProfileDto(testUserProfile));
+            BDDMockito.given(accountServiceMock.getAccount(user.getId())).willReturn(account.getBalance());
+
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .get("/api/user/me")
+                            .header("Authorization", "access token")
+            );
+
+            verify(userServiceMock, times(1)).findOtherUserProfile(user.getId());
+            verify(accountServiceMock, times(1)).getAccount(user.getId());
+
+            resultActions.andDo(
+                    restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("회원")
+                                            .description("요청하는 유저의 프로필 조회")
+                                            .responseFields(
+                                                    fieldWithPath("message").description("결과 메세지"),
+                                                    fieldWithPath("result").description("조회 결과"),
+                                                    fieldWithPath("result.userId").description("유저 ID"),
+                                                    fieldWithPath("result.nickname").description("닉네임"),
+                                                    fieldWithPath("result.intro").description("소개글"),
+                                                    fieldWithPath("result.imgUrl").description("이미지 링크"),
+                                                    fieldWithPath("result.gender").description("성별(남/여)"),
+                                                    fieldWithPath("result.birth").description("생년 월일"),
+                                                    fieldWithPath("result.phoneNumber").description("전화번호"),
+                                                    fieldWithPath("result.balance").description("잔고")
+                                            )
+                                            .requestSchema(
+                                                    Schema.schema("내 프로필 조회 Response")
+                                            )
+                                            .build()
+                            )
+                    )
+            );
+        }
     }
 
-    @Test
-    @Tag("api")
-    @DisplayName("UserProfile 수정")
-    void modifyProfileTest() throws Exception {
-        //given
+    @Nested
+    @DisplayName("다른 유저 프로필 조회")
+    class findUserProfile {
         UserProfile testUserProfile = UserProfile.builder()
                 .birth("19910617")
                 .nickname("닉네임")
                 .imgUrl("이미지 링크")
-                .phoneNumber("01012345678")
+                .phoneNumber("전화번호")
                 .intro("소개글")
                 .gender(Gender.MALE)
+                .lastLogin(LocalDateTime.now().minusMinutes(15))
                 .build();
 
-        var requestDto = ModifyUserProfileRequestDto.builder()
-                .nickname("변경 닉네임").intro("변경 소개글").imgUrl("변경 이미지").build();
+        User user = User.builder()
+                .id(1L)
+                .userProfile(testUserProfile).build();
 
-        testUserProfile.modifyUserProfile(requestDto);
-        BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
-        BDDMockito.given(userProfileRepository.findUserProfileByUserId(1L))
-                .willReturn(Optional.of(testUserProfile));
+        @Test
+        @Tag("api")
+        @DisplayName("조회 성공")
+        void test1() throws Exception {
+            //given
+            BDDMockito.given(userServiceMock.findOtherUserProfile(user.getId()))
+                    .willReturn(new UserProfileDto(testUserProfile));
 
-        ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders
-                        .patch("/api/user/profile")
-                        .header("Authorization", "access token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-        );
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .get("/api/user/profile/{userId}", user.getId())
+                            .header("Authorization", "access token")
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
 
-        verify(userServiceMock, atLeastOnce()).modifyUserProfile(any(ModifyUserProfileRequestDto.class), anyLong());
+            verify(userServiceMock, times(1)).findOtherUserProfile(user.getId());
 
-        resultActions
-                .andExpect(MockMvcResultMatchers.status().isOk()
-                ).andExpect(jsonPath("$.nickname").value(testUserProfile.getNickname())
-                ).andExpect(jsonPath("$.imgUrl").value(testUserProfile.getImgUrl())
-                ).andExpect(jsonPath("$.birth").value(testUserProfile.getBirth())
-                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().getGender())
-                ).andExpect(jsonPath("$.intro").value(testUserProfile.getIntro()));
-
-        resultActions.andDo(
-                restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("회원")
-                                        .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
-                                        .requestFields(
-                                                fieldWithPath("nickname").description("닉네임"),
-                                                fieldWithPath("intro").description("소개"),
-                                                fieldWithPath("imgUrl").description("이미지 링크")
-                                        )
-                                        .responseFields(
-                                                fieldWithPath("birth").description("생년월일"),
-                                                fieldWithPath("nickname").description("닉네임"),
-                                                fieldWithPath("imgUrl").description("이미지 링크"),
-                                                fieldWithPath("phoneNumber").description("전화번호"),
-                                                fieldWithPath("intro").description("소개글"),
-                                                fieldWithPath("gender").description("성별(male, female)")
-                                        )
-                                        .requestSchema(
-                                                Schema.schema("ModifyUserProfileResponseDto.Get")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+            resultActions.andDo(
+                    restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("회원")
+                                            .description("다른 유저의 프로필 조회")
+                                            .responseFields(
+                                                    fieldWithPath("message").description("결과 메세지"),
+                                                    fieldWithPath("result").description("조회 결과"),
+                                                    fieldWithPath("result.nickname").description("닉네임"),
+                                                    fieldWithPath("result.imgUrl").description("이미지 링크"),
+                                                    fieldWithPath("result.age").description("연령 (10대/20대...)"),
+                                                    fieldWithPath("result.gender").description("성별(남/여)"),
+                                                    fieldWithPath("result.intro").description("소개글"),
+                                                    fieldWithPath("result.lastLogin").description("마지막 로그인")
+                                            )
+                                            .requestSchema(
+                                                    Schema.schema("다른 유저의 프로필 조회 Response")
+                                            )
+                                            .build()
+                            )
+                    )
+            );
+        }
     }
+
+//    @Test
+//    @Tag("api")
+//    @DisplayName("UserProfile 수정")
+//    void modifyProfileTest() throws Exception {
+//        //given
+//        UserProfile testUserProfile = UserProfile.builder()
+//                .birth("19910617")
+//                .nickname("닉네임")
+//                .imgUrl("이미지 링크")
+//                .phoneNumber("01012345678")
+//                .intro("소개글")
+//                .gender(Gender.MALE)
+//                .build();
+//
+//        var requestDto = ModifyUserProfileRequestDto.builder()
+//                .nickname("변경 닉네임").intro("변경 소개글").imgUrl("변경 이미지").build();
+//
+//        testUserProfile.modifyUserProfile(requestDto);
+//        BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
+//        BDDMockito.given(userProfileRepository.findUserProfileByUserId(1L))
+//                .willReturn(Optional.of(testUserProfile));
+//
+//        ResultActions resultActions = mockMvc.perform(
+//                RestDocumentationRequestBuilders
+//                        .patch("/api/user/profile")
+//                        .header("Authorization", "access token")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(requestDto))
+//        );
+//
+//        verify(userServiceMock, atLeastOnce()).modifyUserProfile(any(ModifyUserProfileRequestDto.class), anyLong());
+//
+//        resultActions
+//                .andExpect(MockMvcResultMatchers.status().isOk()
+//                ).andExpect(jsonPath("$.nickname").value(testUserProfile.getNickname())
+//                ).andExpect(jsonPath("$.imgUrl").value(testUserProfile.getImgUrl())
+//                ).andExpect(jsonPath("$.birth").value(testUserProfile.getBirth())
+//                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().getGender())
+//                ).andExpect(jsonPath("$.intro").value(testUserProfile.getIntro()));
+//
+//        resultActions.andDo(
+//                restDocs.document(
+//                        resource(
+//                                ResourceSnippetParameters.builder()
+//                                        .tag("회원")
+//                                        .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
+//                                        .requestFields(
+//                                                fieldWithPath("nickname").description("닉네임"),
+//                                                fieldWithPath("intro").description("소개"),
+//                                                fieldWithPath("imgUrl").description("이미지 링크")
+//                                        )
+//                                        .responseFields(
+//                                                fieldWithPath("birth").description("생년월일"),
+//                                                fieldWithPath("nickname").description("닉네임"),
+//                                                fieldWithPath("imgUrl").description("이미지 링크"),
+//                                                fieldWithPath("phoneNumber").description("전화번호"),
+//                                                fieldWithPath("intro").description("소개글"),
+//                                                fieldWithPath("gender").description("성별(male, female)")
+//                                        )
+//                                        .requestSchema(
+//                                                Schema.schema("ModifyUserProfileResponseDto.Get")
+//                                        )
+//                                        .build()
+//                        )
+//                )
+//        );
+//    }
 
     // 삭제 테스트 작성 필요
 

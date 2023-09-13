@@ -5,8 +5,8 @@ import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.StorageAndDistanceDto;
+import com.example.naejango.domain.storage.dto.StorageInfoDto;
 import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
-import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
@@ -32,18 +32,16 @@ public class StorageService {
     private final GeomUtil geomUtil;
     private final EntityManager em;
 
-
     @Transactional
-    public Long createStorage(String name, Coord location, String address, String description, String imgUrl,  Long userId) {
+    public Long createStorage(String name, Coord location, String address, String description, String imgUrl, Long userId) {
         Point point = geomUtil.createPoint(location.getLongitude(), location.getLatitude());
-        User user = em.getReference(User.class, userId);
         Storage storage = Storage.builder()
                 .name(name)
                 .location(point)
                 .address(address)
                 .description(description)
                 .imgUrl(imgUrl)
-                .user(user)
+                .user(em.getReference(User.class, userId))
                 .build();
         storageRepository.save(storage);
         return storage.getId();
@@ -57,8 +55,9 @@ public class StorageService {
         return storageRepository.findUserIdByStorageId(storageId);
     }
 
-    public List<Storage> myStorageList(Long userId) {
-        return storageRepository.findByUserId(userId);
+    public List<StorageInfoDto> myStorageList(Long userId) {
+        List<Storage> findResult = storageRepository.findByUserId(userId);
+        return findResult.stream().map(StorageInfoDto::new).collect(Collectors.toList());
     }
 
     public List<StorageNearbyInfoDto> searchStorage (Point center, int radius, int page, int size) {
@@ -67,15 +66,20 @@ public class StorageService {
     }
 
     @Transactional
-    public void modifyStorageInfo(ModifyStorageInfoRequestDto requestDto, Long storageId, Long userId) {
+    public void modifyStorageInfo(Long storageId, Long userId, String name, String imgUrl, String description) {
+        // 참고 로드
         Storage storage = storageRepository.findById(storageId).orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
+
+        // 권한 인증
         if (!storage.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.UNAUTHORIZED_MODIFICATION_REQUEST);
-        storage.modify(requestDto);
+
+        // 수정
+        storage.modify(name, imgUrl, description);
     }
 
     @Transactional
     public void deleteStorage(Long storageId, Long userId) {
-        // 보안 인증
+        // 권한 인증
         storageRepository.findByUserId(userId).stream().filter(s -> s.getId().equals(storageId)).findAny()
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
 

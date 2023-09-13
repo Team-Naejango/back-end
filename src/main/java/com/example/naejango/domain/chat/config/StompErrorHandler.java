@@ -27,6 +27,7 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
     @Override
     public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable ex) {
         Throwable cause = ex.getCause();
+
         if (cause instanceof WebSocketException) {
             WebSocketException exception = (WebSocketException) cause;
             try {
@@ -43,7 +44,6 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
                 throw new RuntimeException(e);
             }
         }
-
 
         return message(ex.getMessage());
     }

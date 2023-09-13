@@ -1,6 +1,6 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.application.SubscribeService;
+import com.example.naejango.domain.chat.application.websocket.SubscribeService;
 import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import com.example.naejango.global.auth.jwt.JwtAuthenticator;

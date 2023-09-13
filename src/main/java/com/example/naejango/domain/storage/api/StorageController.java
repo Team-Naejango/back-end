@@ -1,16 +1,15 @@
 package com.example.naejango.domain.storage.api;
 
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.storage.application.StorageService;
-import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
+import com.example.naejango.domain.storage.dto.StorageInfoDto;
 import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.dto.request.SearchStorageRequestDto;
-import com.example.naejango.domain.storage.dto.response.CreateStorageResponseDto;
 import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
-import com.example.naejango.domain.storage.dto.response.MyStorageListResponseDto;
 import com.example.naejango.domain.storage.dto.response.StorageNearbyListResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
@@ -35,40 +34,49 @@ public class StorageController {
     private final GeomUtil geomUtil;
 
     /**
-     * 창고를 생성 합니다.
-     *
+     * 창고 생성
      * @param requestDto 창고 이름(name), 좌표(coord), 주소(address), 설명(description), 이미지링크(imgUrl)
      * @return CreatrStorageResponseDto 창고 Id(storage), 생성 결과(message)
      */
     @PostMapping("")
-    public ResponseEntity<CreateStorageResponseDto> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto,
-                                                                  Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<Long>> createStorage(@RequestBody @Valid CreateStorageRequestDto requestDto,
+                                                           Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
+        // 창고 생성
         Long storageId = storageService.createStorage(requestDto.getName(), requestDto.getCoord(),
                 requestDto.getAddress(), requestDto.getDescription(), requestDto.getImgUrl(), userId);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new CreateStorageResponseDto(storageId, "창고가 생성되었습니다.")
+                new CommonResponseDto<>("창고가 생성되었습니다.", storageId)
         );
     }
 
     /**
-     * 나의 창고 리스트 조회
+     * 내 창고 조회
      * @return StorageInfoDto (id, name, imgUrl, address)
      */
     @GetMapping("")
-    public ResponseEntity<MyStorageListResponseDto> myStorageList(Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<List<StorageInfoDto>>> myStorageList(Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        List<Storage> storages = storageService.myStorageList(userId);
-        return ResponseEntity.ok().body(new MyStorageListResponseDto(storages));
+
+        // 창고 조회
+        List<StorageInfoDto> storages = storageService.myStorageList(userId);
+
+        return ResponseEntity.ok().body(
+                new CommonResponseDto<>("조회 성공", storages)
+        );
     }
 
-    /** 창고 검색 */
+    /** 근처 창고 검색 */
     @GetMapping("/nearby")
     public ResponseEntity<StorageNearbyListResponseDto> storageNearby (@Valid @ModelAttribute SearchStorageRequestDto requestDto) {
+        // 검색 조건
         Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
         int radius = requestDto.getRad();
         int page = requestDto.getPage();
         int size = requestDto.getSize();
+
+        // 창고 검색
         List<StorageNearbyInfoDto> result = storageService.searchStorage(center, radius, page, size);
         return ResponseEntity.ok().body(new StorageNearbyListResponseDto(page, size, result));
     }
@@ -98,21 +106,26 @@ public class StorageController {
      * 창고 정보 수정 ( name, descrpition, imgUrl )
      */
     @PatchMapping("/{storageId}")
-    public ResponseEntity<Void> modifyStorageInfo(@RequestBody @Valid ModifyStorageInfoRequestDto requestDto,
+    public ResponseEntity<CommonResponseDto<Void>> modifyStorageInfo(@RequestBody @Valid ModifyStorageInfoRequestDto requestDto,
                                                   @PathVariable Long storageId, Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        storageService.modifyStorageInfo(requestDto, storageId, userId);
-        return ResponseEntity.ok().build();
+        String name = requestDto.getName();
+        String imgUrl = requestDto.getImgUrl();
+        String description = requestDto.getDescription();
+
+        storageService.modifyStorageInfo(storageId, userId, name, imgUrl, description);
+        return ResponseEntity.ok().body(new CommonResponseDto<>("창고 정보 수정 완료", null));
     }
 
     /**
      * 창고 삭제
      * 창고와 연관된 ItemStorage 삭제 / Item 은 삭제하지 않음
+     * 다른 연관된 엔티티 고려 필요
      */
     @DeleteMapping("/{storageId}")
-    public ResponseEntity<Void> deleteStorage(@PathVariable Long storageId, Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<Void>> deleteStorage(@PathVariable Long storageId, Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
         storageService.deleteStorage(storageId, userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(new CommonResponseDto<>("삭제 완료", null));
     }
 }

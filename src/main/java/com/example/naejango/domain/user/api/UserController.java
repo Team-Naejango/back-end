@@ -1,13 +1,14 @@
 package com.example.naejango.domain.user.api;
 
 import com.example.naejango.domain.account.application.AccountService;
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.domain.UserProfile;
+import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
-import com.example.naejango.domain.user.dto.response.ModifyUserProfileResponseDto;
+import com.example.naejango.domain.user.dto.MyProfileDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
-import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.exception.CustomException;
@@ -33,39 +34,85 @@ public class UserController {
     private final JwtValidator jwtValidator;
     private final JwtCookieHandler jwtCookieHandler;
     private final UserService userService;
-    private final UserProfileRepository userProfileRepository;
     private final AccountService accountService;
     private final AuthenticationHandler authenticationHandler;
 
+    /**
+     * 회원 가입
+     * 유저 프로필 및 계좌 등록
+     * 유저 프로필 및 계좌를 등록하여 회원가입을 마무리 합니다.
+     */
     @PostMapping("/profile")
-    public ResponseEntity<Void> allocateUserProfile(@RequestBody @Valid CreateUserProfileRequestDto requestDto,
-                                                    Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<Void>> createUserProfile(@RequestBody @Valid CreateUserProfileRequestDto requestDto,
+                                                  Authentication authentication) {
+        // 요청 정보를 로드 합니다.
         Long userId = authenticationHandler.getUserId(authentication);
-        UserProfile userProfile = new UserProfile(requestDto);
-        userService.allocateUserProfile(userProfile, userId);
+        String phoneNumber = requestDto.getPhoneNumber();
+        String imgUrl = requestDto.getImgUrl();
+        String nickname = requestDto.getNickname();
+        String intro = requestDto.getIntro();
+        String birth = requestDto.getBirth();
+        Gender gender = requestDto.getGender();
+
+        // 유저 프로필 생성
+        userService.createUserProfile(userId, nickname, intro, imgUrl, gender, phoneNumber, birth);
+
+        // 계좌 생성
         accountService.createAccount(userId);
-        return ResponseEntity.ok().body(null);
+        return ResponseEntity.ok().body(new CommonResponseDto<>("유저 프로필과 계좌가 생성되었습니다. 회원가입 처리가 되었습니다.", null));
     }
 
-    @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponseDto> findUserProfile(Authentication authentication) {
+    /** 내 프로필 조회 */
+    @GetMapping("/me")
+    public ResponseEntity<CommonResponseDto<MyProfileDto>> myProfile(Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        UserProfile userProfile = userProfileRepository.findUserProfileByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
+
+        UserProfileDto userProfile = userService.findOtherUserProfile(userId);
         int balance = accountService.getAccount(userId);
-        UserProfileResponseDto userProfileResponseDto = new UserProfileResponseDto(userProfile, balance);
-        return ResponseEntity.ok().body(userProfileResponseDto);
+
+        return ResponseEntity.ok().body(
+                new CommonResponseDto<>("조회 성공", MyProfileDto.builder()
+                .userId(userId)
+                .nickname(userProfile.getNickname())
+                .intro(userProfile.getIntro())
+                .phoneNumber(userProfile.getPhoneNumber())
+                .imgUrl(userProfile.getImgUrl())
+                .birth(userProfile.getBirth())
+                .gender(userProfile.getGender())
+                .balance(balance).build()));
     }
 
+    /** 다른 유저 프로필 조회 */
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<CommonResponseDto<UserProfileResponseDto>> findUserProfile(@PathVariable Long userId) {
+        UserProfileDto userProfile = userService.findOtherUserProfile(userId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 완료",
+                UserProfileResponseDto.builder()
+                        .nickname(userProfile.getNickname())
+                        .birth(userProfile.getBirth())
+                        .gender(userProfile.getGender())
+                        .imgUrl(userProfile.getImgUrl())
+                        .intro(userProfile.getIntro())
+                        .lastLogin(userProfile.getLastLogin()).build()
+        ));
+    }
+
+    /** 프로필 수정 */
     @PatchMapping("/profile")
-    public ResponseEntity<ModifyUserProfileResponseDto> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto modifyUserProfileRequestDto, Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<Void>> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto requestDto,
+                                                                      Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        userService.modifyUserProfile(modifyUserProfileRequestDto, userId);
-        UserProfile userProfile = userProfileRepository.findUserProfileByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
-        return ResponseEntity.ok().body(new ModifyUserProfileResponseDto(userProfile));
+
+        String nickname = requestDto.getNickname();
+        String intro = requestDto.getIntro();
+        String imgUrl = requestDto.getImgUrl();
+        userService.modifyUserProfile(userId, nickname, intro, imgUrl);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("수정 완료", null));
     }
 
+    /** 유저 삭제 */
     @DeleteMapping("")
     public ResponseEntity<?> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
         Long userId = authenticationHandler.getUserId(authentication);

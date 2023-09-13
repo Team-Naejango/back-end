@@ -1,7 +1,7 @@
 package com.example.naejango.domain.storage.dto.response;
 
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
-import com.example.naejango.domain.storage.application.SearchingConditionDto;
+import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.dto.Coord;
 import lombok.*;
 

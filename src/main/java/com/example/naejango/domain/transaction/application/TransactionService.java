@@ -77,9 +77,8 @@ public class TransactionService {
         if (!Objects.equals(transaction.getTrader().getId(), userId)) {
             throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
         }
-
-        Account userAccount = accountRepository.findByUserId(transaction.getUser().getId());
-        Account traderAccount = accountRepository.findByUserId(userId);
+        Account userAccount = accountRepository.findByUserId(transaction.getUser().getId()).orElseThrow(() -> new CustomException(ErrorCode.ACCOUNT_NOT_FOUND));
+        Account traderAccount = accountRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.ACCOUNT_NOT_FOUND));
         userAccount.chargeBalance(transaction.getAmount());
         traderAccount.deductBalance(transaction.getAmount());
         transaction.waitTransaction();
