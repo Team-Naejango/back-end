@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
     @Query("SELECT up FROM User u JOIN u.userProfile up WHERE u.id = :userId")
     Optional<UserProfile> findUserProfileByUserId(@Param("userId") Long UserId);
+
+
 }

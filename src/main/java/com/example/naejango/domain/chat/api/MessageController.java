@@ -1,20 +1,16 @@
 package com.example.naejango.domain.chat.api;
 
 import com.example.naejango.domain.chat.application.MessageService;
-import com.example.naejango.domain.chat.domain.Message;
 import com.example.naejango.domain.chat.dto.MessageDto;
-import com.example.naejango.domain.chat.dto.response.RecentMessageResponseDto;
-import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Max;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/message")
@@ -35,18 +31,20 @@ public class MessageController {
      *         보낸사람 id(senderId), 내용(content), 보낸 시각(sentAt)
      */
     @GetMapping("/{chatId}/recent")
-    public ResponseEntity<RecentMessageResponseDto> getRecentMessages(@PathVariable("chatId") Long chatId,
-                                                                      @RequestParam(value = "page", defaultValue = "0") int page,
-                                                                      @RequestParam(value = "size", defaultValue = "25") @Max(100) int size,
-                                                                      Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<List<MessageDto>>> getRecentMessages(@PathVariable("chatId") Long chatId,
+                                                                                 @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                                 @RequestParam(value = "size", defaultValue = "25") @Max(100) int size,
+                                                                                 Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
-        Page<Message> result = messageService.recentMessages(userId, chatId, page, size);
-        if(result.isEmpty()) throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND);
-        RecentMessageResponseDto responseBody = new RecentMessageResponseDto(result.getNumber(), result.getSize(), result.hasNext(),
-                result.get().map(MessageDto::new).collect(Collectors.toList()));
+        // 조회
+        List<MessageDto> serviceDto = messageService.recentMessages(userId, chatId, page, size);
+
+        // 메시지 읽음 처리
         messageService.readMessages(chatId);
-        return ResponseEntity.ok().body(responseBody);
+
+        // 반환
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", serviceDto));
     }
 
 }

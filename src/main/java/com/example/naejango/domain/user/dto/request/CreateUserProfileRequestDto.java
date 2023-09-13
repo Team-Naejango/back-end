@@ -23,8 +23,7 @@ public class CreateUserProfileRequestDto {
     @Size(min = 8, max = 8, message = "올바른 생년월일을 입력하세요. (yyyymmdd)")
     private String birth;
 
-    @EnumConstraint(enumClass = Gender.class,
-            message = "올바른 성별 값을 입력하세요. (남/여)")
+    @EnumConstraint(enumClass = Gender.class, message = "올바른 성별 값을 입력하세요. (남/여)")
     private Gender gender;
 
     @NotBlank

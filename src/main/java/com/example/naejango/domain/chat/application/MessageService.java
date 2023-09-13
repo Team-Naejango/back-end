@@ -1,6 +1,7 @@
 package com.example.naejango.domain.chat.application;
 
 import com.example.naejango.domain.chat.domain.*;
+import com.example.naejango.domain.chat.dto.MessageDto;
 import com.example.naejango.domain.chat.repository.*;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -10,7 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,6 @@ public class MessageService {
                 .channel(channel)
                 .build();
         messageRepository.save(sentMessage);
-
         // 메세지를 채팅방에 할당 합니다.
         // 현재 메시지를 구독  중인(보고 있는) 구독자를 찾아옵니다.
         Set<Long> subscribers = subscribeRepository.findSubscribersByChannelId(channelId);
@@ -48,11 +50,19 @@ public class MessageService {
         channel.updateLastMessage(content);
     }
 
-    public Page<Message> recentMessages(Long userId, Long chatId, int page, int size) {
-        // 보안 로직
+    public List<MessageDto> recentMessages(Long userId, Long chatId, int page, int size) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
+
+        // 권한 확인
         if(!userId.equals(chat.getOwner().getId())) throw new CustomException(ErrorCode.UNAUTHORIZED_READ_REQUEST);
-        return messageRepository.findRecentMessages(chatId, PageRequest.of(page, size));
+
+        // 조회
+        Page<Message> findResult = messageRepository.findRecentMessages(chatId, PageRequest.of(page, size));
+
+        // 예외 처리 - Message 가 0 개 인 경우는 없음(채널 시작시 메세지 생성)
+        if(findResult.isEmpty()) throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND);
+
+        return findResult.getContent().stream().map(MessageDto::new).collect(Collectors.toList());
     }
 
     public void readMessages(Long chatId) {

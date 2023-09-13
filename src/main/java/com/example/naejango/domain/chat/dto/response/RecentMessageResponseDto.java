@@ -15,6 +15,5 @@ import java.util.List;
 public class RecentMessageResponseDto {
     private int page;
     private int size;
-    private boolean hasNext;
     private List<MessageDto> messages;
 }

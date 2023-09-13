@@ -3,25 +3,19 @@ package com.example.naejango.domain.chat.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.chat.application.ChannelService;
-import com.example.naejango.domain.chat.application.ChatService;
+import com.example.naejango.domain.chat.application.CreateChannelDto;
 import com.example.naejango.domain.chat.domain.Channel;
-import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.ChannelType;
+import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.GroupChannel;
+import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
 import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
-import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
 import com.example.naejango.domain.chat.dto.request.StartGroupChannelRequestDto;
-import com.example.naejango.domain.chat.dto.response.FindChannelParticipantsResponseDto;
-import com.example.naejango.domain.chat.dto.response.FindGroupChannelNearbyResponseDto;
-import com.example.naejango.domain.chat.dto.response.StartGroupChannelResponseDto;
-import com.example.naejango.domain.chat.dto.response.StartPrivateChannelResponseDto;
-import com.example.naejango.domain.chat.repository.ChannelRepository;
-import com.example.naejango.domain.chat.repository.ChatRepository;
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.user.domain.Role;
@@ -33,22 +27,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.locationtech.jts.geom.Point;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
@@ -63,20 +53,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ChannelController.class)
 class ChannelControllerTest extends RestDocsSupportTest {
     @MockBean
-    ChatRepository chatRepositoryMock;
-    @MockBean
-    ChatService chatServiceMock;
-    @MockBean
     ChannelService channelServiceMock;
-    @MockBean
-    ItemRepository itemRepositoryMock;
-    @MockBean
-    ChannelRepository channelRepository;
-    @MockBean
-    GeomUtil geomUtilMock;
     @MockBean
     AuthenticationHandler authenticationHandlerMock;
     GeomUtil geomUtil = new GeomUtil();
+
     @Nested
     @DisplayName("일대일 채널 개설")
     class startPrivateChannel {
@@ -84,7 +65,6 @@ class ChannelControllerTest extends RestDocsSupportTest {
         User receiver = User.builder().id(2L).role(Role.USER).userKey("test_2").password("").build();
 
         Channel channel = Channel.builder().id(3L).build();
-        Channel newChannel = Channel.builder().id(4L).build();
 
         Chat chat = Chat.builder().id(4L).owner(sender).build();
 
@@ -93,8 +73,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(sender.getId());
-            BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
-                    .willReturn(Optional.of(new ChannelAndChatDto(channel.getId(), chat.getId())));
+            BDDMockito.given(channelServiceMock.createPrivateChannel(sender.getId(), receiver.getId()))
+                    .willReturn(new CreateChannelDto(false, channel.getId(), chat.getId()));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -105,14 +85,12 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
-            verify(chatServiceMock, never()).createPrivateChannel(anyLong(), anyLong());
+            verify(channelServiceMock, times(1)).createPrivateChannel(anyLong(), anyLong());
 
-            resultActions.andExpect(status().isConflict())
-                    .andExpect(
-                            content().json(objectMapper.writeValueAsString(
-                                    new StartPrivateChannelResponseDto(channel.getId(), chat.getId(), "이미 진행중인 채널이 있습니다.")))
-                    );
+            resultActions.andExpect(status().isConflict());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
+                    new CommonResponseDto<>("이미 진행중인 채널이 있습니다.", new ChannelAndChatDto(channel.getId(), chat.getId()))
+            )));
         }
 
         @Test
@@ -121,10 +99,9 @@ class ChannelControllerTest extends RestDocsSupportTest {
         void test2() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(sender.getId());
-            BDDMockito.given(chatRepositoryMock.findPrivateChannelBetweenUsers(sender.getId(), receiver.getId()))
-                    .willReturn(Optional.empty());
-            BDDMockito.given(chatServiceMock.createPrivateChannel(sender.getId(), receiver.getId()))
-                    .willReturn(new ChannelAndChatDto(newChannel.getId(), chat.getId()));
+            BDDMockito.given(channelServiceMock.createPrivateChannel(sender.getId(), receiver.getId()))
+                    .willReturn(new CreateChannelDto(true, channel.getId(), chat.getId()));
+
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -135,26 +112,27 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatRepositoryMock, times(1)).findPrivateChannelBetweenUsers(sender.getId(), receiver.getId());
-            verify(chatServiceMock, times(1)).createPrivateChannel(sender.getId(), receiver.getId());
+            verify(channelServiceMock, times(1)).createPrivateChannel(sender.getId(), receiver.getId());
 
-            resultActions.andExpect(status().isCreated())
-                    .andExpect(content().json(objectMapper.writeValueAsString(
-                            new StartPrivateChannelResponseDto(newChannel.getId(), chat.getId(), "일대일 채널이 개설되었습니다.")
-                    )));
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
+                    new CommonResponseDto<>("일대일 채널이 개설 되었습니다.", new ChannelAndChatDto(channel.getId(), chat.getId()))
+            )));
 
             resultActions.andDo(restDocs.document(
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("채팅")
-                                    .summary("특정 회원에 대하여 일대일 채팅의 채널 id 및 채팅 id 를 반환합니다.")
+                                    .summary("일대일 채널 개설")
+                                    .description("특정 회원과의 일대일 채널을 개설하고 채널 및 채팅방 ID 를 반환합니다. \n\n" +
+                                                "이미 진행 중인 경우에는 채널 및 채팅방 ID 를 반환합니다.")
                                     .pathParameters(
                                             parameterWithName("receiverId").description("상대방 id")
                                     )
                                     .responseFields(
-                                            fieldWithPath("channelId").description("채팅 채널 id"),
-                                            fieldWithPath("chatId").description("내 채팅방 id"),
-                                            fieldWithPath("message").description("결과 메세지")
+                                            fieldWithPath("message").description("결과 메세지"),
+                                            fieldWithPath("result").description("결과"),
+                                            fieldWithPath("result.channelId").description("채팅 채널 id"),
+                                            fieldWithPath("result.chatId").description("내 채팅방 id")
                                     )
                                     .build()
                     )
@@ -163,8 +141,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
+    @DisplayName("그룹 채널 개설")
     class startGroupChannel {
-
         Storage storage = Storage.builder()
                 .id(1L)
                 .name("창고")
@@ -174,17 +152,6 @@ class ChannelControllerTest extends RestDocsSupportTest {
         User channelOwner = User.builder()
                 .id(2L)
                 .userKey("test")
-                .build();
-        Item individualItem = Item.builder()
-                .id(2L)
-                .itemType(ItemType.INDIVIDUAL_BUY)
-                .name("테스트 아이템")
-                .description("")
-                .status(true)
-                .imgUrl("")
-                .user(channelOwner)
-                .viewCount(0)
-                .storage(storage)
                 .build();
 
         Item groupItem = Item.builder()
@@ -199,19 +166,17 @@ class ChannelControllerTest extends RestDocsSupportTest {
                 .storage(storage)
                 .build();
 
-        StartGroupChannelRequestDto badRequestDto = StartGroupChannelRequestDto.builder()
-                .itemId(individualItem.getId())
-                .defaultTitle("공동구매")
-                .limit(5)
-                .build();
+//        StartGroupChannelRequestDto badRequestDto = StartGroupChannelRequestDto.builder()
+//                .itemId(individualItem.getId())
+//                .defaultTitle("공동구매")
+//                .limit(5)
+//                .build();
 
         StartGroupChannelRequestDto normalRequestDto = StartGroupChannelRequestDto.builder()
                 .itemId(groupItem.getId())
                 .defaultTitle("공동구매")
                 .limit(5)
                 .build();
-
-
 
         GroupChannel groupChannel = GroupChannel.builder()
                 .id(3L)
@@ -225,18 +190,14 @@ class ChannelControllerTest extends RestDocsSupportTest {
                 .channel(groupChannel)
                 .build();
 
-
         @Test
         @DisplayName("그룹 채널 개설 실패 : 이미 채널이 존재하는 경우")
         void test1() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(channelOwner.getId());
-            BDDMockito.given(itemRepositoryMock.findById(groupItem.getId())).willReturn(Optional.of(groupItem));
-            BDDMockito.given(itemRepositoryMock.findUserIdById(groupItem.getId())).willReturn(channelOwner.getId());
-            BDDMockito.given(channelRepository.findGroupChannelByItemId(normalRequestDto.getItemId()))
-                    .willReturn(Optional.of(groupChannel)); // 조회 결과 있음
-            BDDMockito.given(chatRepositoryMock.findChatByChannelIdAndOwnerId(normalRequestDto.getItemId(), channelOwner.getId()))
-                    .willReturn(Optional.of(chat));
+            BDDMockito.given(channelServiceMock.createGroupChannel(channelOwner.getId(),
+                            normalRequestDto.getItemId(), normalRequestDto.getDefaultTitle(), normalRequestDto.getLimit()))
+                    .willReturn(new CreateChannelDto(false, groupChannel.getId(), chat.getId()));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -250,9 +211,12 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatServiceMock, times(0)).createGroupChannel(any(), any(), any(), anyInt());
+            verify(channelServiceMock, times(1)).createGroupChannel(channelOwner.getId(),
+                    normalRequestDto.getItemId(), normalRequestDto.getDefaultTitle(), normalRequestDto.getLimit());
             resultActions.andExpect(status().isConflict());
-            resultActions.andExpect(content().json(objectMapper.writeValueAsString(new StartGroupChannelResponseDto(groupChannel.getId(), chat.getId(), "이미 진행중인 채널이 있습니다."))));
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
+                    new CommonResponseDto<>("이미 진행중인 채널이 있습니다.", new ChannelAndChatDto(groupChannel.getId(), chat.getId()))
+            )));
 
         }
 
@@ -262,13 +226,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
         void test2() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(channelOwner.getId());
-            BDDMockito.given(itemRepositoryMock.findById(groupItem.getId())).willReturn(Optional.of(groupItem));
-            BDDMockito.given(itemRepositoryMock.findUserIdById(groupItem.getId())).willReturn(channelOwner.getId());
-            BDDMockito.given(channelRepository.findGroupChannelByItemId(normalRequestDto.getItemId()))
-                    .willReturn(Optional.empty()); // 조회 결과 없음
-            BDDMockito.given(chatServiceMock.createGroupChannel(channelOwner.getId(), normalRequestDto.getItemId(),
-                            normalRequestDto.getDefaultTitle(), normalRequestDto.getLimit()))
-                    .willReturn(new ChannelAndChatDto(100L, 101L));
+            BDDMockito.given(channelServiceMock.createGroupChannel(anyLong(), anyLong(), anyString(), anyInt()))
+                    .willReturn(new CreateChannelDto(true, groupChannel.getId(), chat.getId()));
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -282,14 +241,16 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatServiceMock, times(1)).createGroupChannel(channelOwner.getId(), normalRequestDto.getItemId(),
-                    normalRequestDto.getDefaultTitle(), normalRequestDto.getLimit());
+            verify(channelServiceMock, times(1)).createGroupChannel(channelOwner.getId(),
+                    normalRequestDto.getItemId(), normalRequestDto.getDefaultTitle(), normalRequestDto.getLimit());
 
             resultActions.andExpect(status().isCreated());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
-                            new StartGroupChannelResponseDto(100L, 101L, "그룹 채널이 개설되었습니다.")
-                    )));
+                    new CommonResponseDto<>("그룹 채널이 개설되었습니다.", new ChannelAndChatDto(groupChannel.getId(), chat.getId()))
+                    ))
+            );
 
+            // restDocs
             resultActions.andDo(restDocs.document(
                     resource(
                             ResourceSnippetParameters.builder()
@@ -302,9 +263,10 @@ class ChannelControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("limit").description("채팅 채널 정원")
                                     )
                                     .responseFields(
-                                            fieldWithPath("channelId").description("그룹 채널 id"),
-                                            fieldWithPath("chatId").description("내 채팅방 id"),
-                                            fieldWithPath("message").description("그룹 채널 개설 결과 메세지")
+                                            fieldWithPath("message").description("그룹 채널 개설 결과 메세지"),
+                                            fieldWithPath("result").description("해당 아이템의 Channel ID 와 Chat ID"),
+                                            fieldWithPath("result.channelId").description("그룹 채널 ID"),
+                                            fieldWithPath("result.chatId").description("내 채팅방 ID")
                                     )
                                     .requestSchema(
                                             Schema.schema("그룹 채널 개설 Request")
@@ -319,6 +281,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
+    @DisplayName("근처 그룹 채널 조회")
     class findGroupChannelNearby {
         User user = User.builder().id(1L).role(Role.USER).userKey("test_1").password("").build();
 
@@ -373,13 +336,12 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
         int radius = 2000;
         Coord coord = new Coord(127.037422, 37.4954475);
-        Point point = geomUtil.createPoint(coord);
+
         @Test
         @DisplayName("조회 결과 없음")
         void test1() throws Exception {
             // given
-            BDDMockito.given(geomUtilMock.createPoint(coord)).willReturn(point);
-            BDDMockito.given(channelRepository.findGroupChannelNearBy(point, radius, PageRequest.of(0, 10))).willReturn(Page.empty());
+            BDDMockito.given(channelServiceMock.findGroupChannelNearby(coord, radius, 0, 10)).willReturn(new ArrayList<>());
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
@@ -392,7 +354,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // then
             resultActions.andExpect(status().isNotFound());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
-                    new FindGroupChannelNearbyResponseDto("근처에 진행중인 그룹 채팅이 없습니다.", coord, radius, null))));
+                    new CommonResponseDto<>("근처에 진행중인 그룹 채팅이 없습니다.", new ArrayList<>()))));
         }
 
         @Test
@@ -402,9 +364,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // given
             List<GroupChannel> groupChannels = Arrays.asList(channel1, channel2);
             List<GroupChannelDto> dtos = groupChannels.stream().map(GroupChannelDto::new).collect(Collectors.toList());
-            BDDMockito.given(geomUtilMock.createPoint(coord)).willReturn(point);
-            BDDMockito.given(channelRepository.findGroupChannelNearBy(point, radius, PageRequest.of(0, 10)))
-                    .willReturn(new PageImpl<>(groupChannels, PageRequest.of(0, 10), groupChannels.size()));
+
+            BDDMockito.given(channelServiceMock.findGroupChannelNearby(coord, radius, 0, 10)).willReturn(dtos);
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
@@ -417,7 +378,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // then
             resultActions.andExpect(status().isOk());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
-                    new FindGroupChannelNearbyResponseDto("가까운 그룹 채널이 조회 되었습니다", coord, radius, dtos))));
+                    new CommonResponseDto<>("가까운 그룹 채널이 조회 되었습니다", dtos))));
 
             // restDocs
             resultActions.andDo(restDocs.document(
@@ -431,10 +392,6 @@ class ChannelControllerTest extends RestDocsSupportTest {
                                     parameterWithName("_csrf").ignored()
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
-                                    fieldWithPath("center").description("조회한 중심 좌표"),
-                                    fieldWithPath("center.longitude").description("조회한 중심 경도"),
-                                    fieldWithPath("center.latitude").description("조회한 중심 위도"),
-                                    fieldWithPath("radius").description("조회 반경"),
                                     fieldWithPath("result[]").description("조회한 그룹 채널 정보"),
                                     fieldWithPath("result[].channelId").description("채널 id"),
                                     fieldWithPath("result[].itemId").description("공동 구매 아이템 id"),
@@ -450,7 +407,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    class findChatParticipants {
+    @DisplayName("채널에 참여하고 있는 유저 조회")
+    class findChannelParticipants {
         UserProfile profile1 = UserProfile.builder().nickname("참가자1").imgUrl("사진1").build();
         UserProfile profile2 = UserProfile.builder().nickname("참가자2").imgUrl("사진2").build();
         UserProfile profile3 = UserProfile.builder().nickname("참가자3").imgUrl("사진3").build();
@@ -471,7 +429,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     new ParticipantInfoDto(participant2.getId(), participant2.getUserProfile().getNickname(), participant2.getUserProfile().getImgUrl()),
                     new ParticipantInfoDto(participant3.getId(), participant3.getUserProfile().getNickname(), participant3.getUserProfile().getImgUrl()));
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(participant1.getId());
-            BDDMockito.given(channelServiceMock.findParticipantsInChannel(groupChannel.getId())).willReturn(infoListDto);
+            BDDMockito.given(channelServiceMock.findParticipantsInChannel(groupChannel.getId(), participant1.getId())).willReturn(infoListDto);
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -481,16 +439,12 @@ class ChannelControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(channelServiceMock, times(1)).findParticipantsInChannel(groupChannel.getId());
+            verify(channelServiceMock, times(1)).findParticipantsInChannel(groupChannel.getId(), participant1.getId());
 
             resultActions.andExpect(status().isOk());
             resultActions.andExpect(content()
                     .json(objectMapper.writeValueAsString(
-                            FindChannelParticipantsResponseDto.builder()
-                                    .message("채널 참여자 정보를 조회하였습니다.")
-                                    .participantsCount(infoListDto.size())
-                                    .result(infoListDto)
-                                    .build()
+                            new CommonResponseDto<>("채널 참여자 정보를 조회하였습니다.", infoListDto)
                     ))
             );
 
@@ -504,7 +458,6 @@ class ChannelControllerTest extends RestDocsSupportTest {
                                             parameterWithName("channelId").description("참여자 조회를 하고자 하는 채널 id")
                                     ).responseFields(
                                             fieldWithPath("message").description("조회 결과 메세지"),
-                                            fieldWithPath("participantsCount").description("채널 참여자 수"),
                                             fieldWithPath("result[]").description("채널 참여자 정보"),
                                             fieldWithPath("result[].participantId").description("참여자 id"),
                                             fieldWithPath("result[].nickname").description("참여자 닉네임"),
@@ -515,6 +468,65 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     )
             ));
         }
+    }
+
+    @Nested
+    @DisplayName("채널 퇴장, Chat 삭제")
+    class deleteChat {
+        User user = User.builder()
+                .id(1L)
+                .build();
+
+        Channel channel = Channel.builder()
+                .channelType(ChannelType.GROUP)
+                .id(2L).build();
+
+        @Test
+        @Tag("api")
+        @DisplayName("종료 성공")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .delete("/api/channel/{channelId}", channel.getId())
+                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            verify(authenticationHandlerMock, times(1)).getUserId(any());
+            verify(channelServiceMock, times(1)).deleteChat(channel.getId(), user.getId());
+
+            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
+                    new CommonResponseDto<>("해당 채널에서 퇴장하였습니다.", channel.getId())
+            )));
+
+            // restDocs
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("채팅")
+                                    .summary("채팅방을 종료합니다.")
+                                    .description("채팅방을 종료합니다.\n\n" +
+                                            "일대일 채팅의 경우, Chat은 삭제되지 않고 연관된 ChatMessage 가 삭제됩니다.\n\n" +
+                                            "그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제됩니다.\n\n" +
+                                            "Channel 과 연관된 Chat 이 없으면 채널에 아무도 남지 않았다고 판단합니다.\n\n" +
+                                            "채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.\n\n")
+                                    .pathParameters(
+                                            parameterWithName("channelId").description("종료하고자 하는 채팅방 id")
+                                    ).responseFields(
+                                            fieldWithPath("result").description("종료된 채팅방 id"),
+                                            fieldWithPath("message").description("종료 결과를 알려주는 메세지")
+                                    ).responseSchema(
+                                            Schema.schema("채팅방 종료 Response")
+                                    ).build()
+                    ))
+            );
+        }
+
     }
 
 

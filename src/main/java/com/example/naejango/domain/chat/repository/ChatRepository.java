@@ -28,6 +28,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<ChannelAndChatDto> findPrivateChannelBetweenUsers(@Param("ownerId") Long ownerId, @Param("theOtherId") Long theOtherId);
 
 
+    /** 일대일 채널에서 상대방 Chat 을 조회합니다. */
     @Query("SELECT c FROM Chat c WHERE c.channel.id = :channelId AND c.id <> :chatId")
     Optional<Chat> findOtherChatByPrivateChannelId(@Param("channelId") Long channelId, @Param("chatId") Long chatId);
 

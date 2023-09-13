@@ -23,9 +23,7 @@ public class WebSocketController {
     private final SubscribeService subscribeService;
     private final WebSocketService webSocketService;
 
-    /**
-     * 특정 채팅 채널을 구독하는 Endpoint 입니다.
-     */
+    /** 특정 채팅 채널을 구독하는 WebSocket Endpoint */
     @SubscribeMapping("/sub/channel/{channelId}")
     public WebSocketMessageDto subscribeChannel(@DestinationVariable("channelId") Long channelId,
                                  @Headers SimpMessageHeaderAccessor accessor) {
@@ -40,7 +38,7 @@ public class WebSocketController {
                 .content("채널을 구독 합니다.").build();
     }
 
-    /** 채팅 Channel 에 메세지를 보내는 Endpoint */
+    /** 채팅 Channel 에 메세지를 보내는 WebSocket Endpoint */
     @MessageMapping("/pub/channel/{channelId}")
     public void sendMessage(@Payload WebSocketMessageDto messageDto,
                             @DestinationVariable("channelId") Long channelId,
@@ -50,20 +48,17 @@ public class WebSocketController {
         messageService.publishMessage(channelId, userId, MessageType.CHAT, messageDto.getContent());
     }
 
-    /**
-     * 웹소켓 통신 중 에러가 발생하였을 시 해당 정보를 수신하는 채널을 구독하는 Endpoint 입니다.
-     * 알림 메세지는 유저 개인만 받으면 되기 때문에 Redis 로 Pub/Sub 을 관리하지 않습니다.
-     * @param accessor
-     * @return
-     */
+    /** 웹소켓 통신 중 에러 정보를 수신하는 WebSocket Endpoint */
     @SubscribeMapping("/user/sub/info")
     public WebSocketMessageDto subscribeInfoChannel(SimpMessageHeaderAccessor accessor) {
         Long userId = authenticationHandler.getUserId(accessor.getUser());
+
+        // 알림 메세지는 유저 개인만 받으면 되기 때문에 Redis 로 Pub/Sub 을 관리하지 않습니다.
         return WebSocketMessageDto.builder().messageType(MessageType.INFO).userId(userId)
                 .content("소켓 통신 정보를 수신합니다.").build();
     }
 
-    /** 웹소켓 통신 중 발생하는 예외를 핸들링합니다. */
+    /** 웹소켓 통신 중 발생하는 예외 핸들링 */
     @MessageExceptionHandler
     @SendToUser("/sub/info")
     public WebSocketErrorResponse handleException(Throwable e) {
@@ -73,7 +68,7 @@ public class WebSocketController {
             return WebSocketErrorResponse.response(exception.getErrorCode());
         }
         e.printStackTrace();
-        return WebSocketErrorResponse.builder().error(e.getMessage()).message("통신 중 에러가 발생하였습니다.").build();
+        return WebSocketErrorResponse.builder().error(e.getCause().getMessage()).message("통신 중 에러가 발생하였습니다.").build();
     }
 
 }

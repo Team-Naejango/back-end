@@ -15,7 +15,7 @@ import java.util.List;
 public interface StorageRepository extends JpaRepository<Storage, Long> {
 
     /* 회원 id를 기준으로 조회 */
-    @Query("select s from Storage s where s.user.id = :userId ORDER BY s.createdDate ASC")
+    @Query("select s from Storage s where s.user.id = :userId ORDER BY s.createdDate DESC")
     List<Storage> findByUserId(@Param("userId") Long userId);
 
     /* 특정 좌표 및 반경 내에 있는 모든 창고 조회 */

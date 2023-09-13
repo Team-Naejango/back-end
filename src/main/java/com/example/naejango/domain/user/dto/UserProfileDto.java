@@ -1,6 +1,7 @@
 package com.example.naejango.domain.user.dto;
 
 import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.domain.UserProfile;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
+@EqualsAndHashCode
 public class UserProfileDto {
 
     private String nickname;
@@ -20,4 +22,13 @@ public class UserProfileDto {
     private String phoneNumber;
     private LocalDateTime lastLogin;
 
+    public UserProfileDto(UserProfile userProfile) {
+        this.nickname = userProfile.getNickname();
+        this.intro = userProfile.getIntro();
+        this.imgUrl = userProfile.getImgUrl();
+        this.gender = userProfile.getGender();
+        this.birth = userProfile.getBirth();
+        this.phoneNumber = userProfile.getPhoneNumber();
+        this.lastLogin = userProfile.getLastLogin();
+    }
 }

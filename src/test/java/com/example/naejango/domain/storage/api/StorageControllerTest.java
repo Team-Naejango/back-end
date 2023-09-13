@@ -9,11 +9,13 @@ import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
+import com.example.naejango.domain.storage.dto.StorageInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -30,6 +32,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -95,7 +98,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                                                 fieldWithPath("coord.latitude").description("위도")
                                         )
                                         .responseFields(
-                                                fieldWithPath("storageId").description("생성된 창고 id"),
+                                                fieldWithPath("result").description("생성된 창고 id"),
                                                 fieldWithPath("message").description("결과 메세지")
                                         )
                                         .requestSchema(
@@ -106,11 +109,9 @@ class StorageControllerTest extends RestDocsSupportTest {
                         )));
     }
 
-    @Test
-    @Tag("api")
+    @Nested
     @DisplayName("요청 회원의 창고 목록 조회")
-    void storageList() throws Exception {
-        // when
+    class myStorageList {
         Storage testStorage1 = Storage.builder().id(1L).name("창고1").imgUrl("imgUrl")
                 .description("집").address("강남")
                 .location(geomUtil.createPoint(12.12, 34.34))
@@ -124,48 +125,57 @@ class StorageControllerTest extends RestDocsSupportTest {
                 .location(geomUtil.createPoint(12.12, 34.34))
                 .build();
 
-        List<Storage> storages = Arrays.asList(testStorage1, testStorage2, testStorage3);
-        BDDMockito.given(storageServiceMock.myStorageList(anyLong())).willReturn(storages);
+        @Test
+        @Tag("api")
+        @DisplayName("요청 회원의 창고 목록 조회")
+        void storageList() throws Exception {
+            // when
+            List<Storage> storages = Arrays.asList(testStorage1, testStorage2, testStorage3);
+            BDDMockito.given(storageServiceMock.myStorageList(anyLong()))
+                    .willReturn(storages.stream().map(StorageInfoDto::new).collect(Collectors.toList()));
 
-        ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                .get("/api/storage")
-                .header("Authorization", "엑세스 토큰")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-        );
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/storage")
+                    .header("Authorization", "엑세스 토큰")
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
 
-        // then
-        verify(authenticationHandlerMock, only()).getUserId(any());
-        verify(storageServiceMock, only()).myStorageList(anyLong());
-        resultActions.andExpect(
-                status().isOk()
-        );
+            // then
+            verify(authenticationHandlerMock, only()).getUserId(any());
+            verify(storageServiceMock, only()).myStorageList(anyLong());
+            resultActions.andExpect(
+                    status().isOk()
+            );
 
-        // RestDocs
-        resultActions.andDo(restDocs.document(
-                        resource(
-                                ResourceSnippetParameters.builder()
-                                        .tag("창고")
-                                        .description("요청 유저의 보유 창고 목록을 조회")
-                                        .responseFields(
-                                                fieldWithPath("storageList[]").type(JsonFieldType.ARRAY).description("StorageInfoDto 객체 목록"),
-                                                fieldWithPath("storageList[].id").description("창고 id"),
-                                                fieldWithPath("storageList[].name").description("창고 이름"),
-                                                fieldWithPath("storageList[].imgUrl").description("창고 이미지 링크"),
-                                                fieldWithPath("storageList[].description").description("창고 소개"),
-                                                fieldWithPath("storageList[].address").description("창고 주소"),
-                                                fieldWithPath("storageList[].coord").description("창고 좌표"),
-                                                fieldWithPath("storageList[].coord.longitude").description("경도"),
-                                                fieldWithPath("storageList[].coord.latitude").description("위도"),
-                                                fieldWithPath("count").type(JsonFieldType.NUMBER).description("보유 창고 개수")
-                                        )
-                                        .responseSchema(
-                                                Schema.schema("내 창고 조회 시 응답")
-                                        )
-                                        .build()
-                        )
-                )
-        );
+            // RestDocs
+            resultActions.andDo(restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("창고")
+                                            .summary("내 창고 목록 조회")
+                                            .description("요청 유저의 보유 창고 목록을 조회")
+                                            .responseFields(
+                                                    fieldWithPath("message").description("결과 메세지"),
+                                                    fieldWithPath("result[]").type(JsonFieldType.ARRAY).description("조회 결과"),
+                                                    fieldWithPath("result[].id").description("조회 결과 리스트"),
+                                                    fieldWithPath("result[].name").description("창고 이름"),
+                                                    fieldWithPath("result[].imgUrl").description("창고 이미지 링크"),
+                                                    fieldWithPath("result[].description").description("창고 소개"),
+                                                    fieldWithPath("result[].address").description("창고 주소"),
+                                                    fieldWithPath("result[].coord").description("창고 좌표"),
+                                                    fieldWithPath("result[].coord.longitude").description("경도"),
+                                                    fieldWithPath("result[].coord.latitude").description("위도")
+                                            )
+                                            .responseSchema(
+                                                    Schema.schema("내 창고 조회 시 응답")
+                                            )
+                                            .build()
+                            )
+                    )
+            );
+        }
     }
+
 
     @Test
     @Tag("api")
@@ -254,7 +264,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                 .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         // then
-        verify(storageServiceMock, times(1)).modifyStorageInfo(any(ModifyStorageInfoRequestDto.class), anyLong(), anyLong());
+        verify(storageServiceMock, times(1)).modifyStorageInfo(anyLong(), anyLong(), anyString(), anyString(), anyString());
 
         resultActions.andExpect(status().isOk());
 

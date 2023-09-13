@@ -1,4 +1,4 @@
-package com.example.naejango.domain.user.dto.response;
+package com.example.naejango.domain.user.dto;
 
 import com.example.naejango.domain.user.domain.Gender;
 import lombok.*;
@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class MyProfileResponseDto {
+public class MyProfileDto {
 
     private Long userId;
     private String nickname;

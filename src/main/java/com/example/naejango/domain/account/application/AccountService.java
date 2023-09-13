@@ -32,13 +32,13 @@ public class AccountService {
     /** 계좌에 금액 충전 */
     @Transactional
     public void chargeAccount(Long userId, ChargeAccountRequestDto chargeAccountRequestDto) {
-        Account account = accountRepository.findByUserId(userId);
+        Account account = accountRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.ACCOUNT_NOT_FOUND));
         account.chargeBalance(chargeAccountRequestDto.getAmount());
     }
 
     /** 계좌 잔액 조회 */
     public int getAccount(Long userId){
-        Account account = accountRepository.findByUserId(userId);
+        Account account = accountRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.ACCOUNT_NOT_FOUND));
         return account.getBalance();
     }
 }

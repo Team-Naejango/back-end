@@ -4,7 +4,7 @@ import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
-import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
+import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.oauth.OAuth2UserInfo;
@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -23,8 +24,37 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
 
+    /**
+     * 유저 프로필을 생성
+     */
     @Transactional
-    public User join(OAuth2UserInfo oauth2UserInfo){
+    public void createUserProfile(Long userId, String nickname, String intro, String imgUrl,
+                                  Gender gender, String phoneNumber, String birth) {
+        // 유저를 로드합니다.
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 유저 프로필을 생성합니다.
+        UserProfile userProfile = UserProfile.builder()
+                .nickname(nickname).intro(intro).imgUrl(imgUrl)
+                .gender(gender).phoneNumber(phoneNumber).birth(birth)
+                .lastLogin(LocalDateTime.now()).build();
+        userProfileRepository.save(userProfile);
+
+        // 유저에 할당하고 Role 을 User 로 바꿉니다.
+        user.setUserProfile(userProfile);
+    }
+
+    public UserProfileDto findOtherUserProfile(Long userId) {
+        // 회원 로드
+        User user = userRepository.findUserWithProfileById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 임시 회원의 경우 NOT_FOUND
+        if(user.getRole().equals(Role.TEMPORAL)) throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        return new UserProfileDto(user.getUserProfile());
+    }
+
+    public User join(OAuth2UserInfo oauth2UserInfo) {
         User newUser = User.builder()
                 .userKey(oauth2UserInfo.getUserKey())
                 .password("null")
@@ -37,7 +67,7 @@ public class UserService {
     public Long createGuest() {
         String uuid = UUID.randomUUID().toString();
 
-        User guest = User.builder().userKey("Guest"+uuid)
+        User guest = User.builder().userKey("Guest" + uuid)
                 .role(Role.GUEST)
                 .password("").build();
 
@@ -58,17 +88,21 @@ public class UserService {
     }
 
     @Transactional
-    public void allocateUserProfile(UserProfile userProfile, Long userId) {
-        userProfileRepository.save(userProfile);
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        user.setUserProfile(userProfile);
+    public void modifyUserProfile(Long userId, String nickname, String intro, String imgUrl) {
+        UserProfile userProfile = userProfileRepository.findUserProfileByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
+
+        userProfile.modifyUserProfile(nickname, intro, imgUrl);
     }
 
     @Transactional
-    public void modifyUserProfile(ModifyUserProfileRequestDto requestDto, Long userId) {
-        UserProfile userProfile = userProfileRepository.findUserProfileByUserId(userId)
+    public User login(Long userId) {
+        User user = userRepository.findUserWithProfileById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
-        userProfile.modifyUserProfile(requestDto);
+        if (!user.getRole().equals(Role.TEMPORAL)) {
+            user.getUserProfile().setLastLogin();
+        }
+        return user;
     }
 
     @Transactional
