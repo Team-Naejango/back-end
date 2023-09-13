@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.dto.response;
+package com.example.naejango.domain.chat.dto;
 
 import lombok.*;
 
@@ -7,8 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class JoinGroupChatResponseDto {
+public class CreateChannelDto {
+    private boolean isCreated;
     private Long channelId;
     private Long chatId;
-    private String message;
+
 }

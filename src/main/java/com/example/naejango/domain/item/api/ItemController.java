@@ -13,7 +13,7 @@ import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
-import com.example.naejango.domain.storage.application.SearchingConditionDto;
+import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.response.FindStorageChannelResponseDto;
 import com.example.naejango.domain.storage.dto.response.SearchItemResponseDto;

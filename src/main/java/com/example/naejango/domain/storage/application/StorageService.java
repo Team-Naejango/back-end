@@ -32,18 +32,16 @@ public class StorageService {
     private final GeomUtil geomUtil;
     private final EntityManager em;
 
-
     @Transactional
-    public Long createStorage(String name, Coord location, String address, String description, String imgUrl,  Long userId) {
+    public Long createStorage(String name, Coord location, String address, String description, String imgUrl, Long userId) {
         Point point = geomUtil.createPoint(location.getLongitude(), location.getLatitude());
-        User user = em.getReference(User.class, userId);
         Storage storage = Storage.builder()
                 .name(name)
                 .location(point)
                 .address(address)
                 .description(description)
                 .imgUrl(imgUrl)
-                .user(user)
+                .user(em.getReference(User.class, userId))
                 .build();
         storageRepository.save(storage);
         return storage.getId();

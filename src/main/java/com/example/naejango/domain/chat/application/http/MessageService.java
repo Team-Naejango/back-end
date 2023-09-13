@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.application;
+package com.example.naejango.domain.chat.application.http;
 
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.MessageDto;
@@ -26,6 +26,7 @@ public class MessageService {
 
     @Transactional
     public void publishMessage(Long channelId, Long senderId, MessageType messageType, String content) {
+
         // 메세지를 저장합니다.
         Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
         Message sentMessage = Message.builder()
@@ -35,8 +36,9 @@ public class MessageService {
                 .channel(channel)
                 .build();
         messageRepository.save(sentMessage);
+
         // 메세지를 채팅방에 할당 합니다.
-        // 현재 메시지를 구독  중인(보고 있는) 구독자를 찾아옵니다.
+        // 현재 메시지를 구독 중인(보고 있는) 구독자를 찾아옵니다.
         Set<Long> subscribers = subscribeRepository.findSubscribersByChannelId(channelId);
         // 채널에 연결되어 있는 모든 chatId를 찾아 옵니다.
         chatRepository.findByChannelId(channelId).forEach(chat -> {
@@ -65,6 +67,7 @@ public class MessageService {
         return findResult.getContent().stream().map(MessageDto::new).collect(Collectors.toList());
     }
 
+    @Transactional
     public void readMessages(Long chatId) {
         chatMessageRepository.readMessage(chatId);
     }

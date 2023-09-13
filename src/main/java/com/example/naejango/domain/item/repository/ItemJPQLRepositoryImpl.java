@@ -3,7 +3,7 @@ package com.example.naejango.domain.item.repository;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
-import com.example.naejango.domain.storage.application.SearchingConditionDto;
+import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Repository;
 

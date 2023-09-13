@@ -55,6 +55,7 @@ public class UserService {
         return new UserProfileDto(user.getUserProfile());
     }
 
+    @Transactional
     public User join(OAuth2UserInfo oauth2UserInfo) {
         User newUser = User.builder()
                 .userKey(oauth2UserInfo.getUserKey())
@@ -107,7 +108,7 @@ public class UserService {
     }
 
     @Transactional
-    public User webSocketlogin(Long userId) {
+    public User webSocketLogin(Long userId) {
         User user = userRepository.findUserWithProfileById(userId)
                 .orElseThrow(() -> new WebSocketException(ErrorCode.USER_NOT_FOUND));
         if (user.getRole().equals(Role.TEMPORAL)) {

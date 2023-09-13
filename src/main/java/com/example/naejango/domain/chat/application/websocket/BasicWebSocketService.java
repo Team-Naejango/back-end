@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.application;
+package com.example.naejango.domain.chat.application.websocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

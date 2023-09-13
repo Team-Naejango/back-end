@@ -1,6 +1,6 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.application.MessageService;
+import com.example.naejango.domain.chat.application.http.MessageService;
 import com.example.naejango.domain.chat.dto.MessageDto;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;

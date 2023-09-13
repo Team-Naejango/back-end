@@ -1,10 +1,8 @@
-package com.example.naejango.domain.chat.application;
+package com.example.naejango.domain.chat.application.http;
 
+import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.*;
-import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
-import com.example.naejango.domain.chat.dto.GroupChannelDto;
-import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
-import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
+import com.example.naejango.domain.chat.dto.*;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -31,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChannelService {
     private final ChannelRepository channelRepository;
@@ -90,7 +89,6 @@ public class ChannelService {
     /** 그룹 채널 생성 */
     @Transactional
     public CreateChannelDto createGroupChannel(Long userId, Long itemId, String defaultTitle, int channelLimit) {
-
         // 아이템 로드
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
@@ -119,7 +117,7 @@ public class ChannelService {
         // 그룹 채널 개설
         Channel newGroupChannel = GroupChannel.builder()
                 .owner(em.getReference(User.class, userId))
-                .item(em.getReference(Item.class, itemId))
+                .item(item)
                 .channelType(ChannelType.GROUP)
                 .participantsCount(1)
                 .defaultTitle(defaultTitle)
@@ -129,7 +127,7 @@ public class ChannelService {
 
         // 채팅방을 생성합니다.
         Chat chat = Chat.builder()
-                .owner(em.getReference(User.class, userRepository))
+                .owner(em.getReference(User.class, userId))
                 .channel(newGroupChannel)
                 .title(defaultTitle)
                 .build();
@@ -142,7 +140,6 @@ public class ChannelService {
     }
 
     public List<ParticipantInfoDto> findParticipantsInChannel(Long channelId, Long userId) {
-
         // 조회
         List<User> participants = channelRepository.findParticipantsByChannelId(channelId);
 
@@ -153,15 +150,14 @@ public class ChannelService {
                 participant.getUserProfile().getNickname(), participant.getUserProfile().getImgUrl())).collect(Collectors.toList());
     }
 
+    /** 근처의 그룹 채널 조회 */
     public List<GroupChannelDto> findGroupChannelNearby(Coord center, int radius, int page, int size) {
         Point centerPoint = geomUtil.createPoint(center);
         Page<GroupChannel> findResult = channelRepository.findGroupChannelNearBy(centerPoint, radius, PageRequest.of(page, size));
         return findResult.getContent().stream().map(GroupChannelDto::new).collect(Collectors.toList());
     }
 
-    /**
-     * 채널 퇴장
-     */
+    /** 채널 퇴장 */
     @Transactional
     public void deleteChat(Long channelId, Long userId) {
         // Chat 로드

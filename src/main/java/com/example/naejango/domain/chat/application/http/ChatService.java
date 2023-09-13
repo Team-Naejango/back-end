@@ -1,5 +1,6 @@
-package com.example.naejango.domain.chat.application;
+package com.example.naejango.domain.chat.application.http;
 
+import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.domain.MessageType;
@@ -31,10 +32,7 @@ public class ChatService {
     private final EntityManager em;
 
 
-    /**
-     * 그룹 채널에 입장합니다.
-     * Controller 계층에서 정원이 초과되지 않을 때 호출됩니다.
-     */
+    /** 그룹 채널 입장 */
     @Transactional
     public JoinGroupChannelDto joinGroupChannel(Long channelId, Long userId) {
         // Channel 조회
@@ -81,9 +79,7 @@ public class ChatService {
         return new JoinGroupChannelDto(true, newChat.getId());
     }
 
-    /**
-     * 내 채팅 리스트 조회
-     */
+    /** 내 채팅 리스트 조회 */
     public Page<ChatInfoDto> myChatList(Long userId, int page, int size) {
         return chatRepository.findChatByOwnerIdOrderByLastChat(userId, PageRequest.of(page, size));
     }
@@ -96,7 +92,6 @@ public class ChatService {
 
     /** 채팅방 제목 수정 */
     @Transactional
-
     public void changeChatTitle(Long userId, Long chatId, String title) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
         if (!userId.equals(chat.getOwner().getId()))

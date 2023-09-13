@@ -1,7 +1,7 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.application.ChannelService;
-import com.example.naejango.domain.chat.application.CreateChannelDto;
+import com.example.naejango.domain.chat.application.http.ChannelService;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
 import com.example.naejango.domain.chat.dto.ParticipantInfoDto;

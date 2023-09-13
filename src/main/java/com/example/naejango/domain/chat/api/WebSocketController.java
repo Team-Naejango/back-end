@@ -1,8 +1,8 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.application.MessageService;
-import com.example.naejango.domain.chat.application.SubscribeService;
-import com.example.naejango.domain.chat.application.WebSocketService;
+import com.example.naejango.domain.chat.application.http.MessageService;
+import com.example.naejango.domain.chat.application.websocket.SubscribeService;
+import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.MessageType;
 import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
 import com.example.naejango.global.common.exception.WebSocketErrorResponse;

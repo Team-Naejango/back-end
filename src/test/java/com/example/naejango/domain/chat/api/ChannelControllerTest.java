@@ -2,8 +2,8 @@ package com.example.naejango.domain.chat.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.example.naejango.domain.chat.application.ChannelService;
-import com.example.naejango.domain.chat.application.CreateChannelDto;
+import com.example.naejango.domain.chat.application.http.ChannelService;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.Chat;
