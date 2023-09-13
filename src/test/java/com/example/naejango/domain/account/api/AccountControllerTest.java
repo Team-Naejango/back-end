@@ -36,8 +36,10 @@ class AccountControllerTest extends RestDocsSupportTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class chargeAccount {
         Long userId;
+        int amount = 10000;
         ChargeAccountRequestDto chargeAccountRequestDto =
                 ChargeAccountRequestDto.builder().amount(10000).build();
+
         @Test
         @Order(1)
         @Tag("api")
@@ -48,6 +50,8 @@ class AccountControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
+            BDDMockito.given(accountService.chargeAccount(any(), any(Integer.class)))
+                    .willReturn(amount);
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
@@ -70,8 +74,8 @@ class AccountControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("amount").description("충전 금액")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("message").description("결과 메시지"),
+                                            fieldWithPath("result").description("충전 후 금액")
                                     )
                                     .responseSchema(Schema.schema("계좌 금액 충전 Response"))
                                     .build()
