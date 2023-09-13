@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -199,6 +200,7 @@ class UserControllerTest extends RestDocsSupportTest {
                 .phoneNumber("전화번호")
                 .intro("소개글")
                 .gender(Gender.MALE)
+                .lastLogin(LocalDateTime.now().minusMinutes(15))
                 .build();
 
         User user = User.builder()
