@@ -9,7 +9,9 @@ import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.application.ItemService;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.dto.request.CreateItemCommandDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
+import com.example.naejango.domain.item.dto.request.ModifyItemCommandDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
@@ -73,7 +75,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .type(ItemType.INDIVIDUAL_SELL)
+                        .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
                         .storageId(1L)
                         .build();
@@ -84,7 +86,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .type(ItemType.INDIVIDUAL_SELL)
+                        .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
                         .build();
 
@@ -98,7 +100,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
-            BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
+            BDDMockito.given(itemService.createItem(any(), any(CreateItemCommandDto.class)))
                     .willReturn(createItemResponseDto);
 
             // when
@@ -112,7 +114,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             // then
             resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
-            resultActions.andExpect(MockMvcResultMatchers.jsonPath("id").isNumber());
+            resultActions.andExpect(MockMvcResultMatchers.jsonPath("result.id").isNumber());
             resultActions.andExpect(MockMvcResultMatchers.header().exists("Location"));
 
             resultActions.andDo(restDocs.document(
@@ -127,17 +129,18 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("type").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("category").description("카테고리"),
                                             fieldWithPath("storageId").description("창고 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("id").description("아이템 ID"),
-                                            fieldWithPath("name").description("아이템 이름"),
-                                            fieldWithPath("description").description("아이템 설명"),
-                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("type").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("category").description("카테고리")
+                                            fieldWithPath("result.id").description("아이템 ID"),
+                                            fieldWithPath("result.name").description("아이템 이름"),
+                                            fieldWithPath("result.description").description("아이템 설명"),
+                                            fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.category").description("카테고리"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .requestSchema(Schema.schema("아이템 생성 Request"))
                                     .responseSchema(Schema.schema("아이템 생성 Response"))
@@ -154,7 +157,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
-            BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
+            BDDMockito.given(itemService.createItem(any(), any(CreateItemCommandDto.class)))
                     .willThrow(new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
             // when
@@ -181,7 +184,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
-            BDDMockito.given(itemService.createItem(any(), any(CreateItemRequestDto.class)))
+            BDDMockito.given(itemService.createItem(any(), any(CreateItemCommandDto.class)))
                     .willThrow(new CustomException(ErrorCode.STORAGE_NOT_FOUND));
 
             // when
@@ -243,12 +246,14 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("id").description("아이템 id"),
-                                            fieldWithPath("name").description("아이템 이름"),
-                                            fieldWithPath("description").description("아이템 설명"),
-                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("category").description("카테고리")
+                                            fieldWithPath("result.id").description("아이템 id"),
+                                            fieldWithPath("result.id").description("아이템 id"),
+                                            fieldWithPath("result.name").description("아이템 이름"),
+                                            fieldWithPath("result.description").description("아이템 설명"),
+                                            fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.category").description("카테고리"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("아이템 정보 조회 Response"))
                                     .build()
@@ -447,7 +452,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .type(ItemType.INDIVIDUAL_SELL)
+                        .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
                         .build();
 
@@ -457,7 +462,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .type(ItemType.INDIVIDUAL_SELL)
+                        .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
                         .build();
 
@@ -471,7 +476,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
-            BDDMockito.given(itemService.modifyItem(any(), any(), any(ModifyItemRequestDto.class)))
+            BDDMockito.given(itemService.modifyItem(any(), any(), any(ModifyItemCommandDto.class)))
                     .willReturn(modifyItemResponseDto);
 
             // when
@@ -498,16 +503,17 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("type").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .responseFields(
-                                            fieldWithPath("id").description("아이템 id"),
-                                            fieldWithPath("name").description("아이템 이름"),
-                                            fieldWithPath("description").description("아이템 설명"),
-                                            fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("type").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("category").description("카테고리")
+                                            fieldWithPath("result.id").description("아이템 id"),
+                                            fieldWithPath("result.name").description("아이템 이름"),
+                                            fieldWithPath("result.description").description("아이템 설명"),
+                                            fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.category").description("카테고리"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .requestSchema(Schema.schema("아이템 정보 수정 Request"))
                                     .responseSchema(Schema.schema("아이템 정보 수정 Response"))
