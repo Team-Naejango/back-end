@@ -6,7 +6,7 @@ import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.StorageAndDistanceDto;
 import com.example.naejango.domain.storage.dto.StorageInfoDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
+import com.example.naejango.domain.storage.dto.StorageInfoWithDistanceDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
@@ -60,9 +60,9 @@ public class StorageService {
         return findResult.stream().map(StorageInfoDto::new).collect(Collectors.toList());
     }
 
-    public List<StorageNearbyInfoDto> searchStorage (Point center, int radius, int page, int size) {
+    public List<StorageInfoWithDistanceDto> searchStorage (Point center, int radius, int page, int size) {
         List<StorageAndDistanceDto> storages = storageRepository.findStorageNearby(center, radius, PageRequest.of(page, size));
-        return storages.stream().map(storage -> new StorageNearbyInfoDto(storage.getStorage(), storage.getDistance())).collect(Collectors.toList());
+        return storages.stream().map(storage -> new StorageInfoWithDistanceDto(storage.getStorage(), storage.getDistance())).collect(Collectors.toList());
     }
 
     @Transactional

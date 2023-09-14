@@ -5,12 +5,10 @@ import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.dto.ItemInfoDto;
 import com.example.naejango.domain.storage.dto.StorageInfoDto;
-import com.example.naejango.domain.storage.dto.StorageNearbyInfoDto;
+import com.example.naejango.domain.storage.dto.StorageInfoWithDistanceDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
 import com.example.naejango.domain.storage.dto.request.SearchStorageRequestDto;
-import com.example.naejango.domain.storage.dto.response.ItemListResponseDto;
-import com.example.naejango.domain.storage.dto.response.StorageNearbyListResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +68,7 @@ public class StorageController {
 
     /** 근처 창고 검색 */
     @GetMapping("/nearby")
-    public ResponseEntity<StorageNearbyListResponseDto> storageNearby (@Valid @ModelAttribute SearchStorageRequestDto requestDto) {
+    public ResponseEntity<CommonResponseDto<List<StorageInfoWithDistanceDto>>> storageNearby (@Valid @ModelAttribute SearchStorageRequestDto requestDto) {
         // 검색 조건
         Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
         int radius = requestDto.getRad();
@@ -77,15 +76,15 @@ public class StorageController {
         int size = requestDto.getSize();
 
         // 창고 검색
-        List<StorageNearbyInfoDto> result = storageService.searchStorage(center, radius, page, size);
-        return ResponseEntity.ok().body(new StorageNearbyListResponseDto(page, size, result));
+        List<StorageInfoWithDistanceDto> serviceDto = storageService.searchStorage(center, radius, page, size);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("검색 완료", serviceDto));
+
     }
 
-    /**
-     * 창고에 등록된 아이템 조회
-     */
+    /** 창고에 등록된 아이템 조회 */
     @GetMapping("/{storageId}/items")
-    public ResponseEntity<ItemListResponseDto> ItemList(@PathVariable("storageId") Long storageId,
+    public ResponseEntity<CommonResponseDto<List<ItemInfoDto>>> ItemList(@PathVariable("storageId") Long storageId,
                                                         @RequestParam("status") boolean status,
                                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                                         @RequestParam(value = "size", defaultValue = "10") int size) {
@@ -94,12 +93,12 @@ public class StorageController {
 
         // 검색 결과가 없는 경우
         if (itemList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ItemListResponseDto("등록된 아이템이 없습니다.", page, size, null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CommonResponseDto<>("등록된 아이템이 없습니다.", new ArrayList<>()));
         }
 
         // 검색 결과가 있는 경우
         List<ItemInfoDto> result = itemList.getContent().stream().map(ItemInfoDto::new).collect(Collectors.toList());
-        return ResponseEntity.ok().body(new ItemListResponseDto("창고 내의 아이템을 조회했습니다.", page, size, result));
+        return ResponseEntity.ok().body(new CommonResponseDto<>("창고의 아이템 조회 성공", result));
     }
 
     /**

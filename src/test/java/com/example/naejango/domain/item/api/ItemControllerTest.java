@@ -2,12 +2,9 @@ package com.example.naejango.domain.item.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.example.naejango.domain.chat.domain.ChannelType;
-import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.item.application.ItemService;
-import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.dto.request.CreateItemCommandDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
@@ -17,9 +14,6 @@ import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
-import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.user.domain.Role;
-import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -35,15 +29,11 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Optional;
-
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ItemController.class)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -59,8 +49,6 @@ class ItemControllerTest extends RestDocsSupportTest {
     ChannelRepository channelRepositoryMock;
     @MockBean
     GeomUtil geomUtilMock;
-
-    GeomUtil geomUtil = new GeomUtil();
 
     @Nested
     @Order(1)
@@ -362,85 +350,6 @@ class ItemControllerTest extends RestDocsSupportTest {
 
     @Nested
     @Order(3)
-    @DisplayName("Controller 공동 구매 아이템의 그룹 채널 조회")
-    @WithMockUser()
-    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class findGroupChannel {
-        User user = User.builder().id(1L).role(Role.USER).userKey("test_1").password("").build();
-
-        Storage storage = Storage.builder()
-                .id(2L)
-                .name("테스트 창고1")
-                .location(geomUtil.createPoint(127.0371, 37.4951))
-                .address("서울시 강남구")
-                .build();
-
-        Item item = Item.builder()
-                .id(3L)
-                .itemType(ItemType.INDIVIDUAL_BUY)
-                .name("테스트 아이템2")
-                .description("")
-                .status(true)
-                .imgUrl("")
-                .viewCount(0)
-                .storage(storage)
-                .build();
-
-        GroupChannel channel = GroupChannel.builder()
-                .id(4L)
-                .channelType(ChannelType.GROUP)
-                .item(item)
-                .participantsCount(3)
-                .channelLimit(5)
-                .owner(user)
-                .defaultTitle("그룹채널 1")
-                .build();
-
-        @Test
-        @Tag("api")
-        @DisplayName("공동 구매 아이템의 그룹 채널 조회")
-        void test1() throws Exception {
-            // given
-            BDDMockito.given(channelRepositoryMock.findGroupChannelByItemId(item.getId()))
-                    .willReturn(Optional.of(channel));
-
-            // when
-            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .get("/api/item/{itemId}/channel", item.getId())
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
-            );
-
-            // then
-            resultActions.andExpect(status().isOk());
-            resultActions.andExpect(jsonPath("message").value("해당 창고의 그룹 채널 정보가 조회되었습니다."));
-
-            // restDocs
-            resultActions.andDo(restDocs.document(
-                    resource(ResourceSnippetParameters.builder()
-                            .tag("창고")
-                            .summary("창고 그룹 채널 조회")
-                            .pathParameters(
-                                    parameterWithName("itemId").description("공동 구매 아이템 id")
-                            ).responseFields(
-                                    fieldWithPath("message").description("조회 결과 메세지"),
-                                    fieldWithPath("channelInfo").description("조회된 채널"),
-                                    fieldWithPath("channelInfo.channelId").description("채널 id"),
-                                    fieldWithPath("channelInfo.ownerId").description("채널장 id"),
-                                    fieldWithPath("channelInfo.itemId").description("공동구매 아이템 id"),
-                                    fieldWithPath("channelInfo.participantsCount").description("채널 참가자 수"),
-                                    fieldWithPath("channelInfo.defaultTitle").description("기본 설정된 방제목"),
-                                    fieldWithPath("channelInfo.channelLimit").description("채널 최대 참여자 수")
-                            ).responseSchema(
-                                    Schema.schema("창고 채널 조회 Response")
-                            )
-                            .build())
-            ));
-        }
-    }
-
-
-    @Nested
-    @Order(4)
     @DisplayName("Controller 아이템 정보 수정")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

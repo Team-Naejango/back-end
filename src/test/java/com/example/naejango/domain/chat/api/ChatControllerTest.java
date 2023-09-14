@@ -47,7 +47,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
     @Nested
     @DisplayName("그룹 채널 참여")
-    class joinGroupChat {
+    class joinGroupChannel {
         User user = User.builder()
                 .id(1L)
                 .userKey("test")
@@ -251,7 +251,6 @@ class ChatControllerTest extends RestDocsSupportTest {
         }
     }
 
-
     @Nested
     @DisplayName("채널의 내 채팅방 ID 조회")
     class findChatByChannelId {
@@ -341,7 +340,6 @@ class ChatControllerTest extends RestDocsSupportTest {
         }
     }
 
-
     @Nested
     @DisplayName("채팅방 제목 수정")
     class changeChatTitle {
@@ -402,6 +400,5 @@ class ChatControllerTest extends RestDocsSupportTest {
             );
         }
     }
-
 
 }

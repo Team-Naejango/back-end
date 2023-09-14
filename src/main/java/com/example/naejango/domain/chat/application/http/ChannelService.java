@@ -139,6 +139,19 @@ public class ChannelService {
         return new CreateChannelDto(true, newGroupChannel.getId(), chat.getId());
     }
 
+    /** 공동 구매 아이템에 등록된 그룹 채널 조회 */
+    public Optional<GroupChannelDto> findGroupChannel(Long itemId) {
+        return channelRepository.findGroupChannelByItemId(itemId).map(GroupChannelDto::new);
+    }
+
+    /** 근처의 그룹 채널 조회 */
+    public List<GroupChannelDto> findGroupChannelNearby(Coord center, int radius, int page, int size) {
+        Point centerPoint = geomUtil.createPoint(center);
+        Page<GroupChannel> findResult = channelRepository.findGroupChannelNearBy(centerPoint, radius, PageRequest.of(page, size));
+        return findResult.getContent().stream().map(GroupChannelDto::new).collect(Collectors.toList());
+    }
+
+    /** 채널의 참여 인원 정보 조회 */
     public List<ParticipantInfoDto> findParticipantsInChannel(Long channelId, Long userId) {
         // 조회
         List<User> participants = channelRepository.findParticipantsByChannelId(channelId);
@@ -148,13 +161,6 @@ public class ChannelService {
 
         return participants.stream().map(participant -> new ParticipantInfoDto(participant.getId(),
                 participant.getUserProfile().getNickname(), participant.getUserProfile().getImgUrl())).collect(Collectors.toList());
-    }
-
-    /** 근처의 그룹 채널 조회 */
-    public List<GroupChannelDto> findGroupChannelNearby(Coord center, int radius, int page, int size) {
-        Point centerPoint = geomUtil.createPoint(center);
-        Page<GroupChannel> findResult = channelRepository.findGroupChannelNearBy(centerPoint, radius, PageRequest.of(page, size));
-        return findResult.getContent().stream().map(GroupChannelDto::new).collect(Collectors.toList());
     }
 
     /** 채널 퇴장 */

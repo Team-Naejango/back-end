@@ -1,4 +1,4 @@
-package com.example.naejango.domain.storage.dto.response;
+package com.example.naejango.domain.item.dto.response;
 
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.storage.dto.Coord;
