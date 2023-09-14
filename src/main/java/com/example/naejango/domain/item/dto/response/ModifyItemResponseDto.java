@@ -20,7 +20,7 @@ public class ModifyItemResponseDto {
 
     private String imgUrl;
 
-    private ItemType type;
+    private ItemType itemType;
 
     private String category;
 
@@ -29,7 +29,7 @@ public class ModifyItemResponseDto {
         this.name = item.getName();
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
-        this.type = item.getItemType();
-        this.category = item.getCategory().toString();
+        this.itemType = item.getItemType();
+        this.category = item.getCategory().getName();
     }
 }

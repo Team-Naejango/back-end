@@ -3,18 +3,15 @@ package com.example.naejango.domain.item.api;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.item.application.ItemService;
-import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
-import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
-import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
-import com.example.naejango.domain.item.dto.request.SearchItemRequestDto;
+import com.example.naejango.domain.item.dto.request.*;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
-import com.example.naejango.domain.item.repository.CategoryRepository;
-import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.dto.Coord;
+import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.dto.response.FindStorageChannelResponseDto;
 import com.example.naejango.domain.storage.dto.response.SearchItemResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
@@ -39,23 +36,24 @@ public class ItemController {
     private final ItemService itemService;
     private final ChannelRepository channelRepository;
     private final AuthenticationHandler authenticationHandler;
-    private final CategoryRepository categoryRepository;
     private final GeomUtil geomUtil;
 
     /** 아이템 생성 */
     @PostMapping("")
-    public ResponseEntity<CreateItemResponseDto> createItem(Authentication authentication,
-                                                            @RequestBody CreateItemRequestDto createItemRequestDto) {
+    public ResponseEntity<CommonResponseDto<CreateItemResponseDto>> createItem(Authentication authentication,
+                                                                               @RequestBody @Valid CreateItemRequestDto createItemRequestDto) {
         Long userId = authenticationHandler.getUserId(authentication);
-        CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, createItemRequestDto);
-        return ResponseEntity.created(URI.create("/api/item/"+createItemResponseDto.getId())).body(createItemResponseDto);
+        CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, new CreateItemCommandDto(createItemRequestDto));
+
+        return ResponseEntity.created(URI.create("/api/item/"+ createItemResponseDto.getId())).body(new CommonResponseDto<>("아이템 생성 완료", createItemResponseDto));
     }
 
     /** 아이템 정보 조회 */
     @GetMapping("/{itemId}")
-    public ResponseEntity<FindItemResponseDto> findItem(@PathVariable Long itemId) {
-        FindItemResponseDto findItemResponseDto = itemService.findItem(itemId); // N+1 문제 발생
-        return ResponseEntity.ok().body(findItemResponseDto);
+    public ResponseEntity<CommonResponseDto<FindItemResponseDto>> findItem(@PathVariable Long itemId) {
+        FindItemResponseDto findItemResponseDto = itemService.findItem(itemId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", findItemResponseDto));
     }
 
     /**
@@ -67,27 +65,16 @@ public class ItemController {
     public ResponseEntity<SearchItemResponseDto> searchStorage(@Valid @ModelAttribute SearchItemRequestDto requestDto) {
         Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
 
-        // 카테고리 로드
-        Category category = categoryRepository.findById(requestDto.getCatId())
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
-
         // 키워드 만들기
         String[] keywords = requestDto.getKeyword() == null?
                 new String[]{} : Arrays.stream(requestDto.getKeyword().split(" ")).map(word -> "%" + word + "%").toArray(String[]::new);
 
-        // 조건 생성
-        int rad = requestDto.getRad();
-        int page = requestDto.getPage();
-        int size = requestDto.getSize();
-        SearchingConditionDto conditions = SearchingConditionDto.builder()
-                .cat(category)
-                .itemType(requestDto.getType())
-                .keyword(keywords)
-                .status(requestDto.getStatus()).build();
-
         // 검색
-        List<SearchItemInfoDto> result = itemService.searchItem(center, rad, page, size, conditions);
-        return ResponseEntity.ok().body(new SearchItemResponseDto(new Coord(center), rad, page, size, conditions, result));
+        List<SearchItemInfoDto> result = itemService.searchItem(center, requestDto.getRad(), requestDto.getPage(), requestDto.getSize(),
+                new SearchingConditionDto(requestDto, keywords)
+        );
+
+        return ResponseEntity.ok().body(new SearchItemResponseDto(new Coord(center), requestDto.getPage(), requestDto.getPage(), requestDto.getSize(), result));
     }
 
     /**
@@ -104,11 +91,12 @@ public class ItemController {
 
     /** 아이템 정보 수정 */
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ModifyItemResponseDto> modifyItem(Authentication authentication, @PathVariable Long itemId, @RequestBody ModifyItemRequestDto modifyItemRequestDto) {
+    public ResponseEntity<CommonResponseDto<ModifyItemResponseDto>> modifyItem(Authentication authentication, @PathVariable Long itemId,
+                                                            @RequestBody @Valid ModifyItemRequestDto modifyItemRequestDto) {
         Long userId = authenticationHandler.getUserId(authentication);
-        ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, itemId, modifyItemRequestDto);
+        ModifyItemResponseDto modifyItemResponseDto = itemService.modifyItem(userId, itemId, new ModifyItemCommandDto(modifyItemRequestDto));
 
-        return ResponseEntity.ok().body(modifyItemResponseDto);
+        return ResponseEntity.ok().body(new CommonResponseDto<>("수정 완료", modifyItemResponseDto));
     }
 
 }

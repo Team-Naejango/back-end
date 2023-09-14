@@ -36,20 +36,14 @@ public class SearchItemRequestDto {
     @DecimalMin(value = "1", message = "요청 결과물의 개수가 1개 이상이어야 합니다.")
     private Integer size;
 
-    private Integer catId; // 카테고리 id
+    private String category; // 카테고리
 
     @Size(min = 2, max = 10, message = "검색어가 너무 길거나 짧습니다. (2자 ~ 10자)")
     private String keyword; // 검색 키워드
 
     @EnumConstraint(enumClass = ItemType.class, defaultValue = "null")
-    private ItemType type; // 타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)
+    private ItemType itemType; // 타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)
 
     private Boolean status; // 상태 (거래중 / 거래완료)
 
-    public SearchItemRequestDto() {
-        this.rad = 1000;
-        this.page = 0;
-        this.size = 10;
-        this.catId = null;
-    }
 }

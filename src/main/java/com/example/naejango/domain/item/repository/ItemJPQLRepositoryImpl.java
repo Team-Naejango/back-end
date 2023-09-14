@@ -21,11 +21,11 @@ public class ItemJPQLRepositoryImpl implements ItemJPQLRepository {
     EntityManager em;
 
     @Override
-    public List<SearchItemsDto> findItemsByConditions(Point center, int radius, int page, int size, SearchingConditionDto conditionDto) {
-        var query = em.createQuery(searchingQueryBuilder(conditionDto), SearchItemsDto.class);
+    public List<SearchItemsDto> findItemsByConditions(Point center, int radius, int page, int size, Category cat, SearchingConditionDto conditionDto) {
+        var query = em.createQuery(searchingQueryBuilder(conditionDto, cat), SearchItemsDto.class);
         query.setParameter("center", center);
         query.setParameter("radius", radius);
-        if (conditionDto.getCat() != null) query.setParameter("cat", conditionDto.getCat());
+        if (cat != null) query.setParameter("cat", cat);
         if (conditionDto.getItemType() != null) query.setParameter("itemType", conditionDto.getItemType());
         for (int i = 1; i <= conditionDto.getKeyword().length; i++) {
             query.setParameter("keyword" + i, conditionDto.getKeyword()[i - 1]);
@@ -36,7 +36,7 @@ public class ItemJPQLRepositoryImpl implements ItemJPQLRepository {
                 .getResultList();
     }
 
-    private static String searchingQueryBuilder (SearchingConditionDto conditions) {
+    private static String searchingQueryBuilder (SearchingConditionDto conditions, Category cat) {
         String SELECT = "SELECT NEW com.example.naejango.domain.storage.dto.SearchItemsDto";
         String PROJECTION = "(it, st, c, ROUND(CAST(ST_DistanceSphere(:center, st.location) AS double)) AS distance) ";
         String FROM = "FROM Storage st ";
@@ -48,7 +48,7 @@ public class ItemJPQLRepositoryImpl implements ItemJPQLRepository {
         String AND_TYPE = "AND it.itemType = :itemType ";
         String AND_STATUS = "AND it.status = :status ";
         String ORDER_DISTANCE = "ORDER BY distance ASC";
-        Category cat = conditions.getCat();
+
         ItemType type = conditions.getItemType();
         String[] keywords = conditions.getKeyword();
         Boolean status = conditions.getStatus();

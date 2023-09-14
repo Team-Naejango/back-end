@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StorageRepository extends JpaRepository<Storage, Long> {
@@ -25,4 +26,7 @@ public interface StorageRepository extends JpaRepository<Storage, Long> {
 
     @Query("select s.user.id from Storage s where s.id = :storageId")
     Long findUserIdByStorageId(@Param("storageId") Long StorageId);
+
+    /** 창고 id와 회원 id로 창고 조회 */
+    Optional<Storage> findByIdAndUserId(Long id, Long userId);
 }

@@ -20,6 +20,7 @@ public class Item extends TimeAuditingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
     private Long id;
 
     @Column(length = 20, nullable = false)
@@ -62,7 +63,4 @@ public class Item extends TimeAuditingEntity {
         this.category = category;
     }
 
-    public void putItem(Storage storage) {
-        this.storage = storage;
-    }
 }
