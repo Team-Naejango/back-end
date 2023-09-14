@@ -3,12 +3,12 @@ package com.example.naejango.domain.chat.api;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.chat.application.http.ChannelService;
-import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.ChannelType;
 import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
 import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
 import com.example.naejango.domain.chat.dto.request.StartGroupChannelRequestDto;
@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
@@ -47,8 +48,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ChannelController.class)
 class ChannelControllerTest extends RestDocsSupportTest {
@@ -279,6 +279,80 @@ class ChannelControllerTest extends RestDocsSupportTest {
             ));
         }
     }
+
+    @Nested
+    @DisplayName("공동 구매 아이템에 등록된 그룹 채널 조회")
+    class findGroupChannel {
+        User owner = User.builder().id(1L).userKey("test").role(Role.USER).build();
+        Item item = Item.builder().id(2L).itemType(ItemType.GROUP_BUY).status(true).build();
+        GroupChannel groupChannel = GroupChannel.builder()
+                .id(3L)
+                .item(item)
+                .channelType(ChannelType.GROUP)
+                .owner(owner)
+                .lastMessage("마지막으로 나눈 대화")
+                .participantsCount(5)
+                .channelLimit(10)
+                .defaultTitle("채팅방 기본 제목")
+                .build();
+        @Test
+        @DisplayName("조회 결과 없음")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(channelServiceMock.findGroupChannel(item.getId())).willReturn(Optional.empty());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/channel/group/{itemId}", item.getId())
+                    .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("message").value("등록된 그룹 채널이 없습니다."));
+
+        }
+
+        @Test
+        @DisplayName("조회 결과 있음")
+        @Tag("api")
+        void test2() throws Exception {
+            // given
+            GroupChannelDto groupChannelDto = new GroupChannelDto(groupChannel);
+            BDDMockito.given(channelServiceMock.findGroupChannel(item.getId())).willReturn(Optional.of(groupChannelDto));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/channel/group/{itemId}", item.getId())
+                    .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("message").value("조회 성공"));
+
+            // restDoc
+            resultActions.andDo(restDocs.document(resource(
+                    ResourceSnippetParameters.builder()
+                            .tag("채팅")
+                            .summary("공동 구매 아이템에 등록된 그룹 채널 조회")
+                            .description("공동 구매 아이템에 등록된 그룹 채널의 정보를 조회해 옵니다.")
+                            .pathParameters(
+                                    parameterWithName("itemId").description("아이템 ID")
+                            )
+                            .responseFields(
+                                    fieldWithPath("message").description("조회 결과 메세지"),
+                                    fieldWithPath("result").description("조회 결과"),
+                                    fieldWithPath("result.channelId").description("채널 ID"),
+                                    fieldWithPath("result.ownerId").description("아이템 주인 ID"),
+                                    fieldWithPath("result.itemId").description("아이템 ID"),
+                                    fieldWithPath("result.participantsCount").description("채널 참여자 수"),
+                                    fieldWithPath("result.defaultTitle").description("채널 제목"),
+                                    fieldWithPath("result.channelLimit").description("채널 정원")
+                            ).build()
+                    )
+            ));
+        }
+    }
+
 
     @Nested
     @DisplayName("근처 그룹 채널 조회")

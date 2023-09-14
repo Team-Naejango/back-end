@@ -7,10 +7,14 @@ import com.example.naejango.domain.account.domain.Account;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
+import com.example.naejango.domain.user.dto.CreateUserProfileCommandDto;
+import com.example.naejango.domain.user.dto.ModifyUserProfileCommandDto;
 import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
+import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -26,15 +30,15 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(UserController.class)
@@ -65,12 +69,15 @@ class UserControllerTest extends RestDocsSupportTest {
                 .gender(Gender.MALE)
                 .build();
 
+        User user = User.builder().id(1L).role(Role.TEMPORAL).build();
+
         @Test
         @Tag("api")
-        @DisplayName("조회 성공")
+        @DisplayName("생성 성공")
         void test1() throws Exception {
             // given
             String requestJson = objectMapper.writeValueAsString(requestDto);
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
 
             // when
             ResultActions resultActions = mockMvc.perform(
@@ -84,12 +91,10 @@ class UserControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(userServiceMock, atLeastOnce())
-                    .createUserProfile(anyLong(), anyString(), anyString(), anyString(), any(), anyString(), anyString());
-
+            verify(userServiceMock, times(1)).createUserProfile(new CreateUserProfileCommandDto(user.getId(), requestDto));
+            verify(accountServiceMock, times(1)).createAccount(user.getId());
             resultActions.andExpect(
-                    MockMvcResultMatchers
-                            .status().isOk());
+                    status().isOk());
 
             resultActions.andDo(restDocs.document(
                             resource(
@@ -118,7 +123,6 @@ class UserControllerTest extends RestDocsSupportTest {
             );
         }
     }
-
 
     @Nested
     @DisplayName("내 프로필 조회")
@@ -250,76 +254,75 @@ class UserControllerTest extends RestDocsSupportTest {
         }
     }
 
-//    @Test
-//    @Tag("api")
-//    @DisplayName("UserProfile 수정")
-//    void modifyProfileTest() throws Exception {
-//        //given
-//        UserProfile testUserProfile = UserProfile.builder()
-//                .birth("19910617")
-//                .nickname("닉네임")
-//                .imgUrl("이미지 링크")
-//                .phoneNumber("01012345678")
-//                .intro("소개글")
-//                .gender(Gender.MALE)
-//                .build();
-//
-//        var requestDto = ModifyUserProfileRequestDto.builder()
-//                .nickname("변경 닉네임").intro("변경 소개글").imgUrl("변경 이미지").build();
-//
-//        testUserProfile.modifyUserProfile(requestDto);
-//        BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
-//        BDDMockito.given(userProfileRepository.findUserProfileByUserId(1L))
-//                .willReturn(Optional.of(testUserProfile));
-//
-//        ResultActions resultActions = mockMvc.perform(
-//                RestDocumentationRequestBuilders
-//                        .patch("/api/user/profile")
-//                        .header("Authorization", "access token")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(requestDto))
-//        );
-//
-//        verify(userServiceMock, atLeastOnce()).modifyUserProfile(any(ModifyUserProfileRequestDto.class), anyLong());
-//
-//        resultActions
-//                .andExpect(MockMvcResultMatchers.status().isOk()
-//                ).andExpect(jsonPath("$.nickname").value(testUserProfile.getNickname())
-//                ).andExpect(jsonPath("$.imgUrl").value(testUserProfile.getImgUrl())
-//                ).andExpect(jsonPath("$.birth").value(testUserProfile.getBirth())
-//                ).andExpect(jsonPath("$.gender").value(testUserProfile.getGender().getGender())
-//                ).andExpect(jsonPath("$.intro").value(testUserProfile.getIntro()));
-//
-//        resultActions.andDo(
-//                restDocs.document(
-//                        resource(
-//                                ResourceSnippetParameters.builder()
-//                                        .tag("회원")
-//                                        .description("요청된 Dto 에 따라 회원의 프로필 변경, 수정된 프로필 반환")
-//                                        .requestFields(
-//                                                fieldWithPath("nickname").description("닉네임"),
-//                                                fieldWithPath("intro").description("소개"),
-//                                                fieldWithPath("imgUrl").description("이미지 링크")
-//                                        )
-//                                        .responseFields(
-//                                                fieldWithPath("birth").description("생년월일"),
-//                                                fieldWithPath("nickname").description("닉네임"),
-//                                                fieldWithPath("imgUrl").description("이미지 링크"),
-//                                                fieldWithPath("phoneNumber").description("전화번호"),
-//                                                fieldWithPath("intro").description("소개글"),
-//                                                fieldWithPath("gender").description("성별(male, female)")
-//                                        )
-//                                        .requestSchema(
-//                                                Schema.schema("ModifyUserProfileResponseDto.Get")
-//                                        )
-//                                        .build()
-//                        )
-//                )
-//        );
-//    }
+    @Nested
+    @DisplayName("유저 프로필 수정")
+    class modifyUserProfile {
 
-    // 삭제 테스트 작성 필요
+        UserProfile testUserProfile = UserProfile.builder()
+                .birth("19910617")
+                .nickname("닉네임")
+                .imgUrl("이미지 링크")
+                .phoneNumber("01012345678")
+                .intro("소개글")
+                .gender(Gender.MALE)
+                .build();
 
+        User user = User.builder()
+                .id(1L)
+                .userProfile(testUserProfile)
+                .build();
 
+        @Test
+        @Tag("api")
+        @DisplayName("수정 성공")
+        void test1() throws Exception {
+            //given
+            var requestDto = ModifyUserProfileRequestDto.builder()
+                    .nickname("변경 닉네임").intro("변경 소개글").imgUrl("변경 이미지").build();
+
+            var commandDto = new ModifyUserProfileCommandDto(user.getId(), requestDto);
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    RestDocumentationRequestBuilders
+                            .patch("/api/user/profile")
+                            .header("Authorization", "access token")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto))
+            );
+
+            // then
+            verify(userServiceMock, atLeastOnce()).modifyUserProfile(commandDto);
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("message").value("수정 완료"));
+
+            // restDocs
+            resultActions.andDo(
+                    restDocs.document(
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("회원")
+                                            .summary("회원 프로필 수정")
+                                            .description("요청된 Dto 에 따라 회원의 프로필을 변경합니다.")
+                                            .requestFields(
+                                                    fieldWithPath("nickname").description("닉네임"),
+                                                    fieldWithPath("intro").description("소개"),
+                                                    fieldWithPath("imgUrl").description("이미지 링크")
+                                            )
+                                            .responseFields(
+                                                    fieldWithPath("message").description("수정 결과 메세지"),
+                                                    fieldWithPath("result").description("")
+                                            )
+                                            .requestSchema(
+                                                    Schema.schema("ModifyUserProfileResponseDto.Get")
+                                            )
+                                            .build()
+                            )
+                    )
+            );
+        }
+    }
 
 }
