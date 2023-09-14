@@ -39,6 +39,7 @@ public class Storage extends TimeAuditingEntity implements Serializable {
     @Column(columnDefinition = "Geometry(Point, 4326)", nullable = false)
     private Point location;
 
+    @Builder.Default
     @OneToMany(mappedBy = "storage")
     private List<Item> items = new ArrayList<>();
 

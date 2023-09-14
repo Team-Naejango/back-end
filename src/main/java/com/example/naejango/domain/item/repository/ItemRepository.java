@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepository {
 
@@ -20,4 +22,8 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepos
     void deleteByStorageId(@Param("storageId") Long storageId);
 
     Long findUserIdById(Long itemId);
+
+    @EntityGraph(attributePaths = {"category"})
+    Optional<Item> findItemById(Long Id);
+
 }
