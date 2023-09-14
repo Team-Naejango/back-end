@@ -32,8 +32,8 @@ public class ChatController {
      * @return 채널 id(channelId), 채팅방 id(chatId), 생성 결과(message)
      */
     @PostMapping("/group/{channelId}")
-    public ResponseEntity<CommonResponseDto<ChannelAndChatDto>> joinGroupChat(@PathVariable("channelId") Long channelId,
-                                                                              Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<ChannelAndChatDto>> joinGroupChannel(@PathVariable("channelId") Long channelId,
+                                                                                 Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
         // 그룹 채널 입장
@@ -58,7 +58,7 @@ public class ChatController {
      * @param size 요청 결과 개수
      * @return 요청 유저 id(ownerId),
      *         채팅방 Info 리스트 (List<ChatInfoDto>) :
-     *          채팅방 id(chatId), 채널 id(channelId), 채팅 타입(type),
+     *          채팅방 id(chatId), 채널 id(channelId), 채널 타입(channelType),
      *          채팅방 제목(title), 마지막 대화(lastMessage), 안읽은 메세지(unreadMessages),
      *          마지막 대화나눈 시간(lastChatAt)
      */

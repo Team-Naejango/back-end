@@ -3,11 +3,12 @@ package com.example.naejango.domain.user.api;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.dto.CreateUserProfileCommandDto;
+import com.example.naejango.domain.user.dto.ModifyUserProfileCommandDto;
+import com.example.naejango.domain.user.dto.MyProfileDto;
 import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
-import com.example.naejango.domain.user.dto.MyProfileDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
@@ -47,15 +48,10 @@ public class UserController {
                                                   Authentication authentication) {
         // 요청 정보를 로드 합니다.
         Long userId = authenticationHandler.getUserId(authentication);
-        String phoneNumber = requestDto.getPhoneNumber();
-        String imgUrl = requestDto.getImgUrl();
-        String nickname = requestDto.getNickname();
-        String intro = requestDto.getIntro();
-        String birth = requestDto.getBirth();
-        Gender gender = requestDto.getGender();
+        var commandDto = new CreateUserProfileCommandDto(userId, requestDto);
 
         // 유저 프로필 생성
-        userService.createUserProfile(userId, nickname, intro, imgUrl, gender, phoneNumber, birth);
+        userService.createUserProfile(commandDto);
 
         // 계좌 생성
         accountService.createAccount(userId);
@@ -100,14 +96,12 @@ public class UserController {
 
     /** 프로필 수정 */
     @PatchMapping("/profile")
-    public ResponseEntity<CommonResponseDto<Void>> modifyProfile(@RequestBody @Valid ModifyUserProfileRequestDto requestDto,
-                                                                      Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<Void>> modifyUserProfile(@RequestBody @Valid ModifyUserProfileRequestDto requestDto,
+                                                                     Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
-        String nickname = requestDto.getNickname();
-        String intro = requestDto.getIntro();
-        String imgUrl = requestDto.getImgUrl();
-        userService.modifyUserProfile(userId, nickname, intro, imgUrl);
+        var commandDto = new ModifyUserProfileCommandDto(userId, requestDto);
+        userService.modifyUserProfile(commandDto);
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("수정 완료", null));
     }

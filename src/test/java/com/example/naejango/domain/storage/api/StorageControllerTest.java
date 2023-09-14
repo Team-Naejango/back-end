@@ -12,6 +12,7 @@ import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.StorageInfoDto;
 import com.example.naejango.domain.storage.dto.request.CreateStorageRequestDto;
 import com.example.naejango.domain.storage.dto.request.ModifyStorageInfoRequestDto;
+import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -112,16 +113,17 @@ class StorageControllerTest extends RestDocsSupportTest {
     @Nested
     @DisplayName("요청 회원의 창고 목록 조회")
     class myStorageList {
+        User user = User.builder().id(5L).build();
         Storage testStorage1 = Storage.builder().id(1L).name("창고1").imgUrl("imgUrl")
-                .description("집").address("강남")
+                .description("집").address("강남").user(user)
                 .location(geomUtil.createPoint(12.12, 34.34))
                 .build();
         Storage testStorage2 = Storage.builder().id(2L).name("창고2").imgUrl("imgUrl")
-                .description("회사").address("서초")
+                .description("회사").address("서초").user(user)
                 .location(geomUtil.createPoint(12.12, 34.34))
                 .build();
         Storage testStorage3 = Storage.builder().id(3L).name("창고3").imgUrl("imgUrl")
-                .description("본가").address("구로")
+                .description("본가").address("구로").user(user)
                 .location(geomUtil.createPoint(12.12, 34.34))
                 .build();
 
@@ -157,7 +159,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                                             .responseFields(
                                                     fieldWithPath("message").description("결과 메세지"),
                                                     fieldWithPath("result[]").type(JsonFieldType.ARRAY).description("조회 결과"),
-                                                    fieldWithPath("result[].id").description("조회 결과 리스트"),
+                                                    fieldWithPath("result[].storageId").description("창고 ID"),
+                                                    fieldWithPath("result[].ownerId").description("창고 소유 회원 ID"),
                                                     fieldWithPath("result[].name").description("창고 이름"),
                                                     fieldWithPath("result[].imgUrl").description("창고 이미지 링크"),
                                                     fieldWithPath("result[].description").description("창고 소개"),
@@ -184,11 +187,17 @@ class StorageControllerTest extends RestDocsSupportTest {
         // given
         Storage storage = Storage.builder().id(1L).name("테스트 창고").build();
         Category category = Category.builder().id(1).name("생필품").build();
-        Item item1 = Item.builder().id(2L).status(true).itemType(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("imgUrl").description("아이템 설명").category(category).build();
-        Item item2 = Item.builder().id(3L).status(true).itemType(ItemType.INDIVIDUAL_SELL).name("item2").imgUrl("imgUrl").description("아이템 설명").category(category).build();
-        Item item3 = Item.builder().id(4L).status(false).itemType(ItemType.INDIVIDUAL_BUY).name("item3").imgUrl("imgUrl").description("아이템 설명").category(category).build();
-        Item item4 = Item.builder().id(5L).status(true).itemType(ItemType.INDIVIDUAL_SELL).name("item4").imgUrl("imgUrl").description("아이템 설명").category(category).build();
-        Item item5 = Item.builder().id(6L).status(true).itemType(ItemType.INDIVIDUAL_SELL).name("item5").imgUrl("imgUrl").description("아이템 설명").category(category).build();
+        User user = User.builder().id(7L).build();
+        Item item1 = Item.builder().id(2L).status(true).itemType(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("imgUrl").description("아이템 설명")
+                .user(user).category(category).build();
+        Item item2 = Item.builder().id(3L).status(true).itemType(ItemType.INDIVIDUAL_SELL).name("item2").imgUrl("imgUrl").description("아이템 설명")
+                .user(user).category(category).build();
+        Item item3 = Item.builder().id(4L).status(false).itemType(ItemType.INDIVIDUAL_BUY).name("item3").imgUrl("imgUrl").description("아이템 설명")
+                .user(user).category(category).build();
+        Item item4 = Item.builder().id(5L).status(true).itemType(ItemType.INDIVIDUAL_SELL).name("item4").imgUrl("imgUrl").description("아이템 설명")
+                .user(user).category(category).build();
+        Item item5 = Item.builder().id(6L).status(true).itemType(ItemType.INDIVIDUAL_SELL).name("item5").imgUrl("imgUrl").description("아이템 설명")
+                .user(user).category(category).build();
         List<Item> itemList = List.of(item1, item2, item3, item4, item5);
 
         // when
@@ -207,9 +216,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         verify(storageServiceMock, times(1)).findItemList(1L, Boolean.TRUE, 0, 10);
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("message").value("창고 내의 아이템을 조회했습니다."))
-                .andExpect(jsonPath("page").value("0"))
-                .andExpect(jsonPath("size").value("10"));
+                .andExpect(jsonPath("message").value("창고의 아이템 조회 성공"));
 
         // restDocs
         resultActions.andDo(restDocs.document(
@@ -227,9 +234,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                                 )
                                 .responseFields(
                                         fieldWithPath("message").description("조회 결과 메세지"),
-                                        fieldWithPath("page").description("요청한 페이지"),
-                                        fieldWithPath("size").description("페이지당 결과물 수"),
                                         fieldWithPath("result[].itemId").description("아이템 id"),
+                                        fieldWithPath("result[].ownerId").description("아이템 소유 회원 id"),
                                         fieldWithPath("result[].category").description("아이템 카테고리"),
                                         fieldWithPath("result[].itemType").description("아이템 타입(BUY / SELL)"),
                                         fieldWithPath("result[].name").description("아이템 제목"),

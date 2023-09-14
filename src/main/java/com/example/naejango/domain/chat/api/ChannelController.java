@@ -1,8 +1,8 @@
 package com.example.naejango.domain.chat.api;
 
 import com.example.naejango.domain.chat.application.http.ChannelService;
-import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.chat.dto.GroupChannelDto;
 import com.example.naejango.domain.chat.dto.ParticipantInfoDto;
 import com.example.naejango.domain.chat.dto.request.FindGroupChannelNearbyRequestDto;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -84,6 +85,22 @@ public class ChannelController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new CommonResponseDto<>("이미 진행중인 채널이 있습니다.", result));
         }
+    }
+
+    /**
+     * 공동구매 아이템에 등록된 그룹 채팅 조회
+     * @param itemId 아이템1 id
+     * @return FindStorageChannelResponseDto 채널 id(channelId), 결과 메세지(message)
+     */
+    @GetMapping("/group/{itemId}")
+    public ResponseEntity<CommonResponseDto<GroupChannelDto>> findGroupChannel(@PathVariable Long itemId) {
+
+        Optional<GroupChannelDto> serviceDtoOptional = channelService.findGroupChannel(itemId);
+
+        if (serviceDtoOptional.isEmpty()) {
+            return ResponseEntity.ok().body(new CommonResponseDto<>("등록된 그룹 채널이 없습니다.", null));
+        }
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", serviceDtoOptional.get()));
     }
 
     /**

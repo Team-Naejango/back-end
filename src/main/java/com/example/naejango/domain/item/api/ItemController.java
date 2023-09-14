@@ -1,8 +1,5 @@
 package com.example.naejango.domain.item.api;
 
-import com.example.naejango.domain.chat.domain.GroupChannel;
-import com.example.naejango.domain.chat.dto.GroupChannelDto;
-import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.item.application.ItemService;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
@@ -11,9 +8,6 @@ import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.storage.dto.SearchingConditionDto;
-import com.example.naejango.domain.storage.dto.response.FindStorageChannelResponseDto;
-import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final ChannelRepository channelRepository;
     private final AuthenticationHandler authenticationHandler;
     private final GeomUtil geomUtil;
 
@@ -73,18 +66,6 @@ public class ItemController {
         );
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("검색 성공", result));
-    }
-
-    /**
-     * 공동구매 아이템에 등록된 그룹 채팅 조회
-     * @param itemId 아이템1 id
-     * @return FindStorageChannelResponseDto 채널 id(channelId), 결과 메세지(message)
-     */
-    @GetMapping("/{itemId}/channel")
-    public ResponseEntity<FindStorageChannelResponseDto> findGroupChannel(@PathVariable Long itemId) {
-        GroupChannel groupChannel = channelRepository.findGroupChannelByItemId(itemId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-        return ResponseEntity.ok().body(new FindStorageChannelResponseDto(new GroupChannelDto(groupChannel), "해당 창고의 그룹 채널 정보가 조회되었습니다."));
     }
 
     /** 아이템 정보 수정 */

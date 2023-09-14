@@ -4,6 +4,8 @@ import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
+import com.example.naejango.domain.user.dto.CreateUserProfileCommandDto;
+import com.example.naejango.domain.user.dto.ModifyUserProfileCommandDto;
 import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
@@ -15,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -29,16 +30,13 @@ public class UserService {
      * 유저 프로필을 생성
      */
     @Transactional
-    public void createUserProfile(Long userId, String nickname, String intro, String imgUrl,
-                                  Gender gender, String phoneNumber, String birth) {
+    public void createUserProfile(CreateUserProfileCommandDto commandDto) {
         // 유저를 로드합니다.
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(commandDto.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 유저 프로필을 생성합니다.
-        UserProfile userProfile = UserProfile.builder()
-                .nickname(nickname).intro(intro).imgUrl(imgUrl)
-                .gender(gender).phoneNumber(phoneNumber).birth(birth)
-                .lastLogin(LocalDateTime.now()).build();
+        UserProfile userProfile = commandDto.toEntity();
         userProfileRepository.save(userProfile);
 
         // 유저에 할당하고 Role 을 User 로 바꿉니다.
@@ -90,11 +88,11 @@ public class UserService {
     }
 
     @Transactional
-    public void modifyUserProfile(Long userId, String nickname, String intro, String imgUrl) {
-        UserProfile userProfile = userProfileRepository.findUserProfileByUserId(userId)
+    public void modifyUserProfile(ModifyUserProfileCommandDto commandDto) {
+        UserProfile userProfile = userProfileRepository.findUserProfileByUserId(commandDto.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USERPROFILE_NOT_FOUND));
 
-        userProfile.modifyUserProfile(nickname, intro, imgUrl);
+        userProfile.modifyUserProfile(commandDto.getNickname(), commandDto.getIntro(), commandDto.getImgUrl());
     }
 
     @Transactional
