@@ -10,10 +10,8 @@ import com.example.naejango.domain.item.dto.request.*;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
-import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.dto.response.FindStorageChannelResponseDto;
-import com.example.naejango.domain.storage.dto.response.SearchItemResponseDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -62,7 +60,7 @@ public class ItemController {
      * @param requestDto 좌표(lon, lat), 반경(rad), 카테고리(cat), 키워드(keyword), 아이템 타입(type), 아이템 상태(status)
      */
     @GetMapping("/search")
-    public ResponseEntity<SearchItemResponseDto> searchStorage(@Valid @ModelAttribute SearchItemRequestDto requestDto) {
+    public ResponseEntity<CommonResponseDto<List<SearchItemInfoDto>>> searchStorage(@Valid @ModelAttribute SearchItemRequestDto requestDto) {
         Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
 
         // 키워드 만들기
@@ -74,7 +72,7 @@ public class ItemController {
                 new SearchingConditionDto(requestDto, keywords)
         );
 
-        return ResponseEntity.ok().body(new SearchItemResponseDto(new Coord(center), requestDto.getPage(), requestDto.getPage(), requestDto.getSize(), result));
+        return ResponseEntity.ok().body(new CommonResponseDto<>("검색 성공", result));
     }
 
     /**
