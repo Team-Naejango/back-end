@@ -75,12 +75,13 @@ class WishControllerTest extends RestDocsSupportTest {
                                     .tag("관심")
                                     .description("관심 목록 조회")
                                     .responseFields(
-                                            fieldWithPath("[].id").description("아이템 ID"),
-                                            fieldWithPath("[].name").description("아이템 이름"),
-                                            fieldWithPath("[].description").description("아이템 설명"),
-                                            fieldWithPath("[].imgUrl").description("이미지 URL"),
-                                            fieldWithPath("[].type").description("아이템 타입"),
-                                            fieldWithPath("[].category").description("카테고리")
+                                            fieldWithPath("result[].id").description("아이템 ID"),
+                                            fieldWithPath("result[].name").description("아이템 이름"),
+                                            fieldWithPath("result[].description").description("아이템 설명"),
+                                            fieldWithPath("result[].imgUrl").description("이미지 URL"),
+                                            fieldWithPath("result[].itemType").description("아이템 타입"),
+                                            fieldWithPath("result[].category").description("카테고리"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("관심 목록 조회 Response"))
                                     .build()
@@ -126,8 +127,8 @@ class WishControllerTest extends RestDocsSupportTest {
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("관심 등록 Response"))
                                     .build()
@@ -173,8 +174,8 @@ class WishControllerTest extends RestDocsSupportTest {
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("관심 해제 Response"))
                                     .build()
