@@ -3,7 +3,6 @@ package com.example.naejango.domain.wish.application;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.user.domain.User;
-import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.domain.wish.domain.Wish;
 import com.example.naejango.domain.wish.dto.response.FindWishResponseDto;
 import com.example.naejango.domain.wish.repository.WishRepository;
@@ -13,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
 public class WishService {
     private final WishRepository wishRepository;
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    private final EntityManager em;
 
     /** 관심 목록 조회 */
     public List<FindWishResponseDto> findWish(Long userId){
@@ -36,7 +36,6 @@ public class WishService {
         return findWishResponseDtoList;
     }
 
-
     /** 아이템 관심 등록 */
     @Transactional
     public void addWish(Long userId, Long itemId){
@@ -48,12 +47,10 @@ public class WishService {
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Wish wish = Wish.builder()
                 .id(null)
-                .user(user)
+                .user(em.getReference(User.class, userId))
                 .item(item)
                 .build();
 
@@ -64,10 +61,8 @@ public class WishService {
     /** 아이템 관심 해제 */
     @Transactional
     public void deleteWish(Long userId, Long itemId){
-        Wish wish = wishRepository.findByUserIdAndItemId(userId, itemId);
-        if (wish == null) {
-            throw new CustomException(ErrorCode.WISH_NOT_FOUND);
-        }
+        Wish wish = wishRepository.findByUserIdAndItemId(userId, itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WISH_NOT_FOUND));
 
         wishRepository.delete(wish);
     }
