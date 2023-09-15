@@ -8,6 +8,8 @@ public enum ErrorCode {
     ALREADY_LOGGED_IN(HttpStatus.BAD_REQUEST, "이미 로그인 된 회원입니다."),
     UNIDENTIFIED_DESTINATION(HttpStatus.BAD_REQUEST, "채널 지정이 잘못되었습니다."),
     CANNOT_GENERATE_GROUP_CHANNEL(HttpStatus.BAD_REQUEST, "그룹 채널을 생성할 수 없습니다."),
+    TRANSACTION_NOT_PERMISSION(HttpStatus.BAD_REQUEST, "거래 등록 할 권한이 없습니다."),
+    TRANSACTION_BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 거래 요청입니다."),
     TRANSACTION_NOT_MODIFICATION(HttpStatus.BAD_REQUEST, "수정 할 수 없는 거래입니다."),
     TRANSACTION_NOT_DELETE(HttpStatus.BAD_REQUEST, "삭제 할 수 없는 거래입니다."),
     REISSUE_TOKEN_FAILURE(HttpStatus.BAD_REQUEST, "토큰 발급에 실패했습니다."),
