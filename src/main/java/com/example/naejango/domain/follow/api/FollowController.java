@@ -1,8 +1,8 @@
 package com.example.naejango.domain.follow.api;
 
+import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.follow.application.FollowService;
 import com.example.naejango.domain.follow.dto.response.FindFollowResponseDto;
-import com.example.naejango.global.common.dto.BaseResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,29 +20,29 @@ public class FollowController {
 
     /** 팔로우 목록 조회 */
     @GetMapping("")
-    public ResponseEntity<List<FindFollowResponseDto>> findFollow(Authentication authentication){
+    public ResponseEntity<CommonResponseDto<List<FindFollowResponseDto>>> findFollow(Authentication authentication){
         Long userId = authenticationHandler.getUserId(authentication);
         List<FindFollowResponseDto> findFollowResponseDtoList = followService.findFollow(userId);
 
-        return ResponseEntity.ok().body(findFollowResponseDtoList);
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", findFollowResponseDtoList));
     }
 
     /** 창고 팔로우 등록 */
     @PostMapping("/{storageId}")
-    public ResponseEntity<BaseResponseDto> addFollow(Authentication authentication, @PathVariable Long storageId){
+    public ResponseEntity<CommonResponseDto<Void>> addFollow(Authentication authentication, @PathVariable Long storageId){
         Long userId = authenticationHandler.getUserId(authentication);
         followService.addFollow(userId, storageId);
 
-        return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
+        return ResponseEntity.ok().body(new CommonResponseDto<>("등록 성공", null));
     }
 
     /** 창고 팔로우 해제 */
     @DeleteMapping("/{storageId}")
-    public ResponseEntity<BaseResponseDto> deleteFollow(Authentication authentication, @PathVariable Long storageId){
+    public ResponseEntity<CommonResponseDto<Void>> deleteFollow(Authentication authentication, @PathVariable Long storageId){
         Long userId = authenticationHandler.getUserId(authentication);
         followService.deleteFollow(userId, storageId);
 
-        return ResponseEntity.ok().body(new BaseResponseDto(200, "success"));
+        return ResponseEntity.ok().body(new CommonResponseDto<>("해제 성공", null));
     }
 
 }

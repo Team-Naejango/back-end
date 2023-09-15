@@ -75,10 +75,11 @@ class FollowControllerTest extends RestDocsSupportTest {
                                     .tag("팔로우")
                                     .description("팔로우 목록 조회")
                                     .responseFields(
-                                            fieldWithPath("[].id").description("창고 ID"),
-                                            fieldWithPath("[].name").description("창고 이름"),
-                                            fieldWithPath("[].description").description("창고 설명"),
-                                            fieldWithPath("[].imgUrl").description("이미지 URL")
+                                            fieldWithPath("result[].id").description("창고 ID"),
+                                            fieldWithPath("result[].name").description("창고 이름"),
+                                            fieldWithPath("result[].description").description("창고 설명"),
+                                            fieldWithPath("result[].imgUrl").description("이미지 URL"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("팔로우 목록 조회 Response"))
                                     .build()
@@ -124,8 +125,8 @@ class FollowControllerTest extends RestDocsSupportTest {
                                             parameterWithName("storageId").description("창고 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("팔로우 등록 Response"))
                                     .build()
@@ -171,8 +172,8 @@ class FollowControllerTest extends RestDocsSupportTest {
                                             parameterWithName("storageId").description("창고 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("팔로우 해제 Response"))
                                     .build()
