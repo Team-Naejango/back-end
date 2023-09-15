@@ -15,6 +15,7 @@ import javax.persistence.*;
 public class Notification extends TimeAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "notification_id")
     private Long id;
 
     @Column(nullable = false)
