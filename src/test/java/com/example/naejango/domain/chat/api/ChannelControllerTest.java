@@ -353,7 +353,6 @@ class ChannelControllerTest extends RestDocsSupportTest {
         }
     }
 
-
     @Nested
     @DisplayName("근처 그룹 채널 조회")
     class findGroupChannelNearby {
@@ -462,7 +461,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .requestParameters(
                                     parameterWithName("lon").description("조회하고자 하는 중심 경도"),
                                     parameterWithName("lat").description("조회하고자 하는 중심 위도"),
-                                    parameterWithName("rad").description("조회 반경"),
+                                    parameterWithName("rad").description("조회 반경").defaultValue("1000"),
                                     parameterWithName("_csrf").ignored()
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
