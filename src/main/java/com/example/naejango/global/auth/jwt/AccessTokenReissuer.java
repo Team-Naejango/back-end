@@ -17,7 +17,6 @@ public class AccessTokenReissuer {
         String refreshToken = jwtCookieHandler.getRefreshToken(request);
         var validateResult = jwtValidator.isValidRefreshToken(refreshToken);
         if (!validateResult.isValidToken()) return null;
-
         return jwtGenerator.generateAccessToken(validateResult.getUserId());
     }
 

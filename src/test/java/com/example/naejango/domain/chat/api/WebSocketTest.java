@@ -1,7 +1,7 @@
 package com.example.naejango.domain.chat.api;
 
 import com.example.naejango.domain.chat.domain.MessageType;
-import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
+import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -129,9 +129,9 @@ public class WebSocketTest {
         Thread.sleep(100);
 
         // then
-        var dto = new WebSocketMessageDto(MessageType.INFO, user2.getId(), null, "소켓 통신 정보를 수신합니다.");
+        var dto = new WebSocketMessageReceiveDto(MessageType.INFO, user2.getId(), null, "소켓 통신 정보를 수신합니다.");
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user2.getId(), 2L, "채널을 구독 합니다.");
+        var dto2 = new WebSocketMessageReceiveDto(MessageType.ENTER, user2.getId(), 2L, "채널을 구독 합니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
     }
 
@@ -161,15 +161,15 @@ public class WebSocketTest {
         // 메세지 전송
         StompHeaders sendMessageHeaders = new StompHeaders();
         sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
-        WebSocketMessageDto messageDto = WebSocketMessageDto.builder()
-                .messageType(MessageType.CHAT).channelId(2L).userId(user4.getId()).content("메세지 전송").build();
+        WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
+                .messageType(MessageType.CHAT).channelId(2L).senderId(user4.getId()).content("메세지 전송").build();
         stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(messageDto));
         Thread.sleep(200);
 
         // then
-        var dto = new WebSocketMessageDto(MessageType.INFO, user4.getId(), null, "소켓 통신 정보를 수신합니다.");
+        var dto = new WebSocketMessageReceiveDto(MessageType.INFO, user4.getId(), null, "소켓 통신 정보를 수신합니다.");
         assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new WebSocketMessageDto(MessageType.ENTER, user4.getId(), 2L, "채널을 구독 합니다.");
+        var dto2 = new WebSocketMessageReceiveDto(MessageType.ENTER, user4.getId(), 2L, "채널을 구독 합니다.");
         assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
         assertEquals(objectMapper.writeValueAsString(messageDto), blockingQueue.poll());
     }

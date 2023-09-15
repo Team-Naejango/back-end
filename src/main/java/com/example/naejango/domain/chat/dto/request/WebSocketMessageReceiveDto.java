@@ -1,17 +1,17 @@
-package com.example.naejango.domain.chat.dto;
+package com.example.naejango.domain.chat.dto.request;
 
 import com.example.naejango.domain.chat.domain.MessageType;
 import lombok.*;
 
-@Getter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @ToString
-public class WebSocketMessageDto {
+public class WebSocketMessageReceiveDto {
 
     private MessageType messageType;
-    private Long userId;
+    private Long senderId;
     private Long channelId;
     private String content;
 

@@ -13,12 +13,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MessageDto {
     private Long messageId;
+    private Long channelId;
     private Long senderId;
     private MessageType messageType;
     private String content;
 
     public MessageDto(Message message) {
         this.messageId = message.getId();
+        this.channelId = message.getChannel().getId();
         this.senderId = message.getSenderId();
         this.messageType = message.getMessageType();
         this.content = message.getContent();

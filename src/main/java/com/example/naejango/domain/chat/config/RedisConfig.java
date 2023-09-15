@@ -1,11 +1,12 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
+import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -22,13 +23,13 @@ public class RedisConfig {
      * @param redisConnectionFactory Redis 서버와의 연결 정보
      */
     @Bean
-    public RedisTemplate<String, WebSocketMessageDto> MessageRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, WebSocketMessageDto> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, WebSocketMessageReceiveDto> MessageRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, WebSocketMessageReceiveDto> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         // 시리얼라이저 설정
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(WebSocketMessageDto.class));
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(WebSocketMessageReceiveDto.class));
         return redisTemplate;
     }
 
@@ -39,7 +40,7 @@ public class RedisConfig {
 
         // 시리얼라이저 설정
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Long.class));
+        redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Long.class));
         return redisTemplate;
     }
 
@@ -53,17 +54,5 @@ public class RedisConfig {
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
         return redisTemplate;
     }
-
-    @Bean
-    public RedisTemplate<String, Boolean> booleanRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Boolean> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
-
-        // 시리얼라이저 설정
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Boolean.class));
-        return redisTemplate;
-    }
-
 
 }

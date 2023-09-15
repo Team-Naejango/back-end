@@ -34,6 +34,7 @@ public enum ErrorCode {
     /** 404 NOT_FOUND : 리소스를 찾을 수 없음 */
     MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메세지를 찾을 수 없습니다."),
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
+    SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "세션 정보를 찾을 수 없습니다."),
     USERPROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 프로필을 찾을 수 없습니다."),
     CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 Chat 을 찾을 수 없습니다."),
     CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "채널을 찾을 수 없습니다."),

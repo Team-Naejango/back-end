@@ -3,6 +3,7 @@ package com.example.naejango.domain.chat.application.http;
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.*;
+import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -199,11 +200,11 @@ public class ChannelService {
             // 그룹 채널로 캐스팅 합니다.
             GroupChannel groupChannel = (GroupChannel) channel;
             // 퇴장 메세지 발행
-            WebSocketMessageDto messageDto = WebSocketMessageDto.builder()
+            WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
                     .messageType(MessageType.EXIT)
                     .content("채널에서 퇴장 하였습니다.")
                     .channelId(groupChannel.getId())
-                    .userId(userId).build();
+                    .senderId(userId).build();
             webSocketService.publishMessage(String.valueOf(groupChannel.getId()), messageDto);
             // Chat 을 삭제합니다. (더이상 메세지를 수신하지 못하도록)
             chatRepository.delete(chat);
