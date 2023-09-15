@@ -84,10 +84,10 @@ public class StorageController {
 
     /** 창고에 등록된 아이템 조회 */
     @GetMapping("/{storageId}/items")
-    public ResponseEntity<CommonResponseDto<List<ItemInfoDto>>> ItemList(@PathVariable("storageId") Long storageId,
-                                                        @RequestParam("status") boolean status,
-                                                        @RequestParam(value = "page", defaultValue = "0") int page,
-                                                        @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<CommonResponseDto<List<ItemInfoDto>>> itemList(@PathVariable("storageId") Long storageId,
+                                                                         @RequestParam("status") boolean status,
+                                                                         @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                         @RequestParam(value = "size", defaultValue = "10") int size) {
         // 카테고리 정보와 함께 아이템 로드
         Page<Item> itemList = storageService.findItemList(storageId, status, page, size);
 
