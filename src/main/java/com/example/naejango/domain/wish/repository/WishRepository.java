@@ -1,6 +1,7 @@
 package com.example.naejango.domain.wish.repository;
 
 import com.example.naejango.domain.wish.domain.Wish;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface WishRepository extends JpaRepository<Wish, Long> {
+    @EntityGraph(attributePaths = {"item"})
     List<Wish> findByUserId(Long userId);
 
     Optional<Wish> findByUserIdAndItemId(Long userId, Long itemId);

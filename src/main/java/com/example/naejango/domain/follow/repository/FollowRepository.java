@@ -1,6 +1,7 @@
 package com.example.naejango.domain.follow.repository;
 
 import com.example.naejango.domain.follow.domain.Follow;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Long> {
+    @EntityGraph(attributePaths = {"storage"})
     List<Follow> findByUserId(Long userId);
 
     Optional<Follow> findByUserIdAndStorageId(Long userId, Long storageId);
