@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -16,20 +17,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class InMemorySubscribeRepository implements SubscribeRepository {
 
-    /* sessionId 로 UserId 저장합니다. */
+    /* sessionId 에 UserId 저장합니다. */
     private final ConcurrentHashMap<String, Long> sessionIdUserIdMap = new ConcurrentHashMap<>();
 
     /* 채널을 구독하는 userId 를 저장합니다. */
-    private final ConcurrentHashMap<Long, Set<Long>> subscribersInfo = new ConcurrentHashMap<>();
-
-    /* user 가 구독하는 채팅 channelId 를 저장합니다. */
-    private final ConcurrentHashMap<Long, Set<Long>> subscribingChannelsInfo = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Set<Long>> channelSubscribersMap = new ConcurrentHashMap<>();
 
     /* subscriptionId 가 어떤 channel 을 가르키는지 저장합니다. */
-    private final ConcurrentHashMap<String, Long> subscriptionIdInfo = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long> subscriptionIdChannelIdMap = new ConcurrentHashMap<>();
 
-    /* user 의 SubscriptionId 를 저장합니다. */
-    private final ConcurrentHashMap<Long, Set<String>> userIdSubscriptionIdMap = new ConcurrentHashMap<>();
+    /* session 에 SubscriptionId 를 저장합니다. */
+    private final ConcurrentHashMap<String, Set<String>> sessionIdSubscriptionIdMap = new ConcurrentHashMap<>();
 
     @Override
     public void saveUserIdBySessionId(Long userId, String sessionId) {
@@ -47,83 +45,62 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
     }
 
     @Override
-    public void deleteSubscriptionIdsByUserId(Long userId) {
-        userIdSubscriptionIdMap.remove(userId);
+    public void saveSubscriptionIdBySessionId(String subscriptionId, String sessionId) {
+        sessionIdSubscriptionIdMap.computeIfAbsent(sessionId, key -> new HashSet<>()).add(subscriptionId);
     }
 
     @Override
-    public Set<Long> findSubscribeChannelIdByUserId(Long userId) {
-        return subscribingChannelsInfo.getOrDefault(userId, new HashSet<>());
+    public Set<String> findSubscriptionIdBySessionId(String sessionId) {
+        return sessionIdSubscriptionIdMap.get(sessionId);
     }
+
+    @Override
+    public Set<Long> findSubscribeChannelIdBySessionId(String sessionId) {
+        return sessionIdSubscriptionIdMap.get(sessionId)
+                .stream().map(subscriptionIdChannelIdMap::get).collect(Collectors.toSet());
+    }
+
+    @Override
+    public void deleteAllSubscriptionsBySessionId(String sessionId) {
+        sessionIdSubscriptionIdMap.remove(sessionId);
+    }
+
 
     @Override
     public Set<Long> findSubscribersByChannelId(Long channelId) {
-        return subscribersInfo.getOrDefault(channelId, new HashSet<>());
+        return channelSubscribersMap.getOrDefault(channelId, new HashSet<>());
     }
 
     @Override
     public Optional<Long> findChannelIdBySubscriptionId(String subscriptionId) {
-        return Optional.ofNullable(subscriptionIdInfo.get(subscriptionId));
-    }
-
-    @Override
-    public void saveSubscriptionIdByUserId(String subscriptionId, Long userId) {
-        userIdSubscriptionIdMap.computeIfAbsent(userId, k -> new HashSet<>()).add(subscriptionId);
-    }
-
-    @Override
-    public Set<String> findSubscriptionIdByUserId(Long userId) {
-        return userIdSubscriptionIdMap.getOrDefault(userId, new HashSet<>());
+        return Optional.ofNullable(subscriptionIdChannelIdMap.get(subscriptionId));
     }
 
     @Override
     public void setSubscriberToChannel(Long userId, Long channelId) {
-        Set<Long> usersId = subscribersInfo.get(channelId);
+        Set<Long> usersId = channelSubscribersMap.get(channelId);
         if (usersId == null) {
-            subscribersInfo.put(channelId, new HashSet<>(Collections.singletonList(userId)));
+            channelSubscribersMap.put(channelId, new HashSet<>(Collections.singletonList(userId)));
         }
         else usersId.add(userId);
     }
 
     @Override
-    public void subscribeToChannel(Long userId, Long channelId) {
-        Set<Long> channelsId = subscribingChannelsInfo.get(userId);
-        if (channelsId == null) {
-            subscribingChannelsInfo.put(userId, new HashSet<>(Collections.singletonList(channelId)));
-        }
-        else channelsId.add(channelId);
-    }
-
-    @Override
     public void setSubscriptionIdToChannel(String subscriptionId, Long channelId) {
-        subscriptionIdInfo.put(subscriptionId,channelId);
+        subscriptionIdChannelIdMap.put(subscriptionId,channelId);
     }
 
     @Override
     public void deleteSubscriberFromChannel(Long userId, Long channelId) {
-        Set<Long> subscribersId = subscribersInfo.get(channelId);
+        Set<Long> subscribersId = channelSubscribersMap.get(channelId);
         if (subscribersId == null) return;
         else subscribersId.remove(userId);
-        if (subscribersId.isEmpty()) subscribersInfo.remove(channelId);
+        if (subscribersId.isEmpty()) channelSubscribersMap.remove(channelId);
     }
 
-    @Override
-    public void unsubscribeToChannel(Long userId, Long channelId) {
-        Set<Long> channelsId = subscribingChannelsInfo.get(userId);
-        if (channelsId == null) return;
-        else subscribingChannelsInfo.remove(userId);
-        if (channelsId.isEmpty()) subscribingChannelsInfo.remove(channelId);
-    }
-
-    @Override
-    public void unsubscribeToAllChannel(Long userId) {
-        Set<Long> channelsId = subscribingChannelsInfo.get(userId);
-        if (channelsId != null) channelsId.forEach(channelId -> setSubscriberToChannel(userId, channelId));
-        subscribingChannelsInfo.remove(userId);
-    }
 
     @Override
     public void deleteSubscriptionId(String subscriptionId) {
-        subscriptionIdInfo.remove(subscriptionId);
+        subscriptionIdChannelIdMap.remove(subscriptionId);
     }
 }

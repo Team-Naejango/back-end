@@ -1,9 +1,8 @@
 package com.example.naejango.domain.chat.application.websocket;
 
-import com.example.naejango.domain.chat.application.http.MessageService;
-import com.example.naejango.domain.chat.domain.MessageType;
-import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
+import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.exception.WebSocketException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,56 +19,42 @@ import java.util.Set;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
-    private final WebSocketService webSocketService;
-    private final MessageService messageService;
 
-    public void disconnect(Long userId, String sessionId) {
-        // 유저가 구독한 채널을 조회합니다.
-        Set<Long> channelIds = subscribeRepository.findSubscribeChannelIdByUserId(userId);
-
-        // 채널에서 해당 유저를 삭제합니다.
+    public void disconnect(String sessionId) {
+        // 유저 로드
+        Long userId = subscribeRepository.findUserIdBySessionId(sessionId)
+                .orElseThrow(() -> new WebSocketException(ErrorCode.SESSION_NOT_FOUND));
+        
+        // 유저가 구독한 채널에서 유저를 삭제합니다.
+        Set<Long> channelIds = subscribeRepository.findSubscribeChannelIdBySessionId(sessionId);
         channelIds.forEach(channelId -> subscribeRepository.deleteSubscriberFromChannel(userId, channelId));
 
-        // 유저의 구독 정보 삭제합니다.
-        subscribeRepository.unsubscribeToAllChannel(userId);
-
         // 구독 정보를 삭제합니다.
-        subscribeRepository.findSubscriptionIdByUserId(userId).forEach(subscribeRepository::deleteSubscriptionId);
-        subscribeRepository.deleteSubscriptionIdsByUserId(userId);
+        subscribeRepository.findSubscriptionIdBySessionId(sessionId).forEach(subscribeRepository::deleteSubscriptionId);
+        subscribeRepository.deleteAllSubscriptionsBySessionId(sessionId);
 
         // 세션 정보를 삭제합니다.
         subscribeRepository.deleteSessionId(sessionId);
     }
 
-    public void unsubscribe(Long userId, String subscriptionId) {
+    public void unsubscribe(String sessionId, String subscriptionId) {
         // 구독 id 로 구독 채널을 식별합니다.
         Long channelId = subscribeRepository.findChannelIdBySubscriptionId(subscriptionId).orElse(null);
         if(channelId == null) return;
-
+        
+        // 유저 로드
+        Long userId = subscribeRepository.findUserIdBySessionId(sessionId)
+                .orElseThrow(() -> new WebSocketException(ErrorCode.USER_NOT_FOUND));
+        
         // 채널에서 구독자 삭제
         subscribeRepository.deleteSubscriberFromChannel(userId, channelId);
 
-        // 사용자의 구독 채널 삭제
-        subscribeRepository.unsubscribeToChannel(userId, channelId);
-
         // 구독 id 삭제
         subscribeRepository.deleteSubscriptionId(subscriptionId);
-
-        // 퇴장 메세지
-        var messageDto = WebSocketMessageDto.builder()
-                .channelId(channelId)
-                .messageType(MessageType.EXIT)
-                .userId(userId)
-                .content("")
-                .build();
-        webSocketService.publishMessage(String.valueOf(channelId), messageDto);
-        messageService.publishMessage(channelId, userId, MessageType.EXIT, messageDto.getContent());
+        
     }
 
-    public void subscribe(Long userId, String subscriptionId, Long channelId) {
-        // 유저를 채널에 등록합니다.
-        subscribeRepository.subscribeToChannel(userId, channelId);
-
+    public void subscribe(Long userId, String sessionId, String subscriptionId, Long channelId) {
         // 채널에 유저를 등록합니다.
         subscribeRepository.setSubscriberToChannel(userId, channelId);
 
@@ -77,7 +62,7 @@ public class SubscribeService {
         subscribeRepository.setSubscriptionIdToChannel(subscriptionId, channelId);
 
         // 구독 id 를 등록합니다.
-        subscribeRepository.saveSubscriptionIdByUserId(subscriptionId, userId);
+        subscribeRepository.saveSubscriptionIdBySessionId(subscriptionId, sessionId);
     }
 
     public boolean isSubscriber(Long userId, Long channelId) {

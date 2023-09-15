@@ -6,110 +6,95 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 @ConditionalOnProperty(name = "redis-config.websocket", havingValue = "true")
 @RequiredArgsConstructor
 public class RedisSubscribeRepository implements SubscribeRepository {
-    private final RedisTemplate<String, Long> longTemplate;
+    private final RedisTemplate<String, Long> stringLongTemplate;
     private final RedisTemplate<String, Object> basicTemplate;
     private final StringRedisTemplate stringTemplate;
+    private final String SESSION_USER = "Session_User";
+    private final String SESSION_SUBSCRIPTION = "Session_Subscription:";
+    private final String SUBSCRIPTION_CHANNEL = "Subscription_Channel:";
+    private final String CHANNEL_USER = "Channel_User:";
 
     @Override
     public void saveUserIdBySessionId(Long userId, String sessionId) {
-        String key = "Session:" + sessionId;
-        longTemplate.opsForValue().set(key, userId);
+        basicTemplate.opsForHash().putIfAbsent(SESSION_USER, sessionId, userId);
     }
 
     @Override
     public Optional<Long> findUserIdBySessionId(String sessionId) {
-        String key = "Session:" + sessionId;
-        return Optional.ofNullable(longTemplate.opsForValue().get(key));
+        return Optional.ofNullable((Long) basicTemplate.opsForHash().get(SESSION_USER, sessionId));
     }
 
     @Override
     public void deleteSessionId(String sessionId) {
-        String key = "Session:" + sessionId;
-        longTemplate.opsForValue().getOperations().delete(key);
+        basicTemplate.opsForHash().delete(SESSION_USER, sessionId);
     }
 
     @Override
     public void setSubscriberToChannel(Long userId, Long channelId) {
-        String key = "Channel:" + channelId;
-        basicTemplate.opsForSet().add(key, userId);
+        String key = CHANNEL_USER + channelId;
+        stringLongTemplate.opsForSet().add(key, userId);
     }
     
     @Override
     public Set<Long> findSubscribersByChannelId(Long channelId) {
-        String key = "Channel:" + channelId;
-        return longTemplate.opsForSet().members(key);
+        String key = CHANNEL_USER + channelId;
+        return stringLongTemplate.opsForSet().members(key);
     }
 
     @Override
     public void deleteSubscriberFromChannel(Long userId, Long channelId) {
-        String key = "Channel:" + channelId;
-        basicTemplate.opsForSet().remove(key, userId);
+        String key = CHANNEL_USER + channelId;
+        stringLongTemplate.opsForSet().remove(key, userId);
     }
 
     @Override
-    public Set<Long> findSubscribeChannelIdByUserId(Long userId) {
-        String key = "User:" + userId;
-        return longTemplate.opsForSet().members(key);
+    public Set<Long> findSubscribeChannelIdBySessionId(String sessionId) {
+        String key = SESSION_SUBSCRIPTION + sessionId;
+        Set<String> subscriptions = stringTemplate.opsForSet().members(key);
+        if(subscriptions == null) return new HashSet<>();
+        return subscriptions.stream().map(subscription -> (Long) stringLongTemplate.opsForHash()
+                .get(SUBSCRIPTION_CHANNEL, subscription)).collect(Collectors.toSet());
     }
 
     @Override
-    public void subscribeToChannel(Long userId, Long channelId) {
-        String key = "User:" + userId;
-        longTemplate.opsForSet().add(key, channelId);
+    public void saveSubscriptionIdBySessionId(String subscriptionId, String sessionId) {
+        String key = SESSION_SUBSCRIPTION + sessionId ;
+        stringTemplate.opsForSet().add(key, subscriptionId);
     }
 
     @Override
-    public void unsubscribeToChannel(Long userId, Long channelId) {
-        String key = "User:" + userId;
-        longTemplate.opsForSet().remove(key, channelId);
-    }
-
-    @Override
-    public void unsubscribeToAllChannel(Long userId) {
-        String key = "User:" + userId;
-        longTemplate.delete(key);
-    }
-
-    @Override
-    public void saveSubscriptionIdByUserId(String subscriptionId, Long userId) {
-        String key = "UserSubscription:" + userId;
-        basicTemplate.opsForSet().add(key, subscriptionId);
-    }
-
-    @Override
-    public Set<String> findSubscriptionIdByUserId(Long userId) {
-        String key = "UserSubscription:" + userId;
+    public Set<String> findSubscriptionIdBySessionId(String sessionId) {
+        String key = SESSION_SUBSCRIPTION + sessionId;
         return stringTemplate.opsForSet().members(key);
     }
 
     @Override
-    public void deleteSubscriptionIdsByUserId(Long userId) {
-        String key = "UserSubscription:" + userId;
-        basicTemplate.delete(key);
-    }
-
-    @Override
-    public Optional<Long> findChannelIdBySubscriptionId(String subscriptionId) {
-        String key = "Subscription:" + subscriptionId;
-        return Optional.ofNullable(longTemplate.opsForValue().get(key));
+    public void deleteAllSubscriptionsBySessionId(String sessionId) {
+        String key = SESSION_SUBSCRIPTION + sessionId;
+        stringTemplate.delete(key);
     }
 
     @Override
     public void setSubscriptionIdToChannel(String subscriptionId, Long channelId) {
-        String key = "Subscription:" + subscriptionId;
-        longTemplate.opsForValue().set(key, channelId);
+        basicTemplate.opsForHash().put(SUBSCRIPTION_CHANNEL, subscriptionId, channelId);
+    }
+
+    @Override
+    public Optional<Long> findChannelIdBySubscriptionId(String subscriptionId) {
+        return Optional.ofNullable((Long) basicTemplate.opsForHash().get(SUBSCRIPTION_CHANNEL, subscriptionId));
     }
 
     @Override
     public void deleteSubscriptionId(String subscriptionId) {
-        String key = "Subscription:" + subscriptionId;
-        longTemplate.delete(key);
+        basicTemplate.opsForHash().delete(SUBSCRIPTION_CHANNEL, subscriptionId);
     }
 }

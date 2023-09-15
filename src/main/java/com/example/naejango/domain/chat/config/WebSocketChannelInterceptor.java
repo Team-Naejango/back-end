@@ -26,12 +26,11 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketChannelInterceptor implements ChannelInterceptor {
-    private final ChatRepository chatRepository;
     private final AuthenticationHandler authenticationHandler;
     private final SubscribeService subscribeService;
     private final JwtAuthenticator jwtAuthenticator;
     private final SubscribeRepository subscribeRepository;
-
+    private final ChatRepository chatRepository;
 
     /**
      * 웹소켓 EndPoint 로 전송되는 메세지를 Intercept 하여
@@ -83,9 +82,9 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
             Long userId = authenticationHandler.getUserId(accessor.getUser());
             Long channelId = getChannelId(accessor);
             if (!subscribeService.isSubscriber(userId, channelId)) throw new WebSocketException(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST);
+
             return generateMessage(message, accessor);
         }
-
 
         /*
          * 구독 취소 요청
@@ -97,19 +96,24 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
             // subscriptionId 정보 받아오기
             Long userId = authenticationHandler.getUserId(accessor.getUser());
             String subscriptionId = accessor.getSubscriptionId();
+            String sessionId = accessor.getSessionId();
+
+            // Destination 확인
+            String destination = accessor.getDestination();
 
             // 해당 subscription 제거
-            subscribeService.unsubscribe(userId, subscriptionId);
+            if (destination != null && destination.startsWith("/sub/channel")) { // 읽기 처리를 제외한 구독 정보는 SimpUserRegistry 에서 관리
+                subscribeService.unsubscribe(sessionId, subscriptionId);
+            }
+
             return generateMessage(message, accessor);
         }
 
         /* 웹소켓 연결 종료 요청 */
         if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
             // 모든 구독 정보 삭제
-            if (accessor.getUser() != null) {
-                Long userId = authenticationHandler.getUserId(accessor.getUser());
-                subscribeService.disconnect(userId, accessor.getSessionId());
-            }
+            subscribeService.disconnect(accessor.getSessionId());
+
             return message;
         }
 
@@ -133,7 +137,7 @@ public class WebSocketChannelInterceptor implements ChannelInterceptor {
     /* 채널 정보를 추출합니다. */
     private Long getChannelId(StompHeaderAccessor headerAccessor) {
         String destination = headerAccessor.getDestination();
-        if(destination != null && (destination.startsWith("/sub/channel") || destination.startsWith("/pub/channel"))){
+        if(destination != null && (destination.startsWith("/sub/channel") || destination.startsWith("/pub/channel") || destination.startsWith("/sub/lounge"))){
             String channelId = destination.substring(destination.lastIndexOf('/') + 1);
             return Long.valueOf(channelId);
         }

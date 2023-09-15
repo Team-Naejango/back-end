@@ -28,7 +28,8 @@ public class MessageService {
     public void publishMessage(Long channelId, Long senderId, MessageType messageType, String content) {
 
         // 메세지를 저장합니다.
-        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
         Message sentMessage = Message.builder()
                 .messageType(messageType)
                 .senderId(senderId)

@@ -1,6 +1,7 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.dto.WebSocketMessageDto;
+import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChatMessageListener implements MessageListener {
 
-    private final RedisTemplate<String, WebSocketMessageDto> redisTemplate;
+    private final RedisTemplate<String, WebSocketMessageReceiveDto> redisTemplate;
 
     /*
      * 메세지를 실제로 발행해 주는 객체 입니다.
@@ -34,8 +35,15 @@ public class ChatMessageListener implements MessageListener {
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        WebSocketMessageDto messageDto = (WebSocketMessageDto) redisTemplate.getValueSerializer().deserialize(message.getBody());
-        messageSender.convertAndSend("/sub/channel/" + messageDto.getChannelId(), messageDto);
+        WebSocketMessageReceiveDto receiveDto = (WebSocketMessageReceiveDto) redisTemplate.getValueSerializer().deserialize(message.getBody());
+        if (receiveDto != null) {
+            // 채팅을 실시간으로 읽고 있는 사람에게는 완전한 정보를 보내줍니다.
+            messageSender.convertAndSend("/sub/channel/" + receiveDto.getChannelId(), new WebSocketMessageSendDto(receiveDto));
+
+            // 채팅탭에 머물고 있는 사람은 보낸 사람의 정보를 주지 않습니다.
+            receiveDto.setSenderId(null);
+            messageSender.convertAndSend("/sub/lounge/" + receiveDto.getChannelId(), new WebSocketMessageSendDto(receiveDto));
+        }
     }
 
     /**
