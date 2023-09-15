@@ -82,7 +82,7 @@ public class ChatController {
      * @param channelId 채널 id
      * @return 채널 참여 여부(hasChat), 챗 id(chatId)
      */
-    @GetMapping("/{channelId}/myChat")
+    @GetMapping("/{channelId}")
     public ResponseEntity<CommonResponseDto<Long>> findChatByChannelId(@PathVariable("channelId") Long channelId,
                                                                    Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);

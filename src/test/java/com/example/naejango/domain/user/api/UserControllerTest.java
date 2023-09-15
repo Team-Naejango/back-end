@@ -159,7 +159,7 @@ class UserControllerTest extends RestDocsSupportTest {
 
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
-                            .get("/api/user/me")
+                            .get("/api/user/profile")
                             .header("Authorization", "access token")
             );
 
