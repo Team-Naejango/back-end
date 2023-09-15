@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "transaction_id")
     private Long id;
 
     @Column(nullable = false)
@@ -43,7 +44,7 @@ public class Transaction {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    public void waitTransaction(){
+    public void remitTransaction(){
         this.status = TransactionStatus.REMITTANCE_COMPLETION;
     }
 

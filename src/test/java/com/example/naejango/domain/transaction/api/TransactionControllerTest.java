@@ -4,6 +4,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.transaction.application.TransactionService;
+import com.example.naejango.domain.transaction.dto.request.CreateTransactionCommandDto;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
@@ -77,13 +78,14 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                     .tag("거래")
                                     .description("거래 내역 조회")
                                     .responseFields(
-                                            fieldWithPath("[].id").description("거래 ID"),
-                                            fieldWithPath("[].date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
-                                            fieldWithPath("[].amount").description("거래 금액"),
-                                            fieldWithPath("[].status").description("구매 or 판매"),
-                                            fieldWithPath("[].traderName").description("거래자 이름"),
-                                            fieldWithPath("[].itemName").description("아이템 이름"),
-                                            fieldWithPath("[].itemId").description("아이템 ID")
+                                            fieldWithPath("result[].id").description("거래 ID"),
+                                            fieldWithPath("result[].date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
+                                            fieldWithPath("result[].amount").description("거래 금액"),
+                                            fieldWithPath("result[].status").description("구매 or 판매"),
+                                            fieldWithPath("result[].traderName").description("거래자 이름"),
+                                            fieldWithPath("result[].itemName").description("아이템 이름"),
+                                            fieldWithPath("result[].itemId").description("아이템 ID"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("거래 내역 조회 Response"))
                                     .build()
@@ -107,6 +109,9 @@ class TransactionControllerTest extends RestDocsSupportTest {
                         .itemId(1L)
                         .build();
 
+        CreateTransactionCommandDto createTransactionCommandDto =
+                new CreateTransactionCommandDto(createTransactionRequestDto);
+
         CreateTransactionResponseDto createTransactionResponseDto =
                 CreateTransactionResponseDto.builder()
                         .id(1L)
@@ -128,7 +133,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
 
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
-            BDDMockito.given(transactionService.createTransaction(userId, createTransactionRequestDto))
+            BDDMockito.given(transactionService.createTransaction(userId, createTransactionCommandDto))
                     .willReturn(createTransactionResponseDto);
 
             // when
@@ -142,7 +147,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
 
             // then
             resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
-            resultActions.andExpect(MockMvcResultMatchers.jsonPath("id").isNumber());
+            resultActions.andExpect(MockMvcResultMatchers.jsonPath("result.id").isNumber());
             resultActions.andExpect(MockMvcResultMatchers.header().exists("Location"));
 
             resultActions.andDo(restDocs.document(
@@ -161,13 +166,14 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("itemId").description("아이템 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("id").description("거래 ID"),
-                                            fieldWithPath("date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
-                                            fieldWithPath("amount").description("거래 금액"),
-                                            fieldWithPath("status").description("거래 상태 ex) TRANSACTION_APPOINTMENT"),
-                                            fieldWithPath("userId").description("유저 ID"),
-                                            fieldWithPath("traderId").description("거래자 ID"),
-                                            fieldWithPath("itemId").description("아이템 ID")
+                                            fieldWithPath("result.id").description("거래 ID"),
+                                            fieldWithPath("result.date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
+                                            fieldWithPath("result.amount").description("거래 금액"),
+                                            fieldWithPath("result.status").description("거래 상태 ex) TRANSACTION_APPOINTMENT"),
+                                            fieldWithPath("result.userId").description("유저 ID"),
+                                            fieldWithPath("result.traderId").description("거래자 ID"),
+                                            fieldWithPath("result.itemId").description("아이템 ID"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("거래 등록 Response"))
                                     .build()
@@ -195,7 +201,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .patch("/api/transaction/remittance/{transactionId}", transactionId)
+                    .patch("/api/transaction/{transactionId}/remit", transactionId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -214,8 +220,8 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             parameterWithName("transactionId").description("거래 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("송금 완료 요청 Response"))
                                     .build()
@@ -243,7 +249,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .patch("/api/transaction/completion/{transactionId}", transactionId)
+                    .patch("/api/transaction/{transactionId}/complete", transactionId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -262,8 +268,8 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             parameterWithName("transactionId").description("거래 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("status").description("상태코드"),
-                                            fieldWithPath("message").description("메시지")
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("송금 완료 요청 Response"))
                                     .build()
@@ -331,8 +337,9 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("amount").description("거래 금액")
                                     )
                                     .responseFields(
-                                            fieldWithPath("date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
-                                            fieldWithPath("amount").description("거래 금액")
+                                            fieldWithPath("result.date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
+                                            fieldWithPath("result.amount").description("거래 금액"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("거래 정보 수정 Response"))
                                     .build()
@@ -378,6 +385,10 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             "거래 삭제는 거래 예약 상태에서만 가능 (송금 완료 이후 수정 불가)")
                                     .pathParameters(
                                             parameterWithName("transactionId").description("거래 ID")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("거래 삭제 Response"))
                                     .build()
