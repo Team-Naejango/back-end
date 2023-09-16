@@ -1,7 +1,6 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.domain.MessageType;
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -13,12 +12,12 @@ import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.exception.WebSocketErrorResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -43,12 +42,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
 
+import static com.example.naejango.domain.chat.domain.MessageType.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("Test")
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Slf4j
 public class WebSocketTest {
@@ -72,9 +73,8 @@ public class WebSocketTest {
     DataSourceProperties dataSourceProperties;
 
     private final String ENDPOINT = "/ws-endpoint";
-    private final String CHAT_CHANNEL = "/sub/channel";
     private final String INFO_CHANNEL = "/user/sub/info";
-    private final String SEND_MESSAGE_CHANNEL = "/pub/channel";
+
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
     private BlockingQueue<String> blockingQueue;
@@ -88,6 +88,7 @@ public class WebSocketTest {
     }
 
     @Test
+    @Order(1)
     @DisplayName("웹소켓 Endpoint 연결 테스트")
     public void testWebSocketConnection() throws Exception {
         // given
@@ -102,10 +103,12 @@ public class WebSocketTest {
         // then
         assertNotNull(stompSession);
         assertTrue(stompSession.isConnected());
+        stompSession.disconnect();
     }
 
     @Test
-    @DisplayName("Info 채널 및 채팅 채널 구독 테스트")
+    @Order(2)
+    @DisplayName("Info 채널 구독 및 에러메세지 수신")
     void chatChannelSubscribeTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
         User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -122,22 +125,25 @@ public class WebSocketTest {
         stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
-        // 채팅 채널 구독
-        StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/2");
-        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
+        // 권한 없는 채널 구독
+        StompHeaders subscribeHeaders = new StompHeaders();
+        subscribeHeaders.setDestination(SUBSCRIBE_CHANNEL.getEndpointPrefix() + "5");
+        stompSession.subscribe(subscribeHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
         // then
-        var dto = new WebSocketMessageReceiveDto(MessageType.INFO, user2.getId(), null, "소켓 통신 정보를 수신합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new WebSocketMessageReceiveDto(MessageType.ENTER, user2.getId(), 2L, "채널을 구독 합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
+        assertEquals(SUBSCRIBE_INFO, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+        assertEquals(objectMapper.writeValueAsString(WebSocketErrorResponse.response(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST))
+                , blockingQueue.poll());
+
+        // 종료
+        stompSession.disconnect();
     }
 
     @Test
-    @DisplayName("메세지 전송 테스트")
-    void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+    @Order(3)
+    @DisplayName("라운지 채널만 구독시 전송 실패")
+    void sendLoungeChannelTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
         User user4 = userRepository.findByUserKey("test_4").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user4.getId());
@@ -146,42 +152,79 @@ public class WebSocketTest {
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
         stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
         // when
-        // info 채널 구독
+        // INFO 채널 구독
         StompHeaders subscribeInfoHeaders = new StompHeaders();
         subscribeInfoHeaders.setDestination(INFO_CHANNEL);
         stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
-        Thread.sleep(100);
+        Thread.sleep(200);
 
-        // 채팅 채널 구독
+        // 라운지 채널 구독
         StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/2");
+        subscribeChatHeaders.setDestination(SUBSCRIBE_LOUNGE.getEndpointPrefix() + "2");
         stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
         // 메세지 전송
         StompHeaders sendMessageHeaders = new StompHeaders();
-        sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
-        WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
-                .messageType(MessageType.CHAT).channelId(2L).senderId(user4.getId()).content("메세지 전송").build();
-        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(messageDto));
-        Thread.sleep(200);
+        sendMessageHeaders.setDestination(CHAT.getEndpointPrefix() + "2");
+        stompSession.send(sendMessageHeaders, "메세지 전송".getBytes());
+        Thread.sleep(100);
 
         // then
-        var dto = new WebSocketMessageReceiveDto(MessageType.INFO, user4.getId(), null, "소켓 통신 정보를 수신합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto), blockingQueue.poll());
-        var dto2 = new WebSocketMessageReceiveDto(MessageType.ENTER, user4.getId(), 2L, "채널을 구독 합니다.");
-        assertEquals(objectMapper.writeValueAsString(dto2), blockingQueue.poll());
-        assertEquals(objectMapper.writeValueAsString(messageDto), blockingQueue.poll());
+        assertEquals(SUBSCRIBE_INFO, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+        assertEquals(SUBSCRIBE_LOUNGE, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+        assertEquals(objectMapper.writeValueAsString(WebSocketErrorResponse.response(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST))
+                , blockingQueue.poll());
+
+        // 종료
+        stompSession.disconnect();
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("채팅 채널에 메세지 전송 및 수신")
+    void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+        // given
+        User user4 = userRepository.findByUserKey("test_4").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String accessToken = jwtGenerator.generateAccessToken(user4.getId());
+        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
+        StompHeaders connectHeaders = new StompHeaders();
+        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
+        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
+
+        // when
+        // 채팅 채널 구독
+        StompHeaders subscribeChatHeaders = new StompHeaders();
+        subscribeChatHeaders.setDestination(SUBSCRIBE_CHANNEL.getEndpointPrefix() + "2");
+        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
+        Thread.sleep(100);
+
+        // 메세지 전송
+        StompHeaders sendMessageHeaders = new StompHeaders();
+        sendMessageHeaders.setDestination(CHAT.getEndpointPrefix() + "2");
+        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes("메세지 전송"));
+        Thread.sleep(100);
+
+        // then
+        assertEquals(SUBSCRIBE_CHANNEL, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+        assertEquals(CHAT, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+
+        // 종료
+        stompSession.disconnect();
     }
 
 
+
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private class DefaultStompFrameHandler implements StompFrameHandler {
+        @NotNull
         @Override
-        public Type getPayloadType(StompHeaders headers) {
+        public Type getPayloadType(@NotNull StompHeaders headers) {
             return byte[].class;
         }
         @Override
-        public void handleFrame(StompHeaders headers, Object payload) {
+        public void handleFrame(@NotNull StompHeaders headers, Object payload) {
             blockingQueue.offer(new String((byte[]) payload));
         }
     }

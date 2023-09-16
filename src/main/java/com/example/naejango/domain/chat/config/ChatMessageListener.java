@@ -1,19 +1,25 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
 import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
+import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.exception.WebSocketException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+
+import static com.example.naejango.domain.chat.domain.MessageType.*;
 
 
 /**
@@ -23,26 +29,25 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ChatMessageListener implements MessageListener {
-
-    private final RedisTemplate<String, WebSocketMessageReceiveDto> redisTemplate;
-
     /*
      * 메세지를 실제로 발행해 주는 객체 입니다.
      * SimpMessageSendingOperations 는 레디스의 구독 정보와 상관 없이
      * 스프링 웹소켓의 심플 메세지 브로커에 따라서 메세지를 전송합니다.
      */
     private final SimpMessagingTemplate messageSender;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        WebSocketMessageReceiveDto receiveDto = (WebSocketMessageReceiveDto) redisTemplate.getValueSerializer().deserialize(message.getBody());
-        if (receiveDto != null) {
+        try {
+            WebSocketMessageCommandDto commandDto = objectMapper.readValue(message.getBody(), WebSocketMessageCommandDto.class);
+            WebSocketMessageSendDto sendDto = commandDto.toSendDto();
             // 채팅을 실시간으로 읽고 있는 사람에게는 완전한 정보를 보내줍니다.
-            messageSender.convertAndSend("/sub/channel/" + receiveDto.getChannelId(), new WebSocketMessageSendDto(receiveDto));
-
+            messageSender.convertAndSend(SUBSCRIBE_CHANNEL.getEndpointPrefix() + commandDto.getChannelId(), sendDto);
             // 채팅탭에 머물고 있는 사람은 보낸 사람의 정보를 주지 않습니다.
-            receiveDto.setSenderId(null);
-            messageSender.convertAndSend("/sub/lounge/" + receiveDto.getChannelId(), new WebSocketMessageSendDto(receiveDto));
+            messageSender.convertAndSend(SUBSCRIBE_LOUNGE.getEndpointPrefix() + commandDto.getChannelId(), sendDto.toLoungeMessage());
+        } catch (IOException e) {
+            throw new WebSocketException(ErrorCode.FORGED_REQUEST);
         }
     }
 

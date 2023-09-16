@@ -59,7 +59,7 @@ public class UserController {
     }
 
     /** 내 프로필 조회 */
-    @GetMapping("/me")
+    @GetMapping("/profile")
     public ResponseEntity<CommonResponseDto<MyProfileDto>> myProfile(Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 

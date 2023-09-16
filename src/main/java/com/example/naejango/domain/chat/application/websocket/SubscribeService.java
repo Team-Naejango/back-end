@@ -1,5 +1,7 @@
 package com.example.naejango.domain.chat.application.websocket;
 
+import com.example.naejango.domain.chat.dto.SubScribeCommandDto;
+import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.WebSocketException;
@@ -19,6 +21,7 @@ import java.util.Set;
 public class SubscribeService {
 
     private final SubscribeRepository subscribeRepository;
+    private final ChatRepository chatRepository;
 
     public void disconnect(String sessionId) {
         // 유저 로드
@@ -38,8 +41,13 @@ public class SubscribeService {
     }
 
     public void unsubscribe(String sessionId, String subscriptionId) {
+
         // 구독 id 로 구독 채널을 식별합니다.
         Long channelId = subscribeRepository.findChannelIdBySubscriptionId(subscriptionId).orElse(null);
+
+        // 구독 id 삭제
+        subscribeRepository.deleteSubscriptionId(subscriptionId);
+
         if(channelId == null) return;
         
         // 유저 로드
@@ -48,20 +56,32 @@ public class SubscribeService {
         
         // 채널에서 구독자 삭제
         subscribeRepository.deleteSubscriberFromChannel(userId, channelId);
-
-        // 구독 id 삭제
-        subscribeRepository.deleteSubscriptionId(subscriptionId);
         
     }
 
-    public void subscribe(Long userId, String sessionId, String subscriptionId, Long channelId) {
+    public void subscribe(SubScribeCommandDto commandDto) {
+        // 구독 권한 확인
+        Long channelId = commandDto.getChannelId();
+        Long userId = commandDto.getUserId();
+        if(chatRepository.findChatByChannelIdAndOwnerId(channelId, userId).isEmpty()){
+            throw new WebSocketException(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST);
+        }
+
+        // 라운지 채널의 경우 구독관리를 브로커에서만 합니다.
+        String destination = commandDto.getDestination();
+        if (destination != null && destination.startsWith("/sub/lounge")) {
+            return;
+        }
+
         // 채널에 유저를 등록합니다.
         subscribeRepository.setSubscriberToChannel(userId, channelId);
 
         // 구독 id 가 어떤 채널을 가르키는지 저장합니다.
+        String subscriptionId = commandDto.getSubscriptionId();
         subscribeRepository.setSubscriptionIdToChannel(subscriptionId, channelId);
 
         // 구독 id 를 등록합니다.
+        String sessionId = commandDto.getSessionId();
         subscribeRepository.saveSubscriptionIdBySessionId(subscriptionId, sessionId);
     }
 

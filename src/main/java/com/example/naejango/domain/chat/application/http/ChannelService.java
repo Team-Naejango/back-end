@@ -3,7 +3,6 @@ package com.example.naejango.domain.chat.application.http;
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.*;
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -82,7 +81,14 @@ public class ChannelService {
         chatRepository.save(otherUserChat);
 
         // 채널 시작 메세지를 생성합니다.
-        messageService.publishMessage(newPrivateChannel.getId(), null, MessageType.INFO, "채팅이 시작 되었습니다.");
+        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+                .messageType(MessageType.OPEN)
+                .channelId(newPrivateChannel.getId())
+                .senderId(null)
+                .content("채팅이 시작 되었습니다.").build();
+
+        // 메세지 저장
+        messageService.publishMessage(commandDto);
 
         return new CreateChannelDto(true, newPrivateChannel.getId(), requesterChat.getId());
     }
@@ -135,7 +141,14 @@ public class ChannelService {
         chatRepository.save(chat);
 
         // 채널 시작 메세지를 생성합니다.
-        messageService.publishMessage(newGroupChannel.getId(), null, MessageType.INFO, "채팅이 시작되었습니다.");
+        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+                .messageType(MessageType.OPEN)
+                .channelId(newGroupChannel.getId())
+                .senderId(null)
+                .content("채팅이 시작 되었습니다.").build();
+
+        // 메세지 저장
+        messageService.publishMessage(commandDto);
 
         return new CreateChannelDto(true, newGroupChannel.getId(), chat.getId());
     }
@@ -197,15 +210,19 @@ public class ChannelService {
 
         // 그룹 채팅의 경우
         if (channel.getChannelType().equals(ChannelType.GROUP)) {
+
             // 그룹 채널로 캐스팅 합니다.
             GroupChannel groupChannel = (GroupChannel) channel;
+
             // 퇴장 메세지 발행
-            WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
+            WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
                     .messageType(MessageType.EXIT)
-                    .content("채널에서 퇴장 하였습니다.")
-                    .channelId(groupChannel.getId())
-                    .senderId(userId).build();
-            webSocketService.publishMessage(String.valueOf(groupChannel.getId()), messageDto);
+                    .channelId(channelId)
+                    .senderId(userId)
+                    .content("채널에서 퇴장 하였습니다.").build();
+
+            webSocketService.publishMessage(commandDto);
+
             // Chat 을 삭제합니다. (더이상 메세지를 수신하지 못하도록)
             chatRepository.delete(chat);
             // Channel 의 참여자 수를 줄입니다.

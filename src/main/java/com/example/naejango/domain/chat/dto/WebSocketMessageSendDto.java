@@ -1,12 +1,11 @@
 package com.example.naejango.domain.chat.dto;
 
 import com.example.naejango.domain.chat.domain.MessageType;
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,11 +17,10 @@ public class WebSocketMessageSendDto {
     private LocalDateTime sentAt;
     private String content;
 
-    public WebSocketMessageSendDto(WebSocketMessageReceiveDto receiveDto) {
-        this.messageType = receiveDto.getMessageType();
-        this.senderId = receiveDto.getSenderId();
-        this.channelId = receiveDto.getChannelId();
-        this.sentAt = LocalDateTime.now();
-        this.content = receiveDto.getContent();
+    public WebSocketLoungeMessageSendDto toLoungeMessage() {
+        return WebSocketLoungeMessageSendDto.builder()
+                .channelId(channelId)
+                .content(content)
+                .sentAt(sentAt).build();
     }
 }

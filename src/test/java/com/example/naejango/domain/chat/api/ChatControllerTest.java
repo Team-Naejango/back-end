@@ -283,7 +283,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
-                            .get("/api/chat/{channelId}/myChat", channel1.getId())
+                            .get("/api/chat/{channelId}", channel1.getId())
                             .header("Authorization", "Bearer {accessToken}")
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
@@ -306,7 +306,7 @@ class ChatControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
-                            .get("/api/chat/{channelId}/myChat", channel1.getId())
+                            .get("/api/chat/{channelId}", channel1.getId())
                             .header("Authorization", "Bearer {accessToken}")
                             .with(SecurityMockMvcRequestPostProcessors.csrf()));
 

@@ -2,6 +2,7 @@ package com.example.naejango.domain.chat.application.http;
 
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.MessageDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
 import com.example.naejango.domain.chat.repository.*;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -25,24 +26,18 @@ public class MessageService {
     private final SubscribeRepository subscribeRepository;
 
     @Transactional
-    public void publishMessage(Long channelId, Long senderId, MessageType messageType, String content) {
-
+    public void publishMessage(WebSocketMessageCommandDto commandDto) {
         // 메세지를 저장합니다.
-        Channel channel = channelRepository.findById(channelId)
+        Channel channel = channelRepository.findById(commandDto.getChannelId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-        Message sentMessage = Message.builder()
-                .messageType(messageType)
-                .senderId(senderId)
-                .content(content)
-                .channel(channel)
-                .build();
+        Message sentMessage = commandDto.toEntity(channel);
         messageRepository.save(sentMessage);
 
         // 메세지를 채팅방에 할당 합니다.
         // 현재 메시지를 구독 중인(보고 있는) 구독자를 찾아옵니다.
-        Set<Long> subscribers = subscribeRepository.findSubscribersByChannelId(channelId);
+        Set<Long> subscribers = subscribeRepository.findSubscribersByChannelId(channel.getId());
         // 채널에 연결되어 있는 모든 chatId를 찾아 옵니다.
-        chatRepository.findByChannelId(channelId).forEach(chat -> {
+        chatRepository.findByChannelId(channel.getId()).forEach(chat -> {
             ChatMessage chatMessage = ChatMessage.builder().isRead(false).message(sentMessage).chat(chat).build();
             // 현재 구독중인(보고 있는) 유저의 경우 읽음 처리를 합니다.
             if(subscribers.contains(chat.getOwner().getId())) chatMessage.read();
@@ -50,7 +45,7 @@ public class MessageService {
         });
 
         // Channel 의 마지막 메세지를 업데이트 합니다.
-        channel.updateLastMessage(content);
+        channel.updateLastMessage(commandDto.getContent());
     }
 
     public List<MessageDto> recentMessages(Long userId, Long chatId, int page, int size) {
