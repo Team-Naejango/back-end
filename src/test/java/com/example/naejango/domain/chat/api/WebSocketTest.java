@@ -1,8 +1,6 @@
 package com.example.naejango.domain.chat.api;
 
-import com.example.naejango.domain.chat.domain.MessageType;
 import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -44,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
 
+import static com.example.naejango.domain.chat.domain.MessageType.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,10 +73,8 @@ public class WebSocketTest {
     DataSourceProperties dataSourceProperties;
 
     private final String ENDPOINT = "/ws-endpoint";
-    private final String CHAT_CHANNEL = "/sub/channel";
-    private final String LOUNGE_CHANNEL = "/sub/lounge";
     private final String INFO_CHANNEL = "/user/sub/info";
-    private final String SEND_MESSAGE_CHANNEL = "/pub/channel";
+
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
     private BlockingQueue<String> blockingQueue;
@@ -130,13 +127,12 @@ public class WebSocketTest {
 
         // 권한 없는 채널 구독
         StompHeaders subscribeHeaders = new StompHeaders();
-        subscribeHeaders.setDestination(CHAT_CHANNEL + "/5");
+        subscribeHeaders.setDestination(SUBSCRIBE_CHANNEL.getEndpointPrefix() + "5");
         stompSession.subscribe(subscribeHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
         // then
-        var dto = new WebSocketMessageReceiveDto(MessageType.INFO, user2.getId(), null, "소켓 통신 정보를 수신합니다.");
-        assertEquals(dto.getContent(), objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getContent());
+        assertEquals(SUBSCRIBE_INFO, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
         assertEquals(objectMapper.writeValueAsString(WebSocketErrorResponse.response(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST))
                 , blockingQueue.poll());
 
@@ -164,21 +160,19 @@ public class WebSocketTest {
 
         // 라운지 채널 구독
         StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.setDestination(LOUNGE_CHANNEL + "/2");
+        subscribeChatHeaders.setDestination(SUBSCRIBE_LOUNGE.getEndpointPrefix() + "2");
         stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
         // 메세지 전송
         StompHeaders sendMessageHeaders = new StompHeaders();
-        sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
-        WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
-                .messageType(MessageType.CHAT).channelId(2L).senderId(user4.getId()).content("메세지 전송").build();
-        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(messageDto));
+        sendMessageHeaders.setDestination(CHAT.getEndpointPrefix() + "2");
+        stompSession.send(sendMessageHeaders, "메세지 전송".getBytes());
         Thread.sleep(100);
 
         // then
-        assertEquals("소켓 통신 정보를 수신합니다.", objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getContent());
-        assertEquals("라운지 채널을 구독 합니다.", objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getContent());
+        assertEquals(SUBSCRIBE_INFO, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+        assertEquals(SUBSCRIBE_LOUNGE, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
         assertEquals(objectMapper.writeValueAsString(WebSocketErrorResponse.response(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST))
                 , blockingQueue.poll());
 
@@ -201,22 +195,19 @@ public class WebSocketTest {
         // when
         // 채팅 채널 구독
         StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.setDestination(CHAT_CHANNEL + "/2");
+        subscribeChatHeaders.setDestination(SUBSCRIBE_CHANNEL.getEndpointPrefix() + "2");
         stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
         Thread.sleep(100);
 
         // 메세지 전송
         StompHeaders sendMessageHeaders = new StompHeaders();
-        sendMessageHeaders.setDestination(SEND_MESSAGE_CHANNEL + "/2");
-        WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
-                .messageType(MessageType.CHAT).channelId(2L).senderId(user4.getId()).content("메세지 전송").build();
-        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes(messageDto));
+        sendMessageHeaders.setDestination(CHAT.getEndpointPrefix() + "2");
+        stompSession.send(sendMessageHeaders, objectMapper.writeValueAsBytes("메세지 전송"));
         Thread.sleep(100);
 
         // then
-        var dto2 = new WebSocketMessageReceiveDto(MessageType.ENTER, user4.getId(), 2L, "채팅 채널을 구독 합니다.");
-        assertEquals(dto2.getContent(), objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getContent());
-        assertEquals(messageDto.getContent(), objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getContent());
+        assertEquals(SUBSCRIBE_CHANNEL, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
+        assertEquals(CHAT, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
 
         // 종료
         stompSession.disconnect();

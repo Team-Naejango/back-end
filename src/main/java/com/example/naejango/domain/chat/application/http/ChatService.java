@@ -6,7 +6,7 @@ import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.chat.domain.MessageType;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.JoinGroupChannelDto;
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.user.domain.User;
@@ -66,15 +66,17 @@ public class ChatService {
         em.clear();
 
         // 채널 입장 메세지 생성
-        messageService.publishMessage(channelId, userId, MessageType.ENTER, "채널에 참여하였습니다.");
-
-        // 채널에 메세지 발행
-        WebSocketMessageReceiveDto messageDto = WebSocketMessageReceiveDto.builder()
+        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
                 .messageType(MessageType.ENTER)
-                .content("채널에 참여하였습니다.")
                 .channelId(channelId)
-                .senderId(userId).build();
-        webSocketService.publishMessage(String.valueOf(channelId), messageDto);
+                .senderId(userId)
+                .content("채널에 참여하였습니다.").build();
+
+        // 채널에 메세지 발송
+        webSocketService.publishMessage(commandDto);
+
+        // 입장 메세지 저장
+        messageService.publishMessage(commandDto);
 
         return new JoinGroupChannelDto(true, newChat.getId());
     }

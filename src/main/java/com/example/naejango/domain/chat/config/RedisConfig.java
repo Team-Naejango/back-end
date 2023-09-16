@@ -1,6 +1,5 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,17 +21,6 @@ public class RedisConfig {
      * value 값은 Json 형태로 저장하기 위해 Jackson 시리얼라이저를 적용하였습니다.
      * @param redisConnectionFactory Redis 서버와의 연결 정보
      */
-    @Bean
-    public RedisTemplate<String, WebSocketMessageReceiveDto> MessageRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, WebSocketMessageReceiveDto> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
-
-        // 시리얼라이저 설정
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(WebSocketMessageReceiveDto.class));
-        return redisTemplate;
-    }
-
     @Bean
     public RedisTemplate<String, Long> LongRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Long> redisTemplate = new RedisTemplate<>();

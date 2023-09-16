@@ -1,5 +1,11 @@
 package com.example.naejango.domain.transaction.api;
 
+import com.example.naejango.domain.chat.application.http.ChannelService;
+import com.example.naejango.domain.chat.application.http.MessageService;
+import com.example.naejango.domain.chat.application.websocket.WebSocketService;
+import com.example.naejango.domain.chat.domain.MessageType;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.transaction.application.TransactionService;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionCommandDto;
@@ -23,6 +29,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
     private final TransactionService transactionService;
+    private final WebSocketService webSocketService;
+    private final ChannelService channelService;
+    private final MessageService messageService;
     private final AuthenticationHandler authenticationHandler;
 
     /** 거래 내역 조회 */
@@ -36,11 +45,24 @@ public class TransactionController {
 
     /** 거래 예약 등록 */
     @PostMapping("")
-    public ResponseEntity<CommonResponseDto<CreateTransactionResponseDto>> createTransaction(Authentication authentication, @RequestBody CreateTransactionRequestDto createTransactionRequestDto){
+    public ResponseEntity<CommonResponseDto<CreateTransactionResponseDto>> createTransaction(Authentication authentication,
+                                                                                             @RequestBody CreateTransactionRequestDto createTransactionRequestDto){
         Long userId = authenticationHandler.getUserId(authentication);
         CreateTransactionResponseDto createTransactionResponseDto = transactionService.createTransaction(userId, new CreateTransactionCommandDto(createTransactionRequestDto));
 
-        return ResponseEntity.created(URI.create("/api/transaction/"+createTransactionResponseDto.getId())).body(new CommonResponseDto<>("거래 예약 등록 성공", createTransactionResponseDto));
+        // Channel 로드 (없는 경우 생성)
+        CreateChannelDto findResult = channelService.createPrivateChannel(userId, createTransactionRequestDto.getTraderId());
+        Long channelId = findResult.getChannelId();
+
+        // 거래 예약 메세지 생성
+        WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.TRADE, userId, channelId);
+
+        // 메세지 발송 및 저장
+        webSocketService.publishMessage(commandDto);
+        messageService.publishMessage(commandDto);
+
+        return ResponseEntity.created(URI.create("/api/transaction/"+createTransactionResponseDto.getId()))
+                .body(new CommonResponseDto<>("거래 예약 등록 성공", createTransactionResponseDto));
     }
 
     /** 송금 완료 요청 */

@@ -3,9 +3,9 @@ package com.example.naejango.domain.chat.api;
 import com.example.naejango.domain.chat.application.http.MessageService;
 import com.example.naejango.domain.chat.application.websocket.SubscribeService;
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
-import com.example.naejango.domain.chat.domain.MessageType;
+import com.example.naejango.domain.chat.dto.SubScribeCommandDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
 import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
-import com.example.naejango.domain.chat.dto.request.WebSocketMessageReceiveDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.WebSocketErrorResponse;
@@ -19,6 +19,8 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
+
+import static com.example.naejango.domain.chat.domain.MessageType.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -37,14 +39,12 @@ public class WebSocketController {
         Long userId = authenticationHandler.getUserId(accessor.getUser());
 
         // 구독
-        String subscriptionId = accessor.getSubscriptionId();
-        String sessionId = accessor.getSessionId();
-        String destination = accessor.getDestination();
-        subscribeService.subscribe(userId, sessionId, subscriptionId, channelId, destination);
+        SubScribeCommandDto commandDto = new SubScribeCommandDto(userId, accessor, channelId);
+        subscribeService.subscribe(commandDto);
 
         // 유저 개인만 받으면 되기 때문에 Redis 로 Pub/Sub 을 관리하지 않습니다.
         return WebSocketMessageSendDto.builder().sentAt(LocalDateTime.now()).senderId(userId).channelId(channelId)
-                .messageType(MessageType.INFO).content("채팅 채널을 구독 합니다.").build();
+                .messageType(SUBSCRIBE_CHANNEL).content(SUBSCRIBE_CHANNEL.getDefaultMessage()).build();
     }
 
     /** 특정 채팅 채널을 구독하는 WebSocket Endpoint */
@@ -54,19 +54,17 @@ public class WebSocketController {
         Long userId = authenticationHandler.getUserId(accessor.getUser());
 
         // 구독
-        String subscriptionId = accessor.getSubscriptionId();
-        String sessionId = accessor.getSessionId();
-        String destination = accessor.getDestination();
-        subscribeService.subscribe(userId, sessionId, subscriptionId, channelId, destination);
+        SubScribeCommandDto commandDto = new SubScribeCommandDto(userId, accessor, channelId);
+        subscribeService.subscribe(commandDto);
 
         // 유저 개인만 받으면 되기 때문에 Redis 로 Pub/Sub 을 관리하지 않습니다.
         return WebSocketMessageSendDto.builder().sentAt(LocalDateTime.now()).senderId(userId).channelId(channelId)
-                .messageType(MessageType.INFO).content("라운지 채널을 구독 합니다.").build();
+                .messageType(SUBSCRIBE_LOUNGE).content(SUBSCRIBE_LOUNGE.getDefaultMessage()).build();
     }
 
     /** 채팅 Channel 에 메세지를 보내는 WebSocket Endpoint */
     @MessageMapping("/pub/channel/{channelId}")
-    public void sendMessage(@Payload WebSocketMessageReceiveDto messageDto,
+    public void sendMessage(@Payload String content,
                             @DestinationVariable("channelId") Long channelId,
                             @Headers SimpMessageHeaderAccessor accessor) {
         // 유저 로드
@@ -77,11 +75,17 @@ public class WebSocketController {
             throw new WebSocketException(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST);
         }
 
-        // 발송
-        webSocketService.publishMessage(String.valueOf(channelId), messageDto);
+        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+                .channelId(channelId)
+                .senderId(userId)
+                .messageType(CHAT)
+                .content(content).build();
 
-        // 메시지 저장
-        messageService.publishMessage(channelId, userId, messageDto.getMessageType(), messageDto.getContent());
+        // 메세지 발송
+        webSocketService.publishMessage(commandDto);
+
+        // 메세지 저장
+        messageService.publishMessage(commandDto);
     }
 
     /** 웹소켓 통신 중 에러 정보를 수신하는 WebSocket Endpoint */
@@ -90,8 +94,8 @@ public class WebSocketController {
         Long userId = authenticationHandler.getUserId(accessor.getUser());
 
         // 알림 메세지는 유저 개인만 받으면 되기 때문에 Redis 로 Pub/Sub 을 관리하지 않습니다.
-        return WebSocketMessageSendDto.builder().messageType(MessageType.INFO).senderId(userId)
-                .content("소켓 통신 정보를 수신합니다.").sentAt(LocalDateTime.now()).build();
+        return WebSocketMessageSendDto.builder().messageType(SUBSCRIBE_INFO).senderId(userId)
+                .content(SUBSCRIBE_INFO.getDefaultMessage()).sentAt(LocalDateTime.now()).build();
     }
 
     /** 웹소켓 통신 중 발생하는 예외 핸들링 */

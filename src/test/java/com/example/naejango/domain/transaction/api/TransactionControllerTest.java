@@ -2,6 +2,10 @@ package com.example.naejango.domain.transaction.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.example.naejango.domain.chat.application.http.ChannelService;
+import com.example.naejango.domain.chat.application.http.MessageService;
+import com.example.naejango.domain.chat.application.websocket.WebSocketService;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.transaction.application.TransactionService;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionCommandDto;
@@ -33,8 +37,15 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 @WebMvcTest(TransactionController.class)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class TransactionControllerTest extends RestDocsSupportTest {
+
     @MockBean
     TransactionService transactionService;
+    @MockBean
+    WebSocketService webSocketService;
+    @MockBean
+    ChannelService channelService;
+    @MockBean
+    MessageService messageService;
     @MockBean
     AuthenticationHandler authenticationHandler;
 
@@ -135,6 +146,8 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .willReturn(userId);
             BDDMockito.given(transactionService.createTransaction(userId, createTransactionCommandDto))
                     .willReturn(createTransactionResponseDto);
+            BDDMockito.given(channelService.createPrivateChannel(userId, createTransactionCommandDto.getTraderId()))
+                    .willReturn(new CreateChannelDto(false, 0L, 0L));
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders

@@ -1,5 +1,6 @@
 package com.example.naejango.domain.chat.application.websocket;
 
+import com.example.naejango.domain.chat.dto.SubScribeCommandDto;
 import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.chat.repository.SubscribeRepository;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -58,13 +59,16 @@ public class SubscribeService {
         
     }
 
-    public void subscribe(Long userId, String sessionId, String subscriptionId, Long channelId, String destination) {
+    public void subscribe(SubScribeCommandDto commandDto) {
         // 구독 권한 확인
+        Long channelId = commandDto.getChannelId();
+        Long userId = commandDto.getUserId();
         if(chatRepository.findChatByChannelIdAndOwnerId(channelId, userId).isEmpty()){
             throw new WebSocketException(ErrorCode.UNAUTHORIZED_SUBSCRIBE_REQUEST);
         }
 
         // 라운지 채널의 경우 구독관리를 브로커에서만 합니다.
+        String destination = commandDto.getDestination();
         if (destination != null && destination.startsWith("/sub/lounge")) {
             return;
         }
@@ -73,9 +77,11 @@ public class SubscribeService {
         subscribeRepository.setSubscriberToChannel(userId, channelId);
 
         // 구독 id 가 어떤 채널을 가르키는지 저장합니다.
+        String subscriptionId = commandDto.getSubscriptionId();
         subscribeRepository.setSubscriptionIdToChannel(subscriptionId, channelId);
 
         // 구독 id 를 등록합니다.
+        String sessionId = commandDto.getSessionId();
         subscribeRepository.saveSubscriptionIdBySessionId(subscriptionId, sessionId);
     }
 
