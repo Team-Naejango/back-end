@@ -12,13 +12,12 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class JwtCookieHandler {
-    public String getRefreshToken(HttpServletRequest request) {
+    public Optional<String> getRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
+        if (cookies == null) return Optional.empty();
         return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
-                .map(Cookie::getValue)
-                .findAny()
-                .orElse(null);
+        .map(Cookie::getValue)
+        .findAny();
     }
 
     public void addAccessTokenCookie(String accessToken, HttpServletResponse response) {
@@ -45,6 +44,7 @@ public class JwtCookieHandler {
         String refreshTokenCookieHeader= generateRefreshTokenCookie(refreshToken);
         response.setHeader("Set-Cookie", refreshTokenCookieHeader+";   Max-Age=0");
     }
+
     public void deleteAccessTokenCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
 
@@ -66,6 +66,7 @@ public class JwtCookieHandler {
         return cookies != null && Arrays.stream(cookies)
                 .anyMatch(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME));
     }
+
 
 
     private String generateAccessTokenCookie(String accessToken) {

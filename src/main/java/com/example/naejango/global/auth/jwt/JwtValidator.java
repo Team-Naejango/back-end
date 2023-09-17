@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.example.naejango.global.auth.dto.response.ValidateTokenResponseDto;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,37 +21,34 @@ public class JwtValidator {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public ValidateTokenResponseDto isValidToken(HttpServletRequest request) {
+    public Optional<Long> isValidToken(HttpServletRequest request) {
         return validateAccessToken(getAccessToken(request));
     }
 
-    public ValidateTokenResponseDto isValidToken(StompHeaderAccessor headerAccessor) {
+    public Optional<Long> isValidToken(StompHeaderAccessor headerAccessor) {
         return validateAccessToken(getAccessToken(headerAccessor));
     }
 
-    public ValidateTokenResponseDto validateAccessToken(String accessToken) {
-        if (accessToken == null) {
-            return new ValidateTokenResponseDto(null, false);
-        }
+    public Optional<Long> validateAccessToken(String accessToken) {
+        if (accessToken == null) return Optional.empty();
 
         DecodedJWT decodedAccessToken = decodeJwt(accessToken);
-        if (isExpiredToken(decodedAccessToken)) {
-            return new ValidateTokenResponseDto(null, false);
-        }
-        return new ValidateTokenResponseDto(decodedAccessToken.getClaim("userId").asLong(), true);
+        if (isExpiredToken(decodedAccessToken)) return Optional.empty();
+
+        return Optional.of(decodedAccessToken.getClaim("userId").asLong());
     }
 
-    public ValidateTokenResponseDto isValidRefreshToken(String refreshToken) {
-        if (refreshToken == null) return new ValidateTokenResponseDto(null, false);
+    public Optional<Long> validateRefreshToken(String refreshToken) {
+        if (refreshToken == null) return Optional.empty();
 
         DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
-        if(isExpiredToken(decodedRefreshToken)) return new ValidateTokenResponseDto(null, false);
+        if(isExpiredToken(decodedRefreshToken)) return Optional.empty();
 
         Long userId = decodedRefreshToken.getClaim("userId").asLong();
         String storedToken = refreshTokenRepository.getRefreshToken(userId);
-        if (!refreshToken.equals(storedToken)) return new ValidateTokenResponseDto(null, false);
+        if (!refreshToken.equals(storedToken)) return Optional.empty();
 
-        return new ValidateTokenResponseDto(userId, true);
+        return Optional.of(userId);
     }
 
     private String getAccessToken(HttpServletRequest request) {
