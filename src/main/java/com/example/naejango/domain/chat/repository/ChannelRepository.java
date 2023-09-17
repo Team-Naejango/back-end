@@ -24,7 +24,7 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
     Optional<Channel> findByChatId(@Param("chatId") Long chatId);
 
     @Query("SELECT gc FROM GroupChannel gc JOIN Item i ON i.id = gc.item.id JOIN i.storage s " +
-            "WHERE St_DWithin(:center, s.location, :radius, false) = true")
+            "WHERE St_DWithin(:center, s.location, :radius, false) = true AND gc.isClosed = false")
     Page<GroupChannel> findGroupChannelNearBy(@Param("center") Point center, @Param("radius") int radius, Pageable pageable);
 
 
@@ -34,7 +34,4 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
 
     @Query("SELECT gc FROM GroupChannel gc WHERE gc.owner.id = :ownerId")
     Optional<GroupChannel> findGroupChannelByOwnerId(@Param("ownerId") Long ownerId);
-
-    @Query("SELECT gc FROM GroupChannel gc WHERE gc.id = :channelId AND gc.channelType = com.example.naejango.domain.chat.domain.ChannelType.GROUP")
-    Optional<GroupChannel> findGroupChannelById(@Param("channelId") Long channelId);
 }

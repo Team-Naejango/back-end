@@ -42,8 +42,11 @@ public class Channel {
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 
+    private Boolean isClosed;
+
     public void updateLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
     }
+    public void closeChannel() { isClosed = false; }
 }
 

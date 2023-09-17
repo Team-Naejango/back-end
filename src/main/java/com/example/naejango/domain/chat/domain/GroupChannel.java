@@ -26,8 +26,6 @@ public class GroupChannel extends Channel {
     private int participantsCount;
     private String defaultTitle;
     private int channelLimit;
-    public void increaseParticipantCount() {
-        participantsCount++;
-    }
+    public void increaseParticipantCount() { participantsCount++; }
     public void decreaseParticipantCount() { participantsCount--; }
 }

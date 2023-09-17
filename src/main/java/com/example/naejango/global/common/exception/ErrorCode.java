@@ -50,6 +50,7 @@ public enum ErrorCode {
     /** 409 : CONFLICT : 리소스의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     SESSION_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 진행중인 채팅이 있습니다."),
     CHANNEL_IS_FULL(HttpStatus.CONFLICT, "해당 채널의 정원이 가득 찼습니다."),
+    CHANNEL_IS_CLOSED(HttpStatus.CONFLICT, "해당 채널은 종료 되었습니다."),
     GROUP_CHANNEL_ALREADY_EXIST(HttpStatus.CONFLICT, "해당 아이템에 할당된 그룹 채널이 이미 있습니다."),
     TOKEN_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 리프레시 토큰을 가지고 있습니다. 엑세스 토큰을 재발급 합니다."),
     WISH_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 관심 등록 되어있습니다."),
