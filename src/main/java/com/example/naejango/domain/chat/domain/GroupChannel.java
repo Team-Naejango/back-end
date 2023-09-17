@@ -25,7 +25,7 @@ public class GroupChannel extends Channel {
     private Item item;
     private int participantsCount;
     private String defaultTitle;
-    private int channelLimit; // 방 정원 : 기능 추가 예정
+    private int channelLimit;
     public void increaseParticipantCount() {
         participantsCount++;
     }
