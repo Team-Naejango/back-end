@@ -2,18 +2,24 @@ package com.example.naejango.global.auth.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.example.naejango.domain.config.RestDocsSupportTest;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
+import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.mockito.Mockito.any;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @SpringBootTest
@@ -21,13 +27,22 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 @AutoConfigureMockMvc
 @ActiveProfiles("Test")
 class AuthControllerIntegrateTest extends RestDocsSupportTest {
+    @MockBean
+    RefreshTokenRepository refreshTokenRepositoryMock;
+    @MockBean
+    JwtCookieHandler jwtCookieHandlerMock;
 
     @Nested
     @DisplayName("게스트 회원")
     class guest {
         @Test
+        @Tag("api")
         @DisplayName("성공")
         void test1 () throws Exception {
+            // given
+            BDDMockito.given(jwtCookieHandlerMock.hasRefreshTokenCookie(any()))
+                    .willReturn(false);
+
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .get("/api/auth/guest"));
