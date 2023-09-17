@@ -14,7 +14,9 @@ import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
+import com.example.naejango.domain.transaction.repository.TransactionRepository;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.wish.repository.WishRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,8 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
     private final StorageRepository storageRepository;
+    private final WishRepository wishRepository;
+    private final TransactionRepository transactionRepository;
     private final EntityManager em;
 
     /** 아이템 생성 */
@@ -84,6 +88,26 @@ public class ItemService {
         Item savedItem = itemRepository.save(item);
 
         return new ModifyItemResponseDto(savedItem);
+    }
+
+    @Transactional
+    public void deleteItem(Long userId, Long itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+
+        // 아이템을 등록한 유저인지 체크
+        if (!item.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.ITEM_NOT_FOUND);
+        }
+
+        // 해당 아이템에 연관된 Wish 삭제
+        wishRepository.deleteByItemId(itemId);
+
+        // 해당 아이템에 연관된 Transaction과의 관계 끊기
+        transactionRepository.updateItemToNull(itemId);
+
+        // 아이템 삭제
+        itemRepository.delete(item);
     }
 
     private Item findItemWithCatById(Long itemId) { // category까지 fetch로 가져오는 메서드

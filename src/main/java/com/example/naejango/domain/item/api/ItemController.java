@@ -36,7 +36,7 @@ public class ItemController {
         Long userId = authenticationHandler.getUserId(authentication);
         CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, new CreateItemCommandDto(createItemRequestDto));
 
-        return ResponseEntity.created(URI.create("/api/item/"+ createItemResponseDto.getId())).body(new CommonResponseDto<>("아이템 생성 완료", createItemResponseDto));
+        return ResponseEntity.created(URI.create("/api/item/" + createItemResponseDto.getId())).body(new CommonResponseDto<>("아이템 생성 완료", createItemResponseDto));
     }
 
     /** 아이템 정보 조회 */
@@ -78,4 +78,11 @@ public class ItemController {
         return ResponseEntity.ok().body(new CommonResponseDto<>("수정 완료", modifyItemResponseDto));
     }
 
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteItem(Authentication authentication, @PathVariable Long itemId) {
+        Long userId = authenticationHandler.getUserId(authentication);
+        itemService.deleteItem(userId, itemId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("삭제 완료", null));
+    }
 }
