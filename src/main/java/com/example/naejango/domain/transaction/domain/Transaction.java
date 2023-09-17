@@ -32,11 +32,11 @@ public class Transaction {
     @Enumerated(value = EnumType.STRING)
     private TransactionStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trader_id")
     private User trader;
 
