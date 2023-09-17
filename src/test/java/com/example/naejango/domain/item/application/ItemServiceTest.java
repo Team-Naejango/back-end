@@ -96,9 +96,8 @@ class ItemServiceTest {
             BDDMockito.given(categoryRepository.findByName(any())).willReturn(Optional.empty());
 
             // when & then
-            CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(any(), createItemCommandDto);
-            });
+            CustomException exception = Assertions.assertThrows(CustomException.class,
+                    ()-> itemService.createItem(any(), createItemCommandDto));
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.CATEGORY_NOT_FOUND);
 
@@ -114,9 +113,8 @@ class ItemServiceTest {
             BDDMockito.given(storageRepository.findByIdAndUserId(any(Long.class), any(Long.class))).willReturn(Optional.empty());
 
             // when & then
-            CustomException exception = Assertions.assertThrows(CustomException.class, ()-> {
-                itemService.createItem(any(Long.class), createItemCommandDto);
-            });
+            CustomException exception = Assertions.assertThrows(CustomException.class,
+                    ()-> itemService.createItem(any(Long.class), createItemCommandDto));
 
             Assertions.assertEquals(exception.getErrorCode(), ErrorCode.STORAGE_NOT_FOUND);
 
