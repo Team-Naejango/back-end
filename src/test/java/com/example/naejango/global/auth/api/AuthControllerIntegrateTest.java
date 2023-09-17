@@ -4,7 +4,6 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,7 +26,6 @@ class AuthControllerIntegrateTest extends RestDocsSupportTest {
     @DisplayName("게스트 회원")
     class guest {
         @Test
-        @Tag("api")
         @DisplayName("성공")
         void test1 () throws Exception {
             // when
