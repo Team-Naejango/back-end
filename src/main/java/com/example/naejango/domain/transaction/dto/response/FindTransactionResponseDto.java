@@ -29,6 +29,7 @@ public class FindTransactionResponseDto {
         this.id = transaction.getId();
         this.date = transaction.getDate().toString();
         this.amount = transaction.getAmount();
+
         if (transaction.getUser().getId().equals(userId)) {
             this.status = "판매";
             this.traderName = transaction.getTrader().getUserProfile().getNickname();
@@ -36,7 +37,14 @@ public class FindTransactionResponseDto {
             this.status = "구매";
             this.traderName = transaction.getUser().getUserProfile().getNickname();
         }
-        this.itemName = transaction.getItem().getName();
-        this.itemId = transaction.getItem().getId();
+
+        if (transaction.getItem() == null) {
+            this.itemName = "삭제된 아이템";
+            this.itemId = null;
+        } else {
+            this.itemName = transaction.getItem().getName();
+            this.itemId = transaction.getItem().getId();
+        }
+
     }
 }

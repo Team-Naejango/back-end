@@ -11,6 +11,11 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+
+    @Query("SELECT t from Transaction t " +
+            "left join fetch t.item " +
+            "left join fetch t.user.userProfile " +
+            "left join fetch t.trader.userProfile")
     List<Transaction> findByUserIdOrTraderId(Long userId, Long traderId);
 
     @Modifying
