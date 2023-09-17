@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -32,8 +33,8 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
      */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        String refreshToken = jwtCookieHandler.getRefreshToken(request);
-        if (refreshToken != null){
+        Optional<String> refreshToken = jwtCookieHandler.getRefreshToken(request);
+        if (refreshToken.isEmpty()){
             response.sendRedirect(localRedirectUrl + "?loginStatus=already_logged_in");
             return;
         }

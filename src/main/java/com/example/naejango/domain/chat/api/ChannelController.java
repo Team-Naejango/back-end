@@ -137,7 +137,7 @@ public class ChannelController {
      */
     @GetMapping("/{channelId}/participants")
     public ResponseEntity<CommonResponseDto<List<ParticipantInfoDto>>> findChannelParticipants(@PathVariable("channelId") Long channelId,
-                                                                                      Authentication authentication) {
+                                                                                               Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
         // 조회
@@ -148,22 +148,17 @@ public class ChannelController {
     }
 
     /**
-     * 채팅방을 종료합니다.
-     * 일대일 채팅의 경우, Chat 과 연관된 ChatMessage 가 삭제 됩니다.
-     * 그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제되며, channel 의 participantsCount 가 감소합니다.
-     * Channel 과 연관된 ChatMessage 가 없으면 채널에 아무도 남지 않았다고 판단합니다.
-     * 채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.
-     * @param channelId 나가고자 하는 채널 id(channelId)
-     * @return 삭제된 채팅방 id(chatId), 삭제 메세지(message)
+     * 채널을 종료 합니다.
+     * 채널의 isClosed 필드를 이용하여 종료 처리 합니다.
      */
     @DeleteMapping("/{channelId}")
-    public ResponseEntity<CommonResponseDto<Long>> deleteChat(@PathVariable("channelId") Long channelId,
-                                                              Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<Void>> closeGroupChannel(@PathVariable Long channelId,
+                                                                     Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
-        // Chat 삭제
-        channelService.deleteChat(channelId, userId);
+        channelService.closeChannel(channelId, userId);
 
-        return ResponseEntity.ok().body(new CommonResponseDto<>("해당 채널에서 퇴장하였습니다.", channelId));
+        return ResponseEntity.ok().body(new CommonResponseDto<>("채널이 종료되었습니다.", null));
     }
+
 }

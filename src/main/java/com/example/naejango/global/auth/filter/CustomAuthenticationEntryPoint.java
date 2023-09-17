@@ -33,7 +33,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         if (authentication == null && jwtCookieHandler.hasRefreshTokenCookie(request)) {
             jwtCookieHandler.deleteAccessTokenCookie(request, response);
-            throw new TokenException(ErrorCode.ACCESS_TOKEN_REISSUE, accessTokenReissuer.reissueAccessToken(request));
+            String reissuedAccessToken = accessTokenReissuer.reissueAccessToken(request)
+                    .orElseThrow(() -> new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE));
+            throw new TokenException(ErrorCode.ACCESS_TOKEN_REISSUE, reissuedAccessToken);
         }
 
         if(authentication == null) {

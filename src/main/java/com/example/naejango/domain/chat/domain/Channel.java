@@ -31,7 +31,7 @@ public class Channel {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "channel_type", insertable = false, updatable = false)
+    @Column(name = "channel_type", insertable = false, updatable = false, nullable = false)
     private ChannelType channelType;
     private String lastMessage;
 
@@ -42,8 +42,11 @@ public class Channel {
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 
+    private Boolean isClosed;
+
     public void updateLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
     }
+    public void closeChannel() { isClosed = false; }
 }
 

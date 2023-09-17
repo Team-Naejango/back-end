@@ -30,6 +30,12 @@ public class MessageService {
         // 메세지를 저장합니다.
         Channel channel = channelRepository.findById(commandDto.getChannelId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+
+        // 채널 상태 확인
+        if (channel.getIsClosed() && !commandDto.getMessageType().equals(MessageType.EXIT)) {
+            throw new CustomException(ErrorCode.CHANNEL_IS_CLOSED);
+        }
+
         Message sentMessage = commandDto.toEntity(channel);
         messageRepository.save(sentMessage);
 
@@ -67,4 +73,5 @@ public class MessageService {
     public void readMessages(Long chatId) {
         chatMessageRepository.readMessage(chatId);
     }
+
 }

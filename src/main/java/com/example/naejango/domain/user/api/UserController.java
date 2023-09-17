@@ -110,10 +110,11 @@ public class UserController {
     @DeleteMapping("")
     public ResponseEntity<?> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
         Long userId = authenticationHandler.getUserId(authentication);
-        String refreshToken = jwtCookieHandler.getRefreshToken(request);
-        if (!jwtValidator.isValidRefreshToken(refreshToken).isValidToken()) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST);
-        }
+
+        jwtCookieHandler.getRefreshToken(request)
+                .ifPresent(refreshToken -> jwtValidator.validateRefreshToken(refreshToken)
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST)));
+
         userService.deleteUser(userId);
         return ResponseEntity.ok().body("구현 예정 입니다.");
     }

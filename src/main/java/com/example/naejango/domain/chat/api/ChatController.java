@@ -113,5 +113,24 @@ public class ChatController {
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("변경 완료", title));
     }
+    /**
+     * Chat 을 삭제합니다.
+     * 일대일 채팅의 경우, Chat 과 연관된 ChatMessage 가 삭제 됩니다.
+     * 그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제되며, channel 의 participantsCount 가 감소합니다.
+     * Channel 과 연관된 ChatMessage 가 없으면 채널에 아무도 남지 않았다고 판단합니다.
+     * 채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.
+     * @param channelId 나가고자 하는 채널 id(channelId)
+     * @return 삭제된 채팅방 id(chatId), 삭제 메세지(message)
+     */
+    @DeleteMapping("/{channelId}")
+    public ResponseEntity<CommonResponseDto<Long>> deleteChat(@PathVariable("channelId") Long channelId,
+                                                              Authentication authentication) {
+        Long userId = authenticationHandler.getUserId(authentication);
+
+        // Chat 삭제
+        chatService.deleteChat(channelId, userId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("해당 채널에서 퇴장하였습니다.", channelId));
+    }
 
 }

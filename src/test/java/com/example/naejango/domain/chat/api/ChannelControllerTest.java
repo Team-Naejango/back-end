@@ -544,63 +544,42 @@ class ChannelControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @DisplayName("채널 퇴장, Chat 삭제")
-    class deleteChat {
-        User user = User.builder()
-                .id(1L)
-                .build();
-
-        Channel channel = Channel.builder()
-                .channelType(ChannelType.GROUP)
-                .id(2L).build();
-
+    @DisplayName("채널 종료")
+    class closeChannel {
         @Test
         @Tag("api")
         @DisplayName("종료 성공")
-        void test1() throws Exception {
+        void test() throws Exception {
             // given
-            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(2L);
 
             // when
-            ResultActions resultActions = mockMvc.perform(
-                    RestDocumentationRequestBuilders
-                            .delete("/api/channel/{channelId}", channel.getId())
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .delete("/api/channel/{channelId}", 1L)
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
-            verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(channelServiceMock, times(1)).deleteChat(channel.getId(), user.getId());
-
+            verify(channelServiceMock).closeChannel(1L, 2L);
             resultActions.andExpect(status().isOk());
-            resultActions.andExpect(content().json(objectMapper.writeValueAsString(
-                    new CommonResponseDto<>("해당 채널에서 퇴장하였습니다.", channel.getId())
-            )));
 
             // restDocs
-            resultActions.andDo(restDocs.document(
-                    resource(
-                            ResourceSnippetParameters.builder()
-                                    .tag("채팅")
-                                    .summary("채팅방을 종료합니다.")
-                                    .description("채팅방을 종료합니다.\n\n" +
-                                            "일대일 채팅의 경우, Chat은 삭제되지 않고 연관된 ChatMessage 가 삭제됩니다.\n\n" +
-                                            "그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제됩니다.\n\n" +
-                                            "Channel 과 연관된 Chat 이 없으면 채널에 아무도 남지 않았다고 판단합니다.\n\n" +
-                                            "채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.\n\n")
-                                    .pathParameters(
-                                            parameterWithName("channelId").description("종료하고자 하는 채팅방 id")
-                                    ).responseFields(
-                                            fieldWithPath("result").description("종료된 채팅방 id"),
-                                            fieldWithPath("message").description("종료 결과를 알려주는 메세지")
-                                    ).responseSchema(
-                                            Schema.schema("채팅방 종료 Response")
-                                    ).build()
-                    ))
-            );
-        }
+            resultActions.andDo(restDocs.document(resource(
+                    ResourceSnippetParameters.builder()
+                            .tag("채팅")
+                            .summary("채널 종료")
+                            .description("채널을 종료 합니다. \n\n" +
+                                    "채널에 참여할 수 없고, 메세지를 주고 받지 못합니다. \n\n" +
+                                    "그룹 채팅의 경우 근처 채널 조회에서 조회되지 않습니다.")
+                            .responseFields(
+                                    fieldWithPath("message").description("메세지"),
+                                    fieldWithPath("result").description("null")
+                            )
+                    .build())));
 
+        }
     }
+
 
 
 }
