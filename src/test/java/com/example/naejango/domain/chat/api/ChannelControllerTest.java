@@ -547,6 +547,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
     @DisplayName("채널 종료")
     class closeChannel {
         @Test
+        @Tag("api")
         @DisplayName("종료 성공")
         void test() throws Exception {
             // given
