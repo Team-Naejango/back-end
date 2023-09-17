@@ -104,7 +104,7 @@ public class ItemService {
         wishRepository.deleteByItemId(itemId);
 
         // 해당 아이템에 연관된 Transaction과의 관계 끊기
-        transactionRepository.updateItemToNull(itemId);
+        transactionRepository.updateItemToNullByItemId(itemId);
 
         // 아이템 삭제
         itemRepository.delete(item);

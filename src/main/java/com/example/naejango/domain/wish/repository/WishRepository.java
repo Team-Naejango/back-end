@@ -23,4 +23,8 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
     @Modifying()
     @Query("delete from Wish w where w.item.id = :id")
     void deleteByItemId(@Param("id") Long itemId);
+
+    @Modifying()
+    @Query("delete from Wish w where w.item.id in :ids")
+    void deleteByItemIdList(@Param("ids") List<Long> itemIdList);
 }

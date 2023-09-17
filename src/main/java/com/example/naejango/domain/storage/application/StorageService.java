@@ -1,5 +1,6 @@
 package com.example.naejango.domain.storage.application;
 
+import com.example.naejango.domain.follow.repository.FollowRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.storage.domain.Storage;
@@ -8,7 +9,9 @@ import com.example.naejango.domain.storage.dto.StorageAndDistanceDto;
 import com.example.naejango.domain.storage.dto.StorageInfoDto;
 import com.example.naejango.domain.storage.dto.StorageInfoWithDistanceDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
+import com.example.naejango.domain.transaction.repository.TransactionRepository;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.wish.repository.WishRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.GeomUtil;
@@ -29,6 +32,9 @@ import java.util.stream.Collectors;
 public class StorageService {
     private final StorageRepository storageRepository;
     private final ItemRepository itemRepository;
+    private final WishRepository wishRepository;
+    private final TransactionRepository transactionRepository;
+    private final FollowRepository followRepository;
     private final GeomUtil geomUtil;
     private final EntityManager em;
 
@@ -79,15 +85,29 @@ public class StorageService {
 
     @Transactional
     public void deleteStorage(Long storageId, Long userId) {
-        // 권한 인증
-        storageRepository.findByUserId(userId).stream().filter(s -> s.getId().equals(storageId)).findAny()
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
+        Storage storage = storageRepository.findById(storageId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
 
-        // Item 을 삭제합니다. 연관된 GroupChannel 은 삭제하지 않습니다.
+        // 창고를 등록한 유저인지 체크
+        if (!storage.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.STORAGE_NOT_FOUND);
+        }
+
+        // 해당 창고와 연관된 Follow 삭제
+        followRepository.deleteByStorageId(storageId);
+
+        // 해당 창고에 등록된 아이템 ID List 조회
+        List<Long> itemIdList = itemRepository.findItemIdListByStorageId(storageId);
+        // 각 아이템에 연관된 Wish 삭제
+        wishRepository.deleteByItemIdList(itemIdList);
+        // 각 아이템에 연관된 Transaction과의 관계 끊기
+        transactionRepository.updateItemToNullByItemIdList(itemIdList);
+
+        // 창고에 등록된 아이템들 삭제. 연관된 GroupChannel 은 삭제하지 않습니다.
         itemRepository.deleteByStorageId(storageId);
 
         // Storage 를 삭제합니다.
-        storageRepository.deleteById(storageId);
+        storageRepository.delete(storage);
     }
 
 }

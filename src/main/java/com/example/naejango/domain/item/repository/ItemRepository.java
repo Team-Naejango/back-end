@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,4 +27,6 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepos
     @EntityGraph(attributePaths = {"category"})
     Optional<Item> findItemById(Long Id);
 
+    @Query("SELECT i.id FROM Item i WHERE i.storage.id = :storageId")
+    List<Long> findItemIdListByStorageId(@Param("storageId") Long storageId);
 }

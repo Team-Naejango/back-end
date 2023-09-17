@@ -20,5 +20,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Modifying
     @Query("UPDATE Transaction t SET t.item = null WHERE t.item.id = :itemId")
-    void updateItemToNull(@Param("itemId")Long itemId);
+    void updateItemToNullByItemId(@Param("itemId") Long itemId);
+
+    @Modifying
+    @Query("UPDATE Transaction t SET t.item = null WHERE t.item.id in :ids")
+    void updateItemToNullByItemIdList(@Param("ids") List<Long> itemIdList);
 }

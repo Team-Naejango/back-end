@@ -118,8 +118,7 @@ public class StorageController {
 
     /**
      * 창고 삭제
-     * 창고와 연관된 ItemStorage 삭제 / Item 은 삭제하지 않음
-     * 다른 연관된 엔티티 고려 필요
+     * 창고와 연관된 Item 삭제
      */
     @DeleteMapping("/{storageId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteStorage(@PathVariable Long storageId, Authentication authentication) {

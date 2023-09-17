@@ -3,6 +3,9 @@ package com.example.naejango.domain.follow.repository;
 import com.example.naejango.domain.follow.domain.Follow;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +19,8 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     Optional<Follow> findByUserIdAndStorageId(Long userId, Long storageId);
 
     boolean existsByUserIdAndStorageId(Long userId, Long storageId);
+
+    @Modifying()
+    @Query("delete from Follow f where f.storage.id = :id")
+    void deleteByStorageId(@Param("id") Long storageId);
 }
