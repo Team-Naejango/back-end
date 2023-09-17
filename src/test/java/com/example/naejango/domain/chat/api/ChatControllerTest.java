@@ -144,7 +144,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("채팅")
-                                    .summary("그룹 채널에 참여합니다.")
+                                    .summary("그룹 채널 참여")
                                     .description("그룹 채널에 참여합니다. \n\n" +
                                             "참여중이지 않은 채팅인 경우 채팅방(Chat) 을 새로 생성하고(채널 참여) 채팅방 id 를 반환합니다. \n\n" +
                                             "이미 참여중인 채널인 경우 이미 채널에 참여중이라는 메세지와 함께 채팅방 id 를 응답합니다. \n\n" +
@@ -228,8 +228,8 @@ class ChatControllerTest extends RestDocsSupportTest {
                             resource(
                                     ResourceSnippetParameters.builder()
                                             .tag("채팅")
-                                            .summary("채팅방 목록을 가져옵니다.")
-                                            .description("채팅방의 정보가 담긴 목록을 가지고 옵니다. \n\n")
+                                            .summary("내 채팅방 목록 조회")
+                                            .description("내가 참여하고 있는 채널의 내 채팅방의 정보가 담긴 목록을 가지고 옵니다. \n\n")
                                             .responseFields(
                                                     fieldWithPath("message").description("결과 메세지"),
                                                     fieldWithPath("result[]").description("채팅방 리스트"),
@@ -324,7 +324,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("채팅")
-                                    .summary("특정 채널의 내 채팅방 id 조회")
+                                    .summary("내 채팅방 id 조회")
                                     .description("특정 채널에 속한 내 채팅방 id 를 조회합니다. \n\n" +
                                             "특정 채널에 유저가 참여하고 있는지 여부를 알 수 있으며, 참여 하고 있는 경우 해당 채팅방의 id 를 조회합니다. \n\n" +
                                             "없는 경우 404 Not_Found 를 반환 합니다.")
@@ -382,7 +382,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                             resource(
                                     ResourceSnippetParameters.builder()
                                             .tag("채팅")
-                                            .summary("채팅방의 제목을 변경합니다.")
+                                            .summary("채팅방 제목 수정")
                                             .description("채팅방 제목을 변경합니다.\n\n " +
                                                     "채널의 기본 제목이 아니고 개개인에게 보여지는 채팅방의 제목입니다")
                                             .pathParameters(

@@ -255,8 +255,9 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("채팅")
-                                    .summary("그룹 채팅방을 개설합니다.")
-                                    .description("공동 구매 아이템 id, 채팅 채널 제목, 정원을 입력 받습니다.")
+                                    .summary("그룹 채널 개설")
+                                    .description("그룹 채널을 개설합니다. \n\n" +
+                                            "공동 구매 아이템 id, 채널 기본 제목, 정원을 입력 받습니다.")
                                     .requestFields(
                                             fieldWithPath("itemId").description("그룹 채팅이 할당될 공동 구매 아이템 id"),
                                             fieldWithPath("defaultTitle").description("기본 설정 그룹 채널 제목"),
@@ -333,7 +334,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             resultActions.andDo(restDocs.document(resource(
                     ResourceSnippetParameters.builder()
                             .tag("채팅")
-                            .summary("공동 구매 아이템에 등록된 그룹 채널 조회")
+                            .summary("그룹 채널 조회")
                             .description("공동 구매 아이템에 등록된 그룹 채널의 정보를 조회해 옵니다.")
                             .pathParameters(
                                     parameterWithName("itemId").description("아이템 ID")
@@ -457,7 +458,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
             resultActions.andDo(restDocs.document(
                     resource(ResourceSnippetParameters.builder()
                             .tag("채팅")
-                            .summary("근처의 그룹 채널 정보를 조회합니다.")
+                            .summary("근처 그룹 채널 조회")
+                            .description("근처의 그룹 채널 정보를 조회합니다.")
                             .requestParameters(
                                     parameterWithName("lon").description("조회하고자 하는 중심 경도"),
                                     parameterWithName("lat").description("조회하고자 하는 중심 위도"),
@@ -526,7 +528,8 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("채팅")
-                                    .summary("특정 채널에 참여한 참여자 정보를 조회합니다.")
+                                    .summary("채널 참여자 조회")
+                                    .description("특정 채널에 참여한 참여자 정보를 조회합니다.")
                                     .pathParameters(
                                             parameterWithName("channelId").description("참여자 조회를 하고자 하는 채널 id")
                                     ).responseFields(

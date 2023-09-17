@@ -92,7 +92,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("창고")
-                                        .description("창고 생성하여 내 창고 목록에 추가")
+                                        .summary("창고 생성")
+                                        .description("창고를 생성하여 내 창고 목록에 추가합니다.")
                                         .requestFields(
                                                 fieldWithPath("name").description("이름"),
                                                 fieldWithPath("imgUrl").description("이미지 링"),
@@ -263,9 +264,8 @@ class StorageControllerTest extends RestDocsSupportTest {
         }
     }
 
-
     @Nested
-    @DisplayName("창고에 속한 아이템 조회")
+    @DisplayName("창고의 아이템 조회")
     class ItemList {
         Storage storage = Storage.builder().id(1L).name("테스트 창고").build();
         Category category = Category.builder().id(1).name("생필품").build();
@@ -309,7 +309,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("창고")
-                                    .description("특정 창고의 아이템 목록을 조회")
+                                    .summary("창고 아이템 조회")
+                                    .description("창고에 속해있는 아이템을 조회합니다.")
                                     .pathParameters(
                                             parameterWithName("storageId").description("창고 id")
                                     )
