@@ -90,6 +90,7 @@ public class ItemService {
         return new ModifyItemResponseDto(savedItem);
     }
 
+    /** 아이템 삭제 */
     @Transactional
     public void deleteItem(Long userId, Long itemId) {
         Item item = itemRepository.findById(itemId)

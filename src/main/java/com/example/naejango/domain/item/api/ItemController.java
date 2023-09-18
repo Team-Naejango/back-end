@@ -78,6 +78,7 @@ public class ItemController {
         return ResponseEntity.ok().body(new CommonResponseDto<>("수정 완료", modifyItemResponseDto));
     }
 
+    /** 아이템 삭제 */
     @DeleteMapping("/{itemId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteItem(Authentication authentication, @PathVariable Long itemId) {
         Long userId = authenticationHandler.getUserId(authentication);
