@@ -63,4 +63,8 @@ public class Item extends TimeAuditingEntity {
         this.category = category;
     }
 
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
 }

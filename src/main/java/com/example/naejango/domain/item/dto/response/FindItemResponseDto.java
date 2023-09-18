@@ -24,6 +24,8 @@ public class FindItemResponseDto {
 
     private String category;
 
+    private int viewCount;
+
     public FindItemResponseDto(Item item) {
         this.id = item.getId();
         this.name = item.getName();
@@ -31,5 +33,6 @@ public class FindItemResponseDto {
         this.imgUrl = item.getImgUrl();
         this.itemType = item.getItemType();
         this.category = item.getCategory().getName();
+        this.viewCount = item.getViewCount();
     }
 }

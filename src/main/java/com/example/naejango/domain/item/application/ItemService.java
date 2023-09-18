@@ -58,7 +58,7 @@ public class ItemService {
     /** 아이템 정보 조회 */
     public FindItemResponseDto findItem(Long itemId) {
         Item item = findItemWithCatById(itemId);
-
+        item.increaseViewCount();
         return new FindItemResponseDto(item);
     }
 

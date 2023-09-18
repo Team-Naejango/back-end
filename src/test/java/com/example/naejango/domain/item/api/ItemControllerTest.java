@@ -157,6 +157,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
+                        .viewCount(100)
                         .build();
 
         @Test
@@ -189,12 +190,12 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     )
                                     .responseFields(
                                             fieldWithPath("result.id").description("아이템 id"),
-                                            fieldWithPath("result.id").description("아이템 id"),
                                             fieldWithPath("result.name").description("아이템 이름"),
                                             fieldWithPath("result.description").description("아이템 설명"),
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("result.category").description("카테고리"),
+                                            fieldWithPath("result.viewCount").description("아이템 조회 수"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("아이템 정보 조회 Response"))
