@@ -34,7 +34,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         Optional<String> refreshToken = jwtCookieHandler.getRefreshToken(request);
-        if (refreshToken.isEmpty()){
+        if (refreshToken.isPresent()){
             response.sendRedirect(localRedirectUrl + "?loginStatus=already_logged_in");
             return;
         }
