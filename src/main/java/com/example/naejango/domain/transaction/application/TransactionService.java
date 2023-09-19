@@ -106,6 +106,9 @@ public class TransactionService {
 
         // 거래 상태 "거래 완료"로 변경
         transaction.completeTransaction();
+
+        // 해당 아이템 status (거래 상태) false로 변경
+        itemRepository.updateItemStatusToFalse(transaction.getItem().getId());
     }
 
     /** 거래 정보 수정(거래 일시, 거래 금액) 거래 상태가 "거래 예약" 일때만 가능 */

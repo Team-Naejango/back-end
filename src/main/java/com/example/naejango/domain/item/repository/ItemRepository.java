@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -29,4 +30,8 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepos
 
     @Query("SELECT i.id FROM Item i WHERE i.storage.id = :storageId")
     List<Long> findItemIdListByStorageId(@Param("storageId") Long storageId);
+
+    @Modifying
+    @Query("UPDATE Item i SET i.status = false WHERE i.id = :itemId")
+    void updateItemStatusToFalse(@Param("itemId") Long itemId);
 }
