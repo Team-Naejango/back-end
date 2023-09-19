@@ -2,6 +2,7 @@ package com.example.naejango.global.auth.api;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
@@ -34,6 +35,7 @@ import java.time.ZoneOffset;
 public class AuthController {
 
     private final UserService userService;
+    private final AccountService accountService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationHandler authenticationHandler;
     private final JwtCookieHandler jwtCookieHandler;
@@ -90,6 +92,9 @@ public class AuthController {
         }
 
         Long guestId = userService.createGuest();
+
+        // 계좌 생성
+        accountService.createAccount(guestId);
 
         String accessToken = JWT.create()
                 .withClaim("userId", guestId)
