@@ -13,7 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -59,7 +58,6 @@ class AccountControllerTest extends RestDocsSupportTest {
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
