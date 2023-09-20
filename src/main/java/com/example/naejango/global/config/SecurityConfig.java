@@ -33,6 +33,20 @@ public class SecurityConfig {
     private final JwtAuthenticator jwtAuthenticator;
     private final CorsConfig corsConfig;
 
+    private static final String[] PERMIT_URL_ARRAY = {
+            /* swagger v2 */
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            /* swagger v3 */
+            "/v3/api-docs/**",
+            "/swagger-ui/**"
+    };
+
     @Bean
     public AuthenticationManager authenticationManager(){
         return new ProviderManager(new DaoAuthenticationProvider());
@@ -54,6 +68,8 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .authorizeRequests()
+                .antMatchers(PERMIT_URL_ARRAY)
+                .permitAll()
                 .antMatchers("/api/auth/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/profile")
