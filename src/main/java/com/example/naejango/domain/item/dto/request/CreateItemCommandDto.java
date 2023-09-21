@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,6 +24,7 @@ public class CreateItemCommandDto {
     private String imgUrl;
 
     private ItemType itemType;
+    private List<String> tag;
 
     private String category;
 
@@ -32,6 +35,7 @@ public class CreateItemCommandDto {
         this.description = createItemRequestDto.getDescription();
         this.imgUrl = createItemRequestDto.getImgUrl();
         this.itemType = createItemRequestDto.getItemType();
+        this.tag = createItemRequestDto.getHashTag();
         this.category = createItemRequestDto.getCategory();
         this.storageId = createItemRequestDto.getStorageId();
     }
@@ -43,6 +47,7 @@ public class CreateItemCommandDto {
                 .description(description)
                 .imgUrl(imgUrl)
                 .itemType(itemType)
+                .tag(String.join(" ", tag))
                 .viewCount(0)
                 .status(true)
                 .user(user)
@@ -50,5 +55,5 @@ public class CreateItemCommandDto {
                 .category(category)
                 .build();
     }
-    
+
 }

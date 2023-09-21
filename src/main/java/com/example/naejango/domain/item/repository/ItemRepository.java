@@ -26,7 +26,12 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepos
     Long findUserIdById(Long itemId);
 
     @EntityGraph(attributePaths = {"category"})
-    Optional<Item> findItemById(Long Id);
+    Optional<Item> findItemWithCategoryById(Long Id);
+
+    @EntityGraph(attributePaths = {"storage"})
+    Optional<Item> findItemWithStorageById(Long Id);
+
+
 
     @Query("SELECT i.id FROM Item i WHERE i.storage.id = :storageId")
     List<Long> findItemIdListByStorageId(@Param("storageId") Long storageId);

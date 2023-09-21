@@ -10,12 +10,14 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateItemRequestDto {
+public class
+CreateItemRequestDto {
     @NotBlank
     @Size(max = 25)
     private String name;
@@ -27,6 +29,9 @@ public class CreateItemRequestDto {
     @NotNull
     @Size(max = 100)
     private String imgUrl;
+
+    @Size(min = 1, max = 3)
+    private List<String> hashTag;
 
     @EnumConstraint(enumClass = ItemType.class, message = "올바른 Type을 입력하세요. (INDIVIDUAL_BUY/INDIVIDUAL_SELL/GROUP_BUY)")
     private ItemType itemType;

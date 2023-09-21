@@ -114,8 +114,8 @@ public class WebSocketController {
                     WebSocketErrorResponse.response(exception.getErrorCode()));
         } else {
             e.printStackTrace();
-            messagingTemplate.convertAndSend("/sub/info-user" + accessor.getSessionId(),
-                    WebSocketErrorResponse.builder().error(e.getCause().getMessage()).message("통신 중 에러가 발생하였습니다.").build());
+            if(e.getCause() != null) e = e.getCause();
+            messagingTemplate.convertAndSend("/sub/info-user" + accessor.getSessionId(), WebSocketErrorResponse.builder().error(e.getMessage()).message("통신 중 에러가 발생하였습니다.").build());
         }
     }
 

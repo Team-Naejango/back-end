@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import javax.persistence.EntityManager;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,20 +35,14 @@ class ItemServiceTest {
 
     @InjectMocks
     private ItemService itemService;
-
     @Mock
     private ItemRepository itemRepository;
-
     @Mock
     private CategoryRepository categoryRepository;
-
     @Mock
     private StorageRepository storageRepository;
-
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private EntityManager em;
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -65,6 +60,7 @@ class ItemServiceTest {
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
+                        .hashTag(Arrays.asList("태그1", "태그2", "태그3"))
                         .storageId(storage.getId())
                         .build();
 

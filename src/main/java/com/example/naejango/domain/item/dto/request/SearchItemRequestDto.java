@@ -14,7 +14,8 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @Builder
 @ToString
-public class SearchItemRequestDto {
+public class
+SearchItemRequestDto {
     @DecimalMin(value = "-180.0", message = "올바른 경위도 값을 입력하세요 (-180.0 ~ 180.0)")
     @DecimalMax(value = "180.0", message = "올바른 경위도 값을 입력하세요 (-180.0 ~ 180.0)")
     @NotNull

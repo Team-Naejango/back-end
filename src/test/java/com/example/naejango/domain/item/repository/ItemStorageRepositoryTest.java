@@ -202,8 +202,8 @@ class ItemStorageRepositoryTest {
         // given
         Storage storage1 = Storage.builder().name("test1").description("").address("").imgUrl("").location(geomUtil.createPoint(1, 1)).build();
         Storage storage2 = Storage.builder().name("test2").description("").address("").imgUrl("").location(geomUtil.createPoint(1, 1)).build();
-        Item item1 = Item.builder().status(true).itemType(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("").viewCount(0).description("").build();
-        Item item2 = Item.builder().status(true).itemType(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("").viewCount(0).description("").build();
+        Item item1 = Item.builder().status(true).itemType(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("").viewCount(0).tag("태그1 태그2").description("").build();
+        Item item2 = Item.builder().status(true).itemType(ItemType.INDIVIDUAL_BUY).name("item1").imgUrl("").viewCount(0).tag("태그3 태그4").description("").build();
         storageRepository.save(storage1);
         storageRepository.save(storage2);
         itemRepository.save(item1);

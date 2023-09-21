@@ -3,6 +3,7 @@ package com.example.naejango.domain.chat.domain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@ToString
 public class Channel {
     @Id @GeneratedValue
     @Column(name = "channel_id")

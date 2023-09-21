@@ -76,21 +76,33 @@ public class TestDBInitializer implements ApplicationRunner {
             testUser3.setUserProfile(userProfile4);
 
             // 아이템 1개 생성
-            Item testItem = Item.builder()
-                    .name("테스트 아이템")
+            Item testItem1 = Item.builder()
+                    .name("테스트 아이템1")
                     .itemType(ItemType.INDIVIDUAL_BUY)
                     .viewCount(0)
                     .imgUrl("")
+                    .tag("태그1 태그2")
                     .status(true)
                     .description("").build();
 
-            itemRepository.save(testItem);
+            Item testItem2 = Item.builder()
+                    .name("테스트 아이템2")
+                    .itemType(ItemType.GROUP_BUY)
+                    .viewCount(0)
+                    .imgUrl("")
+                    .tag("태그2 태그3")
+                    .status(true)
+                    .description("").build();
+
+            itemRepository.save(testItem1);
+            itemRepository.save(testItem2);
 
             // 채팅 채널 생성
             PrivateChannel channel1 = new PrivateChannel();
             GroupChannel channel2 = GroupChannel.builder()
                     .owner(em.getReference(User.class, testUser2.getId()))
-                    .item(em.getReference(Item.class, testItem.getId()))
+                    .item(em.getReference(Item.class, testItem2.getId()))
+                    .isClosed(false)
                     .channelLimit(5)
                     .defaultTitle("공동 구매")
                     .build();

@@ -5,6 +5,7 @@ import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@ToString
 public class GroupChannel extends Channel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

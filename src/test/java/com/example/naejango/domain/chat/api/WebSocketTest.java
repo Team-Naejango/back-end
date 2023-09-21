@@ -69,6 +69,7 @@ public class WebSocketTest {
     ChannelRepository channelRepository;
     @Autowired
     JwtGenerator jwtGenerator;
+
     @Autowired
     DataSourceProperties dataSourceProperties;
 
