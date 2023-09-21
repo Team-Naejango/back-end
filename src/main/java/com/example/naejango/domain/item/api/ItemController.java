@@ -2,12 +2,16 @@ package com.example.naejango.domain.item.api;
 
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.item.application.ItemService;
+import com.example.naejango.domain.item.dto.MatchItemsRequestDto;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.item.dto.request.*;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
+import com.example.naejango.domain.item.dto.response.MatchResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.storage.dto.SearchingConditionDto;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +38,16 @@ public class ItemController {
     public ResponseEntity<CommonResponseDto<CreateItemResponseDto>> createItem(Authentication authentication,
                                                                                @RequestBody @Valid CreateItemRequestDto createItemRequestDto) {
         Long userId = authenticationHandler.getUserId(authentication);
+
+        // 해시태그에 공백이 있는지, 글자수가 너무 많은지 확인 (공백 이외 많은 예외처리를 할 수 있지만 편의상 공백만 처리함)
+        createItemRequestDto.getHashTag().stream().filter(tag -> tag.contains(" ") || tag.length() > 10).findAny().ifPresent(k -> {
+            throw new CustomException(ErrorCode.FORGED_REQUEST);
+        });
+
         CreateItemResponseDto createItemResponseDto = itemService.createItem(userId, new CreateItemCommandDto(createItemRequestDto));
 
-        return ResponseEntity.created(URI.create("/api/item/" + createItemResponseDto.getId())).body(new CommonResponseDto<>("아이템 생성 완료", createItemResponseDto));
+        return ResponseEntity.created(URI.create("/api/item/" + createItemResponseDto.getId()))
+                .body(new CommonResponseDto<>("아이템 생성 완료", createItemResponseDto));
     }
 
     /** 아이템 정보 조회 */
@@ -66,6 +77,19 @@ public class ItemController {
         );
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("검색 성공", result));
+    }
+
+    /**
+     * 아이템 매칭
+     * 검색 조건은 좌표 / 반경 / 카테고리 / 아이템 타입 / 키워드 / 아이템 상태 입니다.
+     * @param requestDto 좌표(lon, lat), 카테고리(cat), 키워드(keyword), 아이템 타입(type)
+     */
+    @GetMapping("/match")
+    public ResponseEntity<CommonResponseDto<List<MatchResponseDto>>> matchItems(@Valid @ModelAttribute MatchItemsRequestDto requestDto) {
+        // 검색
+        List<MatchResponseDto> result = itemService.matchItem(requestDto.getRad(), requestDto.getSize(), requestDto.getItemId());
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("매칭 성공", result));
     }
 
     /** 아이템 정보 수정 */

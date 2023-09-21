@@ -8,9 +8,11 @@ import com.example.naejango.domain.item.dto.request.CreateItemCommandDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemCommandDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
+import com.example.naejango.domain.item.dto.response.MatchResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
+import com.example.naejango.domain.item.repository.MatchItemDto;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
@@ -49,7 +51,6 @@ public class ItemService {
                 .orElseThrow(() -> new CustomException(ErrorCode.STORAGE_NOT_FOUND));
 
         Item item = createItemCommandDto.toEntity(em.getReference(User.class, userId), storage, category);
-
         itemRepository.save(item);
 
         return new CreateItemResponseDto(item);
@@ -70,6 +71,17 @@ public class ItemService {
 
         return resultList.stream().map(result -> new SearchItemInfoDto(result.getItem(), result.getStorage(), result.getCategory(), result.getDistance()))
                 .collect(Collectors.toList());
+    }
+
+    /** 아이템 매칭 */
+    public List<MatchResponseDto> matchItem(int rad, int size, Long itemId){
+        // 아이템 조회
+        Item item = itemRepository.findItemWithStorageById(itemId).orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+
+        // 매칭 결과
+        List<MatchItemDto> findResult = itemRepository.findMatchByCondition(item.getStorage().getLocation(), rad, size, item.getMatchingCondition());
+
+        return findResult.stream().map(MatchItemDto::toResponseDto).collect(Collectors.toList());
     }
 
     /** 아이템 정보 수정 */
@@ -113,7 +125,7 @@ public class ItemService {
 
     private Item findItemWithCatById(Long itemId) { // category까지 fetch로 가져오는 메서드
 
-        return itemRepository.findItemById(itemId)
+        return itemRepository.findItemWithCategoryById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
     }
 

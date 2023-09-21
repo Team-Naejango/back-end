@@ -1,6 +1,7 @@
 package com.example.naejango.domain.item.domain;
 
 import com.example.naejango.domain.common.TimeAuditingEntity;
+import com.example.naejango.domain.item.dto.MatchingConditionDto;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -38,6 +39,9 @@ public class Item extends TimeAuditingEntity {
     private ItemType itemType; // INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY
 
     @Column(nullable = false)
+    private String tag;
+
+    @Column(nullable = false)
     private int viewCount;
 
     @Column(nullable = false)
@@ -46,7 +50,6 @@ public class Item extends TimeAuditingEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -67,4 +70,11 @@ public class Item extends TimeAuditingEntity {
         this.viewCount++;
     }
 
+    public MatchingConditionDto getMatchingCondition() {
+        return MatchingConditionDto.builder()
+                .category(category)
+                .hashTags(tag.split(" "))
+                .itemTypes(itemType.equals(ItemType.INDIVIDUAL_SELL) ? new ItemType[]{ItemType.GROUP_BUY, ItemType.INDIVIDUAL_BUY} : new ItemType[]{ItemType.INDIVIDUAL_SELL})
+                .build();
+    }
 }

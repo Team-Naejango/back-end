@@ -13,6 +13,7 @@ import com.example.naejango.domain.item.dto.request.ModifyItemCommandDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemRequestDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
+import com.example.naejango.domain.item.dto.response.MatchResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.storage.dto.Coord;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -31,11 +32,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
@@ -69,6 +71,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
                         .category("카테고리")
+                        .hashTag(Arrays.asList("태그1", "태그2"))
                         .storageId(1L)
                         .build();
 
@@ -79,6 +82,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
+                        .hashTag(Arrays.asList("태그1", "태그2"))
                         .category("카테고리")
                         .build();
 
@@ -121,6 +125,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("hashTag").description("해쉬 태그"),
                                             fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("category").description("카테고리"),
                                             fieldWithPath("storageId").description("창고 ID")
@@ -130,6 +135,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.name").description("아이템 이름"),
                                             fieldWithPath("result.description").description("아이템 설명"),
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("result.hashTag").description("해쉬 태그"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("result.category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
@@ -156,6 +162,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
+                        .hashTag(Arrays.asList("태그1", "태그2"))
                         .category("카테고리")
                         .viewCount(100)
                         .build();
@@ -195,6 +202,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("result.category").description("카테고리"),
+                                            fieldWithPath("result.hashTag[]").description("태그 목록"),
                                             fieldWithPath("result.viewCount").description("아이템 조회 수"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
@@ -286,6 +294,84 @@ class ItemControllerTest extends RestDocsSupportTest {
             ));
         }
     }
+
+    @Nested
+    @Tag("api")
+    @DisplayName("아이템 매치")
+    class  MatchItems {
+        MatchResponseDto dto1 = MatchResponseDto.builder()
+                .itemId(1L)
+                .name("매치 결과 아이템1")
+                .itemType(ItemType.INDIVIDUAL_BUY)
+                .imgUrl("이미지 url")
+                .category("카테고리")
+                .tag(Arrays.asList("태그1", "태그2"))
+                .distance(100)
+                .build();
+
+        MatchResponseDto dto2 = MatchResponseDto.builder()
+                .itemId(2L)
+                .name("매치 결과 아이템2")
+                .itemType(ItemType.GROUP_BUY)
+                .imgUrl("이미지 url")
+                .category("카테고리")
+                .tag(Arrays.asList("태그1", "태그2"))
+                .distance(150)
+                .build();
+
+        @Test
+        @DisplayName("매치 성공")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(itemService.matchItem(anyInt(), anyInt(), anyLong()))
+                    .willReturn(Arrays.asList(dto1, dto2));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/item/match")
+                    .queryParam("rad","1000")
+                    .queryParam("size", "10")
+                    .queryParam("itemId", "32452")
+                    .characterEncoding(StandardCharsets.UTF_8)
+                    .header("Authorization", "엑세스 토큰")
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            // restDocs
+            resultActions.andDo(restDocs.document(
+                    resource(ResourceSnippetParameters.builder()
+                            .tag("아이템")
+                            .summary("아이템 매치")
+                            .description("아이템과 수요가 맞는 근처 아이템을 매칭해줍니다.\n\n" +
+                                    "size, radius 및 itemId 를 요청하고\n\n" +
+                                    "아이템 정보를 응답합니다.")
+                            .requestParameters(
+                                    parameterWithName("rad").description("반경 (1,000~5,000m)"),
+                                    parameterWithName("size").description("매치 결과물 수 (1~10)"),
+                                    parameterWithName("itemId").description("아이템 ID"),
+                                    parameterWithName("_csrf").ignored()
+                            ).responseFields(
+                                    fieldWithPath("message").description("조회 결과 메세지"),
+                                    fieldWithPath("result[].itemId").description("아이템 ID"),
+                                    fieldWithPath("result[].category").description("카테고리 명"),
+                                    fieldWithPath("result[].name").description("아이템 이름"),
+                                    fieldWithPath("result[].imgUrl").description("이미지 url"),
+                                    fieldWithPath("result[].itemType").description("아이템 타입"),
+                                    fieldWithPath("result[].distance").description("아이템 과의 거리"),
+                                    fieldWithPath("result[].tag").description("태그 목록")
+                            ).requestSchema(
+                                    Schema.schema("아이템 검색 Request")
+                            ).responseSchema(
+                                    Schema.schema("아이템 검색 Response")
+                            )
+                            .build())
+            ));
+        }
+    }
+
 
     @Nested
     @Order(3)
