@@ -14,7 +14,7 @@ import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.MatchItemDto;
 import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.storage.dto.SearchingConditionDto;
+import com.example.naejango.domain.item.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.transaction.repository.TransactionRepository;
 import com.example.naejango.domain.user.domain.User;

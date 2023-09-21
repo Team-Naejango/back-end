@@ -9,7 +9,7 @@ import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.MatchResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
-import com.example.naejango.domain.storage.dto.SearchingConditionDto;
+import com.example.naejango.domain.item.dto.SearchingConditionDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;

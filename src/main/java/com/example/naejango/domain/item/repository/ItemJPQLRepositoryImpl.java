@@ -4,7 +4,7 @@ import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.dto.MatchingConditionDto;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
-import com.example.naejango.domain.storage.dto.SearchingConditionDto;
+import com.example.naejango.domain.item.dto.SearchingConditionDto;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Repository;
 
@@ -93,7 +93,7 @@ public class ItemJPQLRepositoryImpl implements ItemJPQLRepository {
     }
 
     private static String searchingQueryBuilder(SearchingConditionDto conditions, Category cat) {
-        String SELECT = "SELECT NEW com.example.naejango.domain.storage.dto.SearchItemsDto";
+        String SELECT = "SELECT NEW com.example.naejango.domain.item.dto.SearchItemsDto";
         String PROJECTION = "(it, st, c, ROUND(CAST(ST_DistanceSphere(:center, st.location) AS double)) AS distance) ";
         String FROM_STORAGE_JOIN_ITEM_CAT = "FROM Storage st JOIN st.items it JOIN it.category c ";
         String WHERE_DISTANCE_CONDITION = "WHERE ST_DWithin(:center, st.location, :radius, FALSE) = TRUE ";
