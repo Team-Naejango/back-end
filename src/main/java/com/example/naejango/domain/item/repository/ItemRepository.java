@@ -23,8 +23,6 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     @Query("DELETE FROM Item i WHERE i.storage.id = :storageId")
     void deleteByStorageId(@Param("storageId") Long storageId);
 
-    Long findUserIdById(Long id);
-
     @EntityGraph(attributePaths = {"category"})
     Optional<Item> findItemWithCategoryById(Long Id);
 

@@ -102,7 +102,7 @@ public class ChannelService {
         }
 
         // 해당 아이템의 주인이 맞는지 검증
-        if (!userId.equals(itemRepository.findUserIdById(itemId))) {
+        if (!userId.equals(item.getUser().getId())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_CREATE_CHANNEL);
         }
 
