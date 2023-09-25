@@ -20,6 +20,7 @@ import java.util.List;
 import static com.example.naejango.domain.item.domain.QCategory.*;
 import static com.example.naejango.domain.item.domain.QItem.item;
 import static com.example.naejango.domain.storage.domain.QStorage.storage;
+import static com.example.naejango.domain.user.domain.QUser.user;
 
 @Repository
 public class ItemRepositoryImpl implements ItemRepositoryCustom {
@@ -56,11 +57,13 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return queryFactory.select(Projections.constructor(MatchItemDto.class,
                         item,
                         category,
+                        user,
                         Expressions.numberTemplate(Integer.class, "ROUND(CAST(ST_DistanceSphere({0}, {1}) AS double))", center, storage.location).as("distance"))
                 )
                 .from(storage)
                 .join(storage.items, item)
                 .join(item.category, category)
+                .join(item.user, user)
                 .where(catEq(condition.getCategory()),
                         itemTypeIn(condition.getItemTypes()),
                         nameLikeOr(condition.getHashTags()))

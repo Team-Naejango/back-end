@@ -311,6 +311,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                 .category("카테고리")
                 .tag(Arrays.asList("태그1", "태그2"))
                 .distance(100)
+                .ownerId(1L)
                 .build();
 
         MatchResponseDto dto2 = MatchResponseDto.builder()
@@ -321,6 +322,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                 .category("카테고리")
                 .tag(Arrays.asList("태그1", "태그2"))
                 .distance(150)
+                .ownerId(2L)
                 .build();
 
         @Test
@@ -365,7 +367,8 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     fieldWithPath("result[].imgUrl").description("이미지 url"),
                                     fieldWithPath("result[].itemType").description("아이템 타입"),
                                     fieldWithPath("result[].distance").description("아이템 과의 거리"),
-                                    fieldWithPath("result[].tag").description("태그 목록")
+                                    fieldWithPath("result[].tag").description("태그 목록"),
+                                    fieldWithPath("result[].ownerId").description("아이템 등록한 유저 ID")
                             ).requestSchema(
                                     Schema.schema("아이템 검색 Request")
                             ).responseSchema(

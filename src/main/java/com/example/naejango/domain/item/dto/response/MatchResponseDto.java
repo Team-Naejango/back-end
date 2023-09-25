@@ -18,4 +18,5 @@ public class MatchResponseDto {
     private ItemType itemType;
     private int distance;
     private List<String> tag;
+    private Long ownerId;
 }
