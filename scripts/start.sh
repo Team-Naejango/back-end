@@ -3,16 +3,13 @@
 PROJECT_ROOT="/home/ec2-user/action"
 JAR_FILE="$PROJECT_ROOT/build/libs/naejango-0.0.1-SNAPSHOT.jar"
 APPLICATION_NAME="naejango-0.0.1-SNAPSHOT.jar"
-
-APP_LOG="$PROJECT_ROOT/application.log"
-ERROR_LOG="$PROJECT_ROOT/error.log"
-DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
+DEPLOY_LOG="$PROJECT_ROOT/log/deploy.log"
 
 TIME_NOW=$(date +%c)
 
 # jar 파일 실행
 echo "$TIME_NOW > $JAR_FILE 파일 실행" >> $DEPLOY_LOG
-nohup java -jar $JAR_FILE > $APP_LOG 2> $ERROR_LOG &
+nohup java -jar $JAR_FILE &
 
 # 현재 구동 중인 애플리케이션 pid 확인
 CURRENT_PID=$(pgrep -f $APPLICATION_NAME)

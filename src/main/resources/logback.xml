@@ -9,7 +9,7 @@
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/home/ec2-user/action/log/error.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/home/ec2-user/action/log/rolling/%d{yyyy-MM-dd}/ERROR-log.%i.gz</fileNamePattern>
+            <fileNamePattern>/home/ec2-user/action/log/rolling/ERROR-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
@@ -22,7 +22,7 @@
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/home/ec2-user/action/log/info.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/home/ec2-user/action/log/rolling/%d{yyyy-MM-dd}/INFO-log.%i.gz</fileNamePattern>
+            <fileNamePattern>/home/ec2-user/action/log/rolling/INFO-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
