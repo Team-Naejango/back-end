@@ -110,7 +110,7 @@ public class ChannelService {
         }
 
         // 해당 아이템에 할당된 채널이 있는지 검증
-        Optional<GroupChannel> channelOptional = channelRepository.findGroupChannelByItemId(itemId);
+        Optional<GroupChannel> channelOptional = findGroupChannelByItemId(itemId);
 
         // 있는 경우
         if (channelOptional.isPresent()) {
@@ -155,7 +155,11 @@ public class ChannelService {
 
     /** 공동 구매 아이템에 등록된 그룹 채널 조회 */
     public Optional<GroupChannelDto> findGroupChannel(Long itemId) {
-        return channelRepository.findGroupChannelByItemId(itemId).map(GroupChannelDto::new);
+        return findGroupChannelByItemId(itemId).map(GroupChannelDto::new);
+    }
+
+    public Optional<GroupChannel> findGroupChannelByItemId(Long itemId) {
+        return channelRepository.findGroupChannelByItemId(itemId);
     }
 
     /** 근처의 그룹 채널 조회 */
@@ -180,6 +184,7 @@ public class ChannelService {
                 participant.getUserProfile().getNickname(), participant.getUserProfile().getImgUrl())).collect(Collectors.toList());
     }
 
+    /** 채널 종료 */
     @Transactional
     public void closeChannel(Long channelId, Long userId) {
         Channel channel = channelRepository.findById(channelId)
@@ -192,9 +197,7 @@ public class ChannelService {
             if(!group.getOwner().getId().equals(userId)) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST);
 
             // 종료 메세지 전송
-            WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.CLOSE, userId, channelId);
-            messageService.publishMessage(commandDto);
-            webSocketService.publishMessage(commandDto);
+            sendCloseMessage(channelId, userId);
 
             // 채팅 종료
             group.closeChannel();
@@ -204,14 +207,18 @@ public class ChannelService {
         // 일대일 채널인 경우
         if (channel.getChannelType().equals(ChannelType.PRIVATE)) {
             // 종료 메세지 전송
-            WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.CLOSE, userId, channelId);
-            messageService.publishMessage(commandDto);
-            webSocketService.publishMessage(commandDto);
+            sendCloseMessage(channelId, userId);
 
             // 채팅 종료
             channel.closeChannel();
             return;
         }
         throw new CustomException(ErrorCode.CHANNEL_NOT_FOUND);
+    }
+
+    public void sendCloseMessage(Long channelId, Long userId) {
+        WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.CLOSE, userId, channelId);
+        messageService.publishMessage(commandDto);
+        webSocketService.publishMessage(commandDto);
     }
 }
