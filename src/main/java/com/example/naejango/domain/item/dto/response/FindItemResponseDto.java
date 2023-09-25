@@ -19,7 +19,7 @@ public class FindItemResponseDto {
     private Long storageId;
     private Integer categoryId;
     private String categoryName;
-    private String itemName;
+    private String name;
     private String description;
     private String imgUrl;
     private ItemType itemType;
@@ -31,7 +31,7 @@ public class FindItemResponseDto {
         this.storageId = item.getStorage().getId();
         this.categoryId = item.getCategory().getId();
         this.categoryName = item.getCategory().getName();
-        this.itemName = item.getName();
+        this.name = item.getName();
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
         this.itemType = item.getItemType();

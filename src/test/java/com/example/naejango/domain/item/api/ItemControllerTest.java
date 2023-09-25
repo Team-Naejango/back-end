@@ -161,7 +161,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .storageId(2L)
                         .categoryId(3)
                         .categoryName("카테고리 이름")
-                        .itemName("아이템 이름")
+                        .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
@@ -202,7 +202,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.storageId").description("창고 id"),
                                             fieldWithPath("result.categoryId").description("카테고리 id"),
                                             fieldWithPath("result.categoryName").description("카테고리 이름"),
-                                            fieldWithPath("result.itemName").description("아이템 이름"),
+                                            fieldWithPath("result.name").description("아이템 이름"),
                                             fieldWithPath("result.description").description("아이템 소개"),
                                             fieldWithPath("result.imgUrl").description("이미지 링크"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
