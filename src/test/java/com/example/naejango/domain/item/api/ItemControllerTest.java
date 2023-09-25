@@ -157,13 +157,15 @@ class ItemControllerTest extends RestDocsSupportTest {
         Long itemId=1L;
         FindItemResponseDto findItemResponseDto =
                 FindItemResponseDto.builder()
-                        .id(1L)
-                        .name("아이템 이름")
+                        .itemId(1L)
+                        .storageId(2L)
+                        .categoryId(3)
+                        .categoryName("카테고리 이름")
+                        .itemName("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
                         .hashTag(Arrays.asList("태그1", "태그2"))
-                        .category("카테고리")
                         .viewCount(100)
                         .build();
 
@@ -196,14 +198,16 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             parameterWithName("itemId").description("아이템 ID")
                                     )
                                     .responseFields(
-                                            fieldWithPath("result.id").description("아이템 id"),
-                                            fieldWithPath("result.name").description("아이템 이름"),
-                                            fieldWithPath("result.description").description("아이템 설명"),
-                                            fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
+                                            fieldWithPath("result.itemId").description("아이템 id"),
+                                            fieldWithPath("result.storageId").description("창고 id"),
+                                            fieldWithPath("result.categoryId").description("카테고리 id"),
+                                            fieldWithPath("result.categoryName").description("카테고리 이름"),
+                                            fieldWithPath("result.itemName").description("아이템 이름"),
+                                            fieldWithPath("result.description").description("아이템 소개"),
+                                            fieldWithPath("result.imgUrl").description("이미지 링크"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("result.category").description("카테고리"),
-                                            fieldWithPath("result.hashTag[]").description("태그 목록"),
-                                            fieldWithPath("result.viewCount").description("아이템 조회 수"),
+                                            fieldWithPath("result.hashTag").description("해쉬 태그"),
+                                            fieldWithPath("result.viewCount").description("조회 수"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
                                     .responseSchema(Schema.schema("아이템 정보 조회 Response"))
@@ -214,7 +218,7 @@ class ItemControllerTest extends RestDocsSupportTest {
 
     @Nested
     @Tag("api")
-    @DisplayName("아이템&창고 검색")
+    @DisplayName("아이템 검색")
     class SearchStorageByConditions {
         Point center = geomUtil.createPoint(127.02, 37.49);
         List<SearchItemInfoDto> searchItemInfoDtoList =
@@ -228,7 +232,7 @@ class ItemControllerTest extends RestDocsSupportTest {
         void 모든_조건으로_아이템과_창고_검색() throws Exception {
             // given
             BDDMockito.given(geomUtilMock.createPoint(127.02, 37.49)).willReturn(center);
-            BDDMockito.given(itemService.searchItem(any(), any(Integer.class), any(Integer.class), any(Integer.class), any()))
+            BDDMockito.given(itemService.searchItem(any()))
                     .willReturn(searchItemInfoDtoList);
 
             // when
@@ -371,7 +375,6 @@ class ItemControllerTest extends RestDocsSupportTest {
             ));
         }
     }
-
 
     @Nested
     @Order(3)

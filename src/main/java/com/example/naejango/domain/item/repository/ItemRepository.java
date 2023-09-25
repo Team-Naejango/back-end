@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepository {
+public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositoryCustom {
 
     @EntityGraph(attributePaths = {"category"})
     @Query("SELECT i FROM Item i WHERE i.storage.id = :storageId AND i.status = :status")
@@ -30,8 +30,6 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemJPQLRepos
 
     @EntityGraph(attributePaths = {"storage"})
     Optional<Item> findItemWithStorageById(Long Id);
-
-
 
     @Query("SELECT i.id FROM Item i WHERE i.storage.id = :storageId")
     List<Long> findItemIdListByStorageId(@Param("storageId") Long storageId);

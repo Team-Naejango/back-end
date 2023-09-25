@@ -1,0 +1,98 @@
+package com.example.naejango.domain.item.repository;
+
+import com.example.naejango.domain.item.domain.Category;
+import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.domain.QCategory;
+import com.example.naejango.domain.item.dto.MatchingConditionDto;
+import com.example.naejango.domain.item.dto.SearchItemsDto;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.locationtech.jts.geom.Point;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+
+import static com.example.naejango.domain.item.domain.QCategory.*;
+import static com.example.naejango.domain.item.domain.QItem.item;
+import static com.example.naejango.domain.storage.domain.QStorage.storage;
+
+@Repository
+public class ItemRepositoryImpl implements ItemRepositoryCustom {
+    private final JPAQueryFactory queryFactory;
+
+    public ItemRepositoryImpl(EntityManager em) {
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+
+    @Override
+    public List<SearchItemsDto> findItemsByConditions(Point center, int radius, int page, int size, Category cat,
+                                                      String[] keywords, ItemType itemType, Boolean status) {
+
+        return queryFactory.select(Projections.constructor(SearchItemsDto.class,
+                        item,
+                        category,
+                        storage,
+                        Expressions.numberTemplate(Integer.class, "ROUND(CAST(ST_DistanceSphere({0}, {1}) AS double))", center, storage.location).as("distance"))
+                )
+                .from(storage)
+                .join(storage.items, item)
+                .join(item.category, category)
+                .where(catEq(cat),
+                        itemTypeEq(itemType),
+                        nameLikeAnd(keywords))
+                .offset((long) page * size)
+                .limit(size)
+                .orderBy(Expressions.stringPath("distance").asc())
+                .fetch();
+    }
+
+    @Override
+    public List<MatchItemDto> findMatchByCondition(Point center, int radius, int size, MatchingConditionDto condition) {
+        return queryFactory.select(Projections.constructor(MatchItemDto.class,
+                        item,
+                        category,
+                        Expressions.numberTemplate(Integer.class, "ROUND(CAST(ST_DistanceSphere({0}, {1}) AS double))", center, storage.location).as("distance"))
+                )
+                .from(storage)
+                .join(storage.items, item)
+                .join(item.category, category)
+                .where(catEq(condition.getCategory()),
+                        itemTypeIn(condition.getItemTypes()),
+                        nameLikeOr(condition.getHashTags()))
+                .limit(size)
+                .orderBy(Expressions.stringPath("distance").asc())
+                .fetch();
+    }
+
+    private BooleanBuilder nameLikeOr(String[] words) {
+        BooleanBuilder condition = new BooleanBuilder();
+        for (String tag : words) {
+            condition.or(item.name.like(tag));
+        }
+        return condition;
+    }
+
+    private BooleanBuilder nameLikeAnd(String[] words) {
+        BooleanBuilder condition = new BooleanBuilder();
+        for (String tag : words) {
+            condition.and(item.name.like(tag));
+        }
+        return condition;
+    }
+
+    private static BooleanExpression itemTypeIn(ItemType[] itemTypes) {
+        return itemTypes != null? item.itemType.in(itemTypes) : null;
+    }
+    private Predicate itemTypeEq(ItemType itemType) {
+        return itemType != null? item.itemType.eq(itemType) : null;
+    }
+
+    private BooleanExpression catEq(Category category) {
+        return category != null? QCategory.category.eq(category) : null;
+    }
+}

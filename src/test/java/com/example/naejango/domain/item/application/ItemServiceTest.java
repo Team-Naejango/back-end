@@ -43,6 +43,8 @@ class ItemServiceTest {
     private StorageRepository storageRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private EntityManager em;
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

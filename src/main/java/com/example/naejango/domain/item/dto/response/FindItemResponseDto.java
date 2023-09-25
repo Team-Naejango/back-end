@@ -15,29 +15,27 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindItemResponseDto {
-    private Long id;
-
-    private String name;
-
+    private Long itemId;
+    private Long storageId;
+    private Integer categoryId;
+    private String categoryName;
+    private String itemName;
     private String description;
-
     private String imgUrl;
-
     private ItemType itemType;
     private List<String> hashTag;
-
-    private String category;
-
     private int viewCount;
 
     public FindItemResponseDto(Item item) {
-        this.id = item.getId();
-        this.name = item.getName();
+        this.itemId = item.getId();
+        this.storageId = item.getStorage().getId();
+        this.categoryId = item.getCategory().getId();
+        this.categoryName = item.getCategory().getName();
+        this.itemName = item.getName();
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
         this.itemType = item.getItemType();
         this.hashTag = Arrays.asList(item.getTag().split(" "));
-        this.category = item.getCategory().getName();
         this.viewCount = item.getViewCount();
     }
 }

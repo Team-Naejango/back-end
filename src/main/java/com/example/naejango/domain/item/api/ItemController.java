@@ -4,12 +4,12 @@ import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.item.application.ItemService;
 import com.example.naejango.domain.item.dto.MatchItemsRequestDto;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
+import com.example.naejango.domain.item.dto.SearchingCommandDto;
 import com.example.naejango.domain.item.dto.request.*;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
 import com.example.naejango.domain.item.dto.response.FindItemResponseDto;
 import com.example.naejango.domain.item.dto.response.MatchResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
-import com.example.naejango.domain.item.dto.SearchingConditionDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -66,15 +66,12 @@ public class ItemController {
     @GetMapping("/search")
     public ResponseEntity<CommonResponseDto<List<SearchItemInfoDto>>> searchStorage(@Valid @ModelAttribute SearchItemRequestDto requestDto) {
         Point center = geomUtil.createPoint(requestDto.getLon(), requestDto.getLat());
-
-        // 키워드 만들기
-        String[] keywords = requestDto.getKeyword() == null?
-                new String[]{} : Arrays.stream(requestDto.getKeyword().split(" ")).map(word -> "%" + word + "%").toArray(String[]::new);
+        String[] keywords = requestDto.getKeyword() != null ?
+                Arrays.stream(requestDto.getKeyword().split(" ")).map(word -> "%" + word + "%").toArray(String[]::new)
+                : new String[]{} ;
 
         // 검색
-        List<SearchItemInfoDto> result = itemService.searchItem(center, requestDto.getRad(), requestDto.getPage(), requestDto.getSize(),
-                new SearchingConditionDto(requestDto, keywords)
-        );
+        List<SearchItemInfoDto> result = itemService.searchItem(new SearchingCommandDto(requestDto, center, keywords));
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("검색 성공", result));
     }

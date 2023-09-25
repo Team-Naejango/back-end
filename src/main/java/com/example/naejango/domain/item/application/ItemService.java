@@ -4,6 +4,7 @@ import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
+import com.example.naejango.domain.item.dto.SearchingCommandDto;
 import com.example.naejango.domain.item.dto.request.CreateItemCommandDto;
 import com.example.naejango.domain.item.dto.request.ModifyItemCommandDto;
 import com.example.naejango.domain.item.dto.response.CreateItemResponseDto;
@@ -14,15 +15,14 @@ import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.item.repository.MatchItemDto;
 import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.item.dto.SearchingConditionDto;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.transaction.repository.TransactionRepository;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.wish.repository.WishRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
+import com.example.naejango.global.common.util.GeomUtil;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,10 +64,11 @@ public class ItemService {
     }
 
     /** 아이템 검색 */
-    public List<SearchItemInfoDto> searchItem(Point center, int rad, int page, int size, SearchingConditionDto conditions) {
-        Category category = findCategoryByName(conditions.getCategory());
+    public List<SearchItemInfoDto> searchItem(SearchingCommandDto conditions) {
+        Category category = findCategoryById(conditions.getCategoryId());
 
-        List<SearchItemsDto> resultList = itemRepository.findItemsByConditions(center, rad, page, size, category, conditions);
+        List<SearchItemsDto> resultList = itemRepository.findItemsByConditions(conditions.getLocation(), conditions.getRad(), conditions.getPage(), conditions.getSize(),
+                category, conditions.getKeyword(), conditions.getItemType(), conditions.getStatus());
 
         return resultList.stream().map(result -> new SearchItemInfoDto(result.getItem(), result.getStorage(), result.getCategory(), result.getDistance()))
                 .collect(Collectors.toList());
@@ -134,5 +135,11 @@ public class ItemService {
         return categoryRepository.findByName(categoryName)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }
+    private Category findCategoryById(Integer categoryId) {
+
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+    }
+
 
 }

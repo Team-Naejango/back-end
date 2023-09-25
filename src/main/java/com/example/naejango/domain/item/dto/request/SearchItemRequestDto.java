@@ -37,7 +37,7 @@ SearchItemRequestDto {
     @DecimalMin(value = "1", message = "요청 결과물의 개수가 1개 이상이어야 합니다.")
     private Integer size;
 
-    private String category; // 카테고리
+    private Integer categoryId; // 카테고리
 
     @Size(min = 2, max = 10, message = "검색어가 너무 길거나 짧습니다. (2자 ~ 10자)")
     private String keyword; // 검색 키워드
