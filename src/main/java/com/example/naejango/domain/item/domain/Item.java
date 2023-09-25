@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Arrays;
 
 @Entity
 @Builder
@@ -73,8 +74,15 @@ public class Item extends TimeAuditingEntity {
     public MatchingConditionDto getMatchingCondition() {
         return MatchingConditionDto.builder()
                 .category(category)
-                .hashTags(tag.split(" "))
-                .itemTypes(itemType.equals(ItemType.INDIVIDUAL_SELL) ? new ItemType[]{ItemType.GROUP_BUY, ItemType.INDIVIDUAL_BUY} : new ItemType[]{ItemType.INDIVIDUAL_SELL})
+                .hashTags(Arrays.stream(tag.split(" ")).map(word -> "%" + word + "%").toArray(String[]::new))
+                .itemTypes(
+                        itemType.equals(ItemType.INDIVIDUAL_SELL) ? new ItemType[]{ItemType.INDIVIDUAL_BUY} :
+                                itemType.equals(ItemType.GROUP_BUY) ? new ItemType[]{ItemType.GROUP_BUY, ItemType.INDIVIDUAL_BUY} :
+                                        new ItemType[]{ItemType.GROUP_BUY, ItemType.INDIVIDUAL_SELL}
+                        // 개인 판매 : 개인 구매
+                        // 공동 구매 : 공동 구매, 개인 구매
+                        // 개인 구매 : 공동 구매, 개인 판매
+                )
                 .build();
     }
 }

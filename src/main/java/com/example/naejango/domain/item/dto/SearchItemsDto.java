@@ -14,5 +14,5 @@ public class SearchItemsDto {
     private Item item;
     private Category category;
     private Storage storage;
-    private int distance;
+    private Integer distance;
 }
