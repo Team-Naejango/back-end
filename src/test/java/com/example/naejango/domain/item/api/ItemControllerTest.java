@@ -302,7 +302,7 @@ class ItemControllerTest extends RestDocsSupportTest {
     @Nested
     @Tag("api")
     @DisplayName("아이템 매치")
-    class  MatchItems {
+    class MatchItems {
         MatchResponseDto dto1 = MatchResponseDto.builder()
                 .itemId(1L)
                 .name("매치 결과 아이템1")
@@ -459,4 +459,55 @@ class ItemControllerTest extends RestDocsSupportTest {
         }
     }
 
+    @Nested
+    @Order(4)
+    @DisplayName("Controller 아이템 삭제")
+    @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class DeleteItem {
+        Long userId;
+        Long itemId=1L;
+
+        @Test
+        @Order(1)
+        @Tag("api")
+        @DisplayName("아이템_삭제_성공")
+        void 아이템_삭제_성공() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandler.getUserId(any()))
+                    .willReturn(userId);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .delete("/api/item/{itemId}", itemId)
+                    .header("Authorization", "JWT")
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("아이템")
+                                    .summary("아이템 삭제")
+                                    .description("아이템을 등록한 유저만 삭제 가능\n\n" +
+                                            "아이템을 삭제 하면 실행되는 로직\n\n" +
+                                            "- 해당 아이템에 연관된 Wish 삭제\n\n" +
+                                            "- 연관된 Transaction 과의 관계 끊어짐\n\n" +
+                                            "- 그룹 채널이 생성 되어 있다면 종료\n\n" +
+                                            "- 이후 아이템 삭제")
+                                    .pathParameters(
+                                            parameterWithName("itemId").description("아이템 ID")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("result").description("null"),
+                                            fieldWithPath("message").description("결과 메시지")
+                                    )
+                                    .responseSchema(Schema.schema("아이템 삭제 Response"))
+                                    .build()
+                    )));
+        }
+    }
 }
