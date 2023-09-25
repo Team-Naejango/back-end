@@ -2,7 +2,6 @@ package com.example.naejango.domain.item.application;
 
 import com.example.naejango.domain.chat.application.http.ChannelService;
 import com.example.naejango.domain.chat.domain.GroupChannel;
-import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
@@ -42,7 +41,6 @@ public class ItemService {
     private final StorageRepository storageRepository;
     private final WishRepository wishRepository;
     private final TransactionRepository transactionRepository;
-    private final ChannelRepository channelRepository;
     private final ChannelService channelService;
     private final EntityManager em;
 
