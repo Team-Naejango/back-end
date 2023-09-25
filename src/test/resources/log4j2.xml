@@ -10,5 +10,10 @@
         <Root level="info">
             <AppenderRef ref="console"/>
         </Root>
+
+        <logger name="org.hibernate.SQL" level="debug">
+            <AppenderRef ref="console"/>
+        </logger>
+
     </Loggers>
 </Configuration>
