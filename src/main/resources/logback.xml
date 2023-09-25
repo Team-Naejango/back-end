@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level){FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue} [%thread] %cyan(%-40.40logger{1.}) : %msg%n%exception{full}</pattern>
@@ -8,9 +7,9 @@
     </appender>
 
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/error.log</file>
+        <file>/home/ec2-user/action/log/error.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>log/rolling/%d{yyyy-MM-dd}/ERROR-log.%i.gz</fileNamePattern>
+            <fileNamePattern>/home/ec2-user/action/log/rolling/%d{yyyy-MM-dd}/ERROR-log.%i.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
@@ -21,9 +20,9 @@
     </appender>
 
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/info.log</file>
+        <file>/home/ec2-user/action/log/info.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>log/rolling/%d{yyyy-MM-dd}/INFO-log.%i.gz</fileNamePattern>
+            <fileNamePattern>/home/ec2-user/action/log/rolling/%d{yyyy-MM-dd}/INFO-log.%i.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>100MB</totalSizeCap>
