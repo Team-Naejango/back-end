@@ -1,5 +1,7 @@
 package com.example.naejango.domain.storage.application;
 
+import com.example.naejango.domain.chat.application.http.ChannelService;
+import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.follow.repository.FollowRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +38,7 @@ public class StorageService {
     private final WishRepository wishRepository;
     private final TransactionRepository transactionRepository;
     private final FollowRepository followRepository;
+    private final ChannelService channelService;
     private final GeomUtil geomUtil;
     private final EntityManager em;
 
@@ -96,18 +100,45 @@ public class StorageService {
         // 해당 창고와 연관된 Follow 삭제
         followRepository.deleteByStorageId(storageId);
 
-        // 해당 창고에 등록된 아이템 ID List 조회
-        List<Long> itemIdList = itemRepository.findItemIdListByStorageId(storageId);
-        // 각 아이템에 연관된 Wish 삭제
-        wishRepository.deleteByItemIdList(itemIdList);
-        // 각 아이템에 연관된 Transaction과의 관계 끊기
-        transactionRepository.updateItemToNullByItemIdList(itemIdList);
-
-        // 창고에 등록된 아이템들 삭제. 연관된 GroupChannel 은 삭제하지 않습니다.
-        itemRepository.deleteByStorageId(storageId);
+        // 해당 창고와 연관된 Item 삭제
+        deleteRelatedItem(storageId, userId);
 
         // Storage 를 삭제합니다.
         storageRepository.delete(storage);
     }
 
+    private void deleteRelatedItem(Long storageId, Long userId) {
+        // 해당 창고에 등록된 아이템 ID List 조회
+        List<Long> itemIdList = itemRepository.findItemIdListByStorageId(storageId);
+
+        // 각 아이템에 연관된 Wish 삭제
+        wishRepository.deleteByItemIdList(itemIdList);
+
+        // 각 아이템에 연관된 Transaction과의 관계 끊기
+        transactionRepository.updateItemToNullByItemIdList(itemIdList);
+
+        // 각 아이템의 채널 종료
+        for (Long itemId : itemIdList) {
+            closeChannel(userId, itemId);
+        }
+
+        // 창고에 등록된 아이템들 삭제
+        itemRepository.deleteByStorageId(storageId);
+    }
+
+    private void closeChannel(Long userId, Long itemId) {
+        // 아이템에 할당 된 채널 조회
+        Optional<GroupChannel> optionalGroupChannel = channelService.findGroupChannelByItemId(itemId);
+
+        // 채널이 존재 하면
+        if (optionalGroupChannel.isPresent()) {
+            GroupChannel groupChannel = optionalGroupChannel.get();
+
+            // 종료 메세지 전송
+            channelService.sendCloseMessage(groupChannel.getId(), userId);
+
+            // 채널 종료
+            groupChannel.closeChannel();
+        }
+    }
 }
