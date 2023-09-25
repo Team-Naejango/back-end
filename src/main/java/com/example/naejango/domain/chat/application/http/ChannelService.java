@@ -42,6 +42,9 @@ public class ChannelService {
     /** 새로운 일대일 채널을 생성합니다. */
     @Transactional
     public CreateChannelDto createPrivateChannel(Long requesterId, Long otherUserId) {
+        // 동일한 유저인지 확인힙니다.
+        if(requesterId.equals(otherUserId)) throw new CustomException(ErrorCode.BAD_REQUEST);
+
         // 두 유저 사이 진행중인 Chat 을 조회합니다.
         Optional<ChannelAndChatDto> chatDtoOptional = chatRepository.findPrivateChannelBetweenUsers(requesterId, otherUserId);
 
