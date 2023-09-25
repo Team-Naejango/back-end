@@ -36,6 +36,11 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="INFO_FILE"/>
     </root>
+
+    <logger name="org.hibernate.SQL" level="debug">
+        <appender-ref ref="INFO_FILE"/>
+    </logger>
+
     <logger name="com.example" level="ERROR" additivity="false">
         <appender-ref ref="ERROR_FILE"/>
     </logger>
