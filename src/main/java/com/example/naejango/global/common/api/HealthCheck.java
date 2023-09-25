@@ -1,4 +1,5 @@
 package com.example.naejango.global.common.api;
+import com.example.naejango.global.aop.NoLogging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,13 @@ public class HealthCheck {
     private final DataSourceProperties dataSourceProperties;
 
     /** EC2 서버 접속 테스트를 위한 임시 API */
+    @NoLogging
     @GetMapping("/healthcheck")
     public ResponseEntity<Void> healthCheck() {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    @NoLogging
     @GetMapping("/DBconnection")
     public String DBConnectionCheck() {
         try {
