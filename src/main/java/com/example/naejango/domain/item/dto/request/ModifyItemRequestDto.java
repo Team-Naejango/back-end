@@ -1,7 +1,5 @@
 package com.example.naejango.domain.item.dto.request;
 
-import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.global.common.validation.EnumConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,9 +26,6 @@ public class ModifyItemRequestDto {
     @Size(max = 100)
     private String imgUrl;
 
-    @EnumConstraint(enumClass = ItemType.class, message = "올바른 Type을 입력하세요. (INDIVIDUAL_BUY/INDIVIDUAL_SELL/GROUP_BUY)")
-    private ItemType itemType;
-
-    private String category;
+    private Integer category;
 
 }

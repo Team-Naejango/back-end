@@ -444,8 +444,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .itemType(ItemType.INDIVIDUAL_SELL)
-                        .category("카테고리")
+                        .category(1)
                         .build();
 
         ModifyItemResponseDto modifyItemResponseDto =
@@ -465,7 +464,6 @@ class ItemControllerTest extends RestDocsSupportTest {
         void 아이템_정보_수정_성공() throws Exception {
             // given
             String content = objectMapper.writeValueAsString(modifyItemRequestDto);
-
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
             BDDMockito.given(itemService.modifyItem(any(), any(), any(ModifyItemCommandDto.class)))
@@ -495,7 +493,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
                                             fieldWithPath("category").description("카테고리")
                                     )
                                     .responseFields(

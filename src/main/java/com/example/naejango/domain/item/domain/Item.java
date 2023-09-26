@@ -59,11 +59,10 @@ public class Item extends TimeAuditingEntity {
     @JoinColumn(name = "storage_id")
     private Storage storage;
 
-    public void modifyItem(String name, String description, String imgUrl, ItemType type, Category category) {
+    public void modifyItem(String name, String description, String imgUrl, Category category) {
         this.name = name;
         this.description = description;
         this.imgUrl = imgUrl;
-        this.itemType = type;
         this.category = category;
     }
 

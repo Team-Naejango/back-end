@@ -91,7 +91,7 @@ public class ItemService {
     /** 아이템 정보 수정 */
     @Transactional
     public ModifyItemResponseDto modifyItem(Long userId, Long itemId, ModifyItemCommandDto modifyItemCommandDto) {
-        Category category = findCategoryByName(modifyItemCommandDto.getCategory());
+        Category category = findCategoryById(modifyItemCommandDto.getCategory());
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
 
