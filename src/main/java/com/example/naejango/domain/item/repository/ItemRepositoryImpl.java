@@ -45,10 +45,12 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .join(item.category, category)
                 .where(catEq(cat),
                         itemTypeEq(itemType),
-                        nameLikeAnd(keywords))
+                        nameLikeAnd(keywords),
+                        distanceWithin(center, radius)
+                )
                 .offset((long) page * size)
                 .limit(size)
-                .orderBy(Expressions.stringPath("distance").asc())
+                .orderBy(Expressions.numberPath(Integer.class,"distance").asc())
                 .fetch();
     }
 
@@ -62,14 +64,21 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 )
                 .from(storage)
                 .join(storage.items, item)
+                .join(storage.user, user)
                 .join(item.category, category)
-                .join(item.user, user)
-                .where(catEq(condition.getCategory()),
+                .where(
+                        distanceWithin(center, radius),
+                        catEq(condition.getCategory()),
                         itemTypeIn(condition.getItemTypes()),
-                        nameLikeOr(condition.getHashTags()))
+                        nameLikeOr(condition.getHashTags())
+                )
                 .limit(size)
-                .orderBy(Expressions.stringPath("distance").asc())
+                .orderBy(Expressions.numberPath(Integer.class, "distance").asc())
                 .fetch();
+    }
+
+    private BooleanExpression distanceWithin(Point center, int radius) {
+        return Expressions.booleanTemplate("ST_DWithin({0}, {1}, {2}, {3})", center, storage.location, radius, false).eq(true);
     }
 
     private BooleanBuilder nameLikeOr(String[] words) {
