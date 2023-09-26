@@ -211,11 +211,21 @@ class ItemRepositoryTest {
 
         @BeforeEach
         void setup() {
-            Storage testStorage4 = Storage.builder().name("테스트 창고 4").location(geomUtil.createPoint(127.021, 37.491)).address("").build();
-            Storage testStorage5 = Storage.builder().name("테스트 창고 5").location(geomUtil.createPoint(127.022, 37.492)).address("").build();
-            Storage testStorage6 = Storage.builder().name("테스트 창고 6").location(geomUtil.createPoint(127.023, 37.493)).address("").build();
-            Storage testStorage7 = Storage.builder().name("테스트 창고 7").location(geomUtil.createPoint(127.024, 37.494)).address("").build();
-            Storage testStorage8 = Storage.builder().name("테스트 창고 8").location(geomUtil.createPoint(127.025, 37.495)).address("").build();
+            User user1 = User.builder().userKey("test_1").password("null").role(Role.GUEST).build();
+            User user2 = User.builder().userKey("test_2").password("null").role(Role.GUEST).build();
+            User user3 = User.builder().userKey("test_3").password("null").role(Role.GUEST).build();
+            User user4 = User.builder().userKey("test_4").password("null").role(Role.GUEST).build();
+
+            em.persist(user1);
+            em.persist(user2);
+            em.persist(user3);
+            em.persist(user4);
+
+            Storage testStorage4 = Storage.builder().name("테스트 창고 4").location(geomUtil.createPoint(127.021, 37.491)).address("").user(user1).build();
+            Storage testStorage5 = Storage.builder().name("테스트 창고 5").location(geomUtil.createPoint(127.022, 37.492)).address("").user(user2).build();
+            Storage testStorage6 = Storage.builder().name("테스트 창고 6").location(geomUtil.createPoint(127.023, 37.493)).address("").user(user3).build();
+            Storage testStorage7 = Storage.builder().name("테스트 창고 7").location(geomUtil.createPoint(127.024, 37.494)).address("").user(user4).build();
+            Storage testStorage8 = Storage.builder().name("테스트 창고 8").location(geomUtil.createPoint(127.025, 37.495)).address("").user(user1).build();
 
             storageRepository.save(testStorage4);
             storageRepository.save(testStorage5);

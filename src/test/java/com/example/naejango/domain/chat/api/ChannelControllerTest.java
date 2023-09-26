@@ -87,7 +87,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             verify(authenticationHandlerMock, times(1)).getUserId(any());
             verify(channelServiceMock, times(1)).createPrivateChannel(anyLong(), anyLong());
 
-            resultActions.andExpect(status().isConflict());
+            resultActions.andExpect(status().isOk());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(
                     new CommonResponseDto<>("이미 진행중인 채널이 있습니다.", new ChannelAndChatDto(channel.getId(), chat.getId()))
             )));

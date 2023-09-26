@@ -51,7 +51,7 @@ public class ChannelController {
                     new CommonResponseDto<>("일대일 채널이 개설 되었습니다.", result)
             );
         } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+            return ResponseEntity.status(HttpStatus.OK).body(
                     new CommonResponseDto<>("이미 진행중인 채널이 있습니다.", result)
             );
         }

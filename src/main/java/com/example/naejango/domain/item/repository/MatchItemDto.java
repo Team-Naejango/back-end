@@ -16,8 +16,8 @@ import java.util.Arrays;
 public class MatchItemDto {
     private Item item;
     private Category category;
-    private int distance;
     private User user;
+    private Integer distance;
 
     public MatchResponseDto toResponseDto() {
         return MatchResponseDto.builder()

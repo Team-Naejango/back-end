@@ -47,7 +47,7 @@ public class WebSocketController {
                 .messageType(SUBSCRIBE_CHANNEL).content(SUBSCRIBE_CHANNEL.getDefaultMessage()).build();
     }
 
-    /** 특정 채팅 채널을 구독하는 WebSocket Endpoint */
+    /** 특정 라운지 채널을 구독하는 WebSocket Endpoint */
     @SubscribeMapping("/sub/lounge/{channelId}")
     public WebSocketMessageSendDto subscribeLoungeChannel(@DestinationVariable("channelId") Long channelId,
                                                              @Headers SimpMessageHeaderAccessor accessor) {
