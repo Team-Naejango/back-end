@@ -52,7 +52,7 @@ public class NPlus1DetectorAop {
             loggingForm.setApiUrl(request.getRequestURI());
         }
 
-        logger.info("{}", getCurrentLoggingForm());
+        logger.info("{}", getCurrentLoggingForm().toLog());
 
         currentLoggingForm.remove();
     }

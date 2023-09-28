@@ -1,10 +1,8 @@
 package com.example.naejango.global.aop;
 
 import lombok.Getter;
-import lombok.ToString;
 
 @Getter
-@ToString
 public class LoggingForm {
 
     private String apiUrl;
@@ -26,5 +24,12 @@ public class LoggingForm {
 
     public void addQueryTime(final Long queryTime) {
         this.queryTime += queryTime;
+    }
+
+    public String toLog() {
+        return "apiMethod=" + apiMethod +
+                "apiUrl=" + apiUrl +
+                "queryCounts" + queryCounts +
+                "queryTime" + queryTime;
     }
 }
