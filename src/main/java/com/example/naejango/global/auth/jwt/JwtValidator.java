@@ -20,6 +20,8 @@ import java.util.Optional;
 public class JwtValidator {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtCookieHandler jwtCookieHandler;
+
 
     public Optional<Long> isValidToken(HttpServletRequest request) {
         return validateAccessToken(getAccessToken(request));
@@ -36,6 +38,12 @@ public class JwtValidator {
         if (isExpiredToken(decodedAccessToken)) return Optional.empty();
 
         return Optional.of(decodedAccessToken.getClaim("userId").asLong());
+    }
+
+    public Optional<Long> validateRefreshToken(HttpServletRequest request) {
+        String refreshToken = jwtCookieHandler.getRefreshToken(request)
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
+        return this.validateAccessToken(refreshToken);
     }
 
     public Optional<Long> validateRefreshToken(String refreshToken) {
