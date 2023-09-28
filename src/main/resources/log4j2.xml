@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
+    <Properties>
+        <Property name="LOG_FORMAT">%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=Magenta, TRACE=blue} %style{${sys:PID}}{White} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</Property>
+        <Property name="BASE_DIR">/home/ec2-user/action/log</Property>
+    </Properties>
+
     <Appenders>
 
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=Magenta, TRACE=blue} %style{${sys:PID}}{White} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+            <PatternLayout pattern="${LOG_FORMAT}"/>
         </Console>
 
-        <RollingFile name="RollingFile-Info" fileName="log/info.log"
-                     filePattern="/home/ec2-user/action/log/rolling/info-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=Magenta, TRACE=blue} %style{${sys:PID}}{White} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        <RollingFile name="RollingFile-Info" fileName="${BASE_DIR}/info.log"
+                     filePattern="${BASE_DIR}/rolling/info-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_FORMAT}"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB" />
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
@@ -20,9 +25,9 @@
             </DefaultRolloverStrategy>
         </RollingFile>
 
-        <RollingFile name="RollingFile-Error" fileName="log/error.log"
-                     filePattern="/home/ec2-user/action/log/rolling/error-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=magenta, TRACE=blue} %style{${sys:PID}}{white} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        <RollingFile name="RollingFile-Error" fileName="${BASE_DIR}/error.log"
+                     filePattern="${BASE_DIR}/rolling/error-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_FORMAT}"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB" />
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
