@@ -345,6 +345,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                                     fieldWithPath("result.channelId").description("채널 ID"),
                                     fieldWithPath("result.ownerId").description("아이템 주인 ID"),
                                     fieldWithPath("result.itemId").description("아이템 ID"),
+                                    fieldWithPath("result.imgUrl").description("아이템 이미지 링크"),
                                     fieldWithPath("result.participantsCount").description("채널 참여자 수"),
                                     fieldWithPath("result.defaultTitle").description("채널 제목"),
                                     fieldWithPath("result.channelLimit").description("채널 정원")
@@ -470,6 +471,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                                     fieldWithPath("result[]").description("조회한 그룹 채널 정보"),
                                     fieldWithPath("result[].channelId").description("채널 id"),
                                     fieldWithPath("result[].itemId").description("공동 구매 아이템 id"),
+                                    fieldWithPath("result[].imgUrl").description("아이템 이미지 링크"),
                                     fieldWithPath("result[].ownerId").description("채널 주인(창고 주인)"),
                                     fieldWithPath("result[].participantsCount").description("채널 참여자 수"),
                                     fieldWithPath("result[].defaultTitle").description("채널 제목"),

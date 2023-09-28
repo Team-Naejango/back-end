@@ -167,7 +167,7 @@ public class ChannelService {
         Point centerPoint = geomUtil.createPoint(center);
 
         // 종료된 채널은 조회하지 않습니다.
-        Page<GroupChannel> findResult = channelRepository.findGroupChannelNearBy(centerPoint, radius, PageRequest.of(page, size));
+        Page<GroupChannel> findResult = channelRepository.findGroupChannelWithItemNearBy(centerPoint, radius, PageRequest.of(page, size));
 
         return findResult.getContent().stream().map(GroupChannelDto::new).collect(Collectors.toList());
     }
