@@ -128,7 +128,7 @@ public class ChatController {
         Long userId = authenticationHandler.getUserId(authentication);
 
         // Chat 삭제
-        chatService.deleteChat(channelId, userId);
+        chatService.deleteChatByChannelIdAndUserId(channelId, userId);
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("해당 채널에서 퇴장하였습니다.", channelId));
     }

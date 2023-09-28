@@ -146,7 +146,7 @@ public class WebSocketTest {
     @DisplayName("라운지 채널만 구독시 전송 실패")
     void sendLoungeChannelTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user4 = userRepository.findByUserKey("test_4").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user4 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user4.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
@@ -186,7 +186,7 @@ public class WebSocketTest {
     @DisplayName("채팅 채널에 메세지 전송 및 수신")
     void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user4 = userRepository.findByUserKey("test_4").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user4 = userRepository.findByUserKey("test_3").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user4.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();

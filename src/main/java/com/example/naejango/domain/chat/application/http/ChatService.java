@@ -110,18 +110,27 @@ public class ChatService {
 
     /** 채널 퇴장 */
     @Transactional
-    public void deleteChat(Long channelId, Long userId) {
+    public void deleteChatByChannelIdAndUserId(Long channelId, Long userId) {
         // Chat 로드
         Chat chat = chatRepository.findChatByChannelIdAndOwnerId(channelId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
-
-        // 권한 확인
-        if(chat.getOwner().getId().equals(userId)) throw new CustomException(ErrorCode.CHAT_NOT_FOUND);
 
         // Channel 로드
         Channel channel = channelRepository.findByChatId(chat.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
+        deleteChat(channelId, chat, channel);
+    }
+
+    public void deleteChatByUserId(Long userId){
+        chatRepository.findByOwner(em.getReference(User.class, userId))
+                .forEach(chat -> {
+                    Optional<Channel> channelOptional = channelRepository.findByChatId(chat.getId());
+                    channelOptional.ifPresent(channel -> deleteChat(userId, chat, channel));
+                });
+    }
+
+    private void deleteChat(Long userId, Chat chat, Channel channel) {
         // Chat 에 연관된 ChatMessage 를 삭제합니다.
         chatMessageRepository.deleteChatMessageByChatId(chat.getId());
 
@@ -148,7 +157,7 @@ public class ChatService {
             // 퇴장 메세지 발행
             WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
                     .messageType(MessageType.EXIT)
-                    .channelId(channelId)
+                    .channelId(channel.getId())
                     .senderId(userId)
                     .content("채널에서 퇴장 하였습니다.").build();
 

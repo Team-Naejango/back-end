@@ -45,4 +45,7 @@ public class User extends TimeAuditingEntity {
         if(this.role == Role.TEMPORAL) this.role = Role.USER;
     }
 
+    public void deleteUser() {
+        this.role = Role.DELETED;
+    }
 }

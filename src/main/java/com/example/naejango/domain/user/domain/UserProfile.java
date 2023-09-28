@@ -57,4 +57,12 @@ public class UserProfile extends TimeAuditingEntity {
         this.lastLogin = LocalDateTime.now();
     }
 
+    public void deleteUserProfile() {
+        this.nickname = "탈퇴회원";
+        this.intro = "";
+        this.imgUrl = "";
+        this.birth = "";
+        this.phoneNumber = "";
+        this.lastLogin = null;
+    }
 }

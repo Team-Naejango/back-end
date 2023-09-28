@@ -428,7 +428,7 @@ class ChatControllerTest extends RestDocsSupportTest {
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
-            verify(chatServiceMock, times(1)).deleteChat(channel.getId(), user.getId());
+            verify(chatServiceMock, times(1)).deleteChatByChannelIdAndUserId(channel.getId(), user.getId());
 
             resultActions.andExpect(status().isOk());
             resultActions.andExpect(content().json(objectMapper.writeValueAsString(

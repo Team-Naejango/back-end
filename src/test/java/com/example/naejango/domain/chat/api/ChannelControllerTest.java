@@ -563,7 +563,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             );
 
             // then
-            verify(channelServiceMock).closeChannel(1L, 2L);
+            verify(channelServiceMock).closeChannelById(1L, 2L);
             resultActions.andExpect(status().isOk());
 
             // restDocs

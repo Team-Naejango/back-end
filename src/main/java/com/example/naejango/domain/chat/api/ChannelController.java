@@ -156,7 +156,7 @@ public class ChannelController {
                                                                      Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
-        channelService.closeChannel(channelId, userId);
+        channelService.closeChannelById(channelId, userId);
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("채널이 종료되었습니다.", null));
     }

@@ -20,7 +20,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     boolean existsByUserIdAndStorageId(Long userId, Long storageId);
 
-    @Modifying()
+    @Modifying
     @Query("delete from Follow f where f.storage.id = :id")
     void deleteByStorageId(@Param("id") Long storageId);
+
+    @Modifying
+    @Query("delete from Follow f where f.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 }

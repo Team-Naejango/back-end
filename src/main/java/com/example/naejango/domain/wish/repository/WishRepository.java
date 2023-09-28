@@ -20,11 +20,15 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
 
     boolean existsByUserIdAndItemId(Long userId, Long itemId);
 
-    @Modifying()
+    @Modifying
     @Query("delete from Wish w where w.item.id = :id")
     void deleteByItemId(@Param("id") Long itemId);
 
-    @Modifying()
+    @Modifying
     @Query("delete from Wish w where w.item.id in :ids")
     void deleteByItemIdList(@Param("ids") List<Long> itemIdList);
+
+    @Modifying
+    @Query("DELETE FROM Wish w WHERE w.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 }
