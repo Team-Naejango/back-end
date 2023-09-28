@@ -1,25 +1,30 @@
 package com.example.naejango.domain.user.application;
 
-import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.chat.application.http.ChatService;
+import com.example.naejango.domain.follow.repository.FollowRepository;
+import com.example.naejango.domain.storage.application.StorageService;
+import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeAll;
+import com.example.naejango.domain.wish.repository.WishRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(SpringExtension.class)
-@Import({UserService.class, UserRepository.class})
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-      @MockBean
-      private UserRepository userRepositoryMock;
-      @Autowired
-      private UserService userService;
-      private static User user;
-      @BeforeAll
-      static void setup() {
-            user = User.builder().id(1234L).userKey("test_1234").build();
-      }
-
+      @InjectMocks
+      UserService userServiceMock;
+      @Mock
+      UserRepository userRepositoryMock;
+      @Mock
+      UserProfileRepository userProfileRepositoryMock;
+      @Mock
+      StorageService storageServiceMock;
+      @Mock
+      ChatService chatServiceMock;
+      @Mock
+      FollowRepository followRepositoryMock;
+      @Mock
+      WishRepository wishRepositoryMock;
 }

@@ -10,10 +10,7 @@ import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
-import com.example.naejango.global.auth.jwt.JwtCookieHandler;
-import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +29,6 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 public class UserController {
-    private final JwtValidator jwtValidator;
-    private final JwtCookieHandler jwtCookieHandler;
     private final UserService userService;
     private final AccountService accountService;
     private final AuthenticationHandler authenticationHandler;
@@ -63,7 +58,7 @@ public class UserController {
     public ResponseEntity<CommonResponseDto<MyProfileDto>> myProfile(Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
-        UserProfileDto userProfile = userService.findOtherUserProfile(userId);
+        UserProfileDto userProfile = userService.findUserProfile(userId);
         int balance = accountService.getAccount(userId);
 
         return ResponseEntity.ok().body(
@@ -81,7 +76,7 @@ public class UserController {
     /** 다른 유저 프로필 조회 */
     @GetMapping("/profile/{userId}")
     public ResponseEntity<CommonResponseDto<UserProfileResponseDto>> findUserProfile(@PathVariable Long userId) {
-        UserProfileDto userProfile = userService.findOtherUserProfile(userId);
+        UserProfileDto userProfile = userService.findUserProfile(userId);
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("조회 완료",
                 UserProfileResponseDto.builder()
@@ -108,15 +103,10 @@ public class UserController {
 
     /** 유저 삭제 */
     @DeleteMapping("")
-    public ResponseEntity<?> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
+    public ResponseEntity<CommonResponseDto<Long>> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
         Long userId = authenticationHandler.getUserId(authentication);
-
-        jwtCookieHandler.getRefreshToken(request)
-                .ifPresent(refreshToken -> jwtValidator.validateRefreshToken(refreshToken)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST)));
-
-        userService.deleteUser(userId);
-        return ResponseEntity.ok().body("구현 예정 입니다.");
+        userService.deleteUser(userId, request);
+        return ResponseEntity.ok().body(new CommonResponseDto<>("삭제 완료", userId));
     }
 
 }

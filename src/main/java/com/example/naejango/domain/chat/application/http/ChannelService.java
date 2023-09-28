@@ -186,10 +186,21 @@ public class ChannelService {
 
     /** 채널 종료 */
     @Transactional
-    public void closeChannel(Long channelId, Long userId) {
+    public void closeChannelById(Long channelId, Long userId) {
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+        closeChannel(channel, userId);
+    }
 
+    @Transactional
+    public void closeChannelByItemId(Long itemId, Long userId) {
+        Channel channel = channelRepository.findGroupChannelByItemId(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+
+        closeChannel(channel, userId);
+    }
+
+    private void closeChannel(Channel channel, Long userId) {
         // 그룹 채널인 경우
         if (channel.getChannelType().equals(ChannelType.GROUP)) {
             // 방장인지 확인 합니다.
@@ -197,7 +208,7 @@ public class ChannelService {
             if(!group.getOwner().getId().equals(userId)) throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST);
 
             // 종료 메세지 전송
-            sendCloseMessage(channelId, userId);
+            sendCloseMessage(channel.getId(), userId);
 
             // 채팅 종료
             group.closeChannel();
@@ -205,10 +216,9 @@ public class ChannelService {
         }
 
         // 일대일 채널인 경우
-        if (channel.getChannelType().equals(ChannelType.PRIVATE)) {
+        else if (channel.getChannelType().equals(ChannelType.PRIVATE)) {
             // 종료 메세지 전송
-            sendCloseMessage(channelId, userId);
-
+            sendCloseMessage(channel.getId(), userId);
             // 채팅 종료
             channel.closeChannel();
             return;

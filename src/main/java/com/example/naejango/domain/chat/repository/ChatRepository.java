@@ -3,6 +3,7 @@ package com.example.naejango.domain.chat.repository;
 import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
+import com.example.naejango.domain.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,5 +49,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findChatByChannelIdAndOwnerId(@Param("channelId") Long channelId, @Param("ownerId") Long ownerId);
 
     List<Chat> findByChannelId(Long channelId);
+    List<Chat> findByOwner(User user);
 
 }

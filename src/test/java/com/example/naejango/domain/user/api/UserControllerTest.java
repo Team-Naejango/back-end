@@ -15,7 +15,6 @@ import com.example.naejango.domain.user.dto.ModifyUserProfileCommandDto;
 import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
-import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +46,6 @@ class UserControllerTest extends RestDocsSupportTest {
 
     @MockBean
     JwtValidator jwtValidatorMock;
-    @MockBean
-    JwtCookieHandler jwtCookieHandler;
     @MockBean
     UserService userServiceMock;
     @MockBean
@@ -154,7 +151,7 @@ class UserControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             //given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
-            BDDMockito.given(userServiceMock.findOtherUserProfile(user.getId())).willReturn(new UserProfileDto(testUserProfile));
+            BDDMockito.given(userServiceMock.findUserProfile(user.getId())).willReturn(new UserProfileDto(testUserProfile));
             BDDMockito.given(accountServiceMock.getAccount(user.getId())).willReturn(account.getBalance());
 
             ResultActions resultActions = mockMvc.perform(
@@ -163,7 +160,7 @@ class UserControllerTest extends RestDocsSupportTest {
                             .header("Authorization", "access token")
             );
 
-            verify(userServiceMock, times(1)).findOtherUserProfile(user.getId());
+            verify(userServiceMock, times(1)).findUserProfile(user.getId());
             verify(accountServiceMock, times(1)).getAccount(user.getId());
 
             resultActions.andDo(
@@ -216,7 +213,7 @@ class UserControllerTest extends RestDocsSupportTest {
         @DisplayName("조회 성공")
         void test1() throws Exception {
             //given
-            BDDMockito.given(userServiceMock.findOtherUserProfile(user.getId()))
+            BDDMockito.given(userServiceMock.findUserProfile(user.getId()))
                     .willReturn(new UserProfileDto(testUserProfile));
 
             ResultActions resultActions = mockMvc.perform(
@@ -226,7 +223,7 @@ class UserControllerTest extends RestDocsSupportTest {
                             .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
-            verify(userServiceMock, times(1)).findOtherUserProfile(user.getId());
+            verify(userServiceMock, times(1)).findUserProfile(user.getId());
 
             resultActions.andDo(
                     restDocs.document(
@@ -322,6 +319,49 @@ class UserControllerTest extends RestDocsSupportTest {
                             )
                     )
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("회원 탈퇴")
+    class deleteUser {
+        @Test
+        @Tag("api")
+        @DisplayName("성공")
+        void test1() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .delete("/api/user")
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(
+                    jsonPath("result").value(1L)
+            );
+
+            // restDoc
+            resultActions.andDo(restDocs.document(resource(
+                    ResourceSnippetParameters.builder()
+                            .tag("회원")
+                            .summary("회원 삭제")
+                            .description("연관되는 엔티티 처리\n\n" +
+                                    "User: role 수정 (deleted) -> 재가입시 UserKey 를 변경\n\n" +
+                                    "UserProfile: 삭제하지 않고 모두 삭제 회원용 프로퍼티로 수정\n\n" +
+                                    "Storage: 삭제 (연관 Item, Transaction, GroupChannel 처리)\n\n" +
+                                    "review: 그냥 두기\n\n" +
+                                    "follow, wish: 모두 삭제 처리\n\n" +
+                                    "chat: 모두 삭제 처리 (chatMessage 도 삭제됨)")
+                            .responseFields(
+                                    fieldWithPath("message").description("결과 메세지"),
+                                    fieldWithPath("result").description("삭제된 회원 아이디"))
+                            .requestSchema(
+                                    Schema.schema("회원 삭제 Response")
+                            ).build()
+            )));
         }
     }
 
