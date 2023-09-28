@@ -45,6 +45,11 @@
     <Logger name="com" level="error">
         <AppenderRef ref="RollingFile-Error"/>
     </Logger>
+
+    <logger name="org.hibernate.SQL" level="debug" additivity="false">
+        <AppenderRef ref="RollingFile-Info"/>
+        <AppenderRef ref="console"/>
+    </logger>
 </Loggers>
 
 </Configuration>
