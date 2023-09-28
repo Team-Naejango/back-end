@@ -1,7 +1,6 @@
 package com.example.naejango.domain.storage.application;
 
 import com.example.naejango.domain.chat.application.http.ChannelService;
-import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.follow.repository.FollowRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,6 +95,20 @@ public class StorageService {
             throw new CustomException(ErrorCode.STORAGE_NOT_FOUND);
         }
 
+        deleteStorage(storageId, userId, storage);
+    }
+
+    @Transactional
+    public void deleteStorageByUserId(Long userId){
+        List<Storage> storageList = storageRepository.findByUserId(userId);
+
+        storageList.forEach(storage -> {
+            // 해당 창고와 연관된 Follow 삭제
+            deleteStorage(storage.getId(), userId, storage);
+        });
+    }
+
+    private void deleteStorage(Long storageId, Long userId, Storage storage) {
         // 해당 창고와 연관된 Follow 삭제
         followRepository.deleteByStorageId(storageId);
 
@@ -119,26 +131,10 @@ public class StorageService {
 
         // 각 아이템의 채널 종료
         for (Long itemId : itemIdList) {
-            closeChannel(userId, itemId);
+            channelService.closeChannelByItemId(itemId, userId);
         }
 
         // 창고에 등록된 아이템들 삭제
         itemRepository.deleteByStorageId(storageId);
-    }
-
-    private void closeChannel(Long userId, Long itemId) {
-        // 아이템에 할당 된 채널 조회
-        Optional<GroupChannel> optionalGroupChannel = channelService.findGroupChannelByItemId(itemId);
-
-        // 채널이 존재 하면
-        if (optionalGroupChannel.isPresent()) {
-            GroupChannel groupChannel = optionalGroupChannel.get();
-
-            // 종료 메세지 전송
-            channelService.sendCloseMessage(groupChannel.getId(), userId);
-
-            // 채널 종료
-            groupChannel.closeChannel();
-        }
     }
 }
