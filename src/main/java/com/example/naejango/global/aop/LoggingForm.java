@@ -27,9 +27,8 @@ public class LoggingForm {
     }
 
     public String toLog() {
-        return "apiMethod=" + apiMethod +
-                "apiUrl=" + apiUrl +
+        return "[" + apiMethod + "] " + apiUrl +
                 "queryCounts" + queryCounts +
-                "queryTime" + queryTime;
+                "queryTime" + queryTime + "ms";
     }
 }
