@@ -6,7 +6,7 @@
             <PatternLayout pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=Magenta, TRACE=blue} %style{${sys:PID}}{White} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
         </Console>
 
-        <RollingFile name="RollingFile-Info" fileName="/home/ec2-user/action/log/info.log"
+        <RollingFile name="RollingFile-Info" fileName="log/info.log"
                      filePattern="/home/ec2-user/action/log/rolling/info-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=Magenta, TRACE=blue} %style{${sys:PID}}{White} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
             <Policies>
@@ -20,7 +20,7 @@
             </DefaultRolloverStrategy>
         </RollingFile>
 
-        <RollingFile name="RollingFile-Error" fileName="/home/ec2-user/action/log/error.log"
+        <RollingFile name="RollingFile-Error" fileName="log/error.log"
                      filePattern="/home/ec2-user/action/log/rolling/error-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=magenta, TRACE=blue} %style{${sys:PID}}{white} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
             <Policies>
@@ -45,12 +45,6 @@
     <Logger name="com" level="error">
         <AppenderRef ref="RollingFile-Error"/>
     </Logger>
-
-    <logger name="org.hibernate.SQL" level="debug">
-        <AppenderRef ref="RollingFile-Info"/>
-        <AppenderRef ref="console"/>
-    </logger>
-
 </Loggers>
 
 </Configuration>
