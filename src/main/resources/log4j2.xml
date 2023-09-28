@@ -48,7 +48,6 @@
 
     <logger name="org.hibernate.SQL" level="debug">
         <AppenderRef ref="RollingFile-Info"/>
-        <AppenderRef ref="RollingFile-Error"/>
         <AppenderRef ref="console"/>
     </logger>
 
