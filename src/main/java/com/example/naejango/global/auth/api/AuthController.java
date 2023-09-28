@@ -13,7 +13,6 @@ import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.TokenException;
-import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +36,6 @@ public class AuthController {
     private final UserService userService;
     private final AccountService accountService;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final AuthenticationHandler authenticationHandler;
     private final JwtCookieHandler jwtCookieHandler;
     private final JwtValidator jwtValidator;
     private final AccessTokenReissuer accessTokenReissuer;
@@ -47,9 +45,8 @@ public class AuthController {
      * User 객체의 Signature 도 null로 설정합니다.
      */
     @GetMapping("/logout")
-    public ResponseEntity<CommonResponseDto<Long>> logout(HttpServletRequest request,
-                                                          HttpServletResponse response,
-                                                          Authentication authentication){
+    public ResponseEntity<CommonResponseDto<Void>> logout(HttpServletRequest request,
+                                                          HttpServletResponse response) {
         // 쿠키 삭제
         jwtCookieHandler.deleteAccessTokenCookie(request, response);
         jwtCookieHandler.deleteRefreshTokenCookie(request, response);
@@ -59,8 +56,7 @@ public class AuthController {
                 .flatMap(jwtValidator::validateRefreshToken)
                 .ifPresent(refreshTokenRepository::deleteRefreshToken);
 
-        Long userId = authenticationHandler.getUserId(authentication);
-        return ResponseEntity.ok().body(new CommonResponseDto<>("토큰이 정상 삭제되었습니다.", userId));
+        return ResponseEntity.ok().body(new CommonResponseDto<>("토큰이 정상 삭제되었습니다.", null));
     }
 
     @GetMapping("/refresh")
