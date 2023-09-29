@@ -28,6 +28,7 @@
         <RollingFile name="RollingFile-Error" fileName="${BASE_DIR}/error.log"
                      filePattern="${BASE_DIR}/rolling/error-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="${LOG_FORMAT}"/>
+            <ThresholdFilter level="ERROR"/> <!-- Error 레벨 필터 -->
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB" />
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
@@ -44,17 +45,13 @@
 <Loggers>
     <Root level="info">
         <AppenderRef ref="RollingFile-Info"/>
+        <AppenderRef ref="RollingFile-Error"/>
         <AppenderRef ref="console"/>
     </Root>
-
-    <Logger name="com" level="error">
-        <AppenderRef ref="RollingFile-Error"/>
-    </Logger>
 
     <logger name="org.hibernate.SQL" level="debug" additivity="false">
         <AppenderRef ref="RollingFile-Info"/>
         <AppenderRef ref="console"/>
     </logger>
 </Loggers>
-
 </Configuration>
