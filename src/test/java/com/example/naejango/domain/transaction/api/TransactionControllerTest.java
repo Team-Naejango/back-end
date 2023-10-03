@@ -60,7 +60,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
         Long userId;
         List<FindTransactionResponseDto> findTransactionResponseDtoList =
                 new ArrayList<>(List.of(
-                        new FindTransactionResponseDto(1L, "2023-07-15T17:35", 1000, "구매", "거래자 이름1", "아이템 이름1", 1L),
+                        new FindTransactionResponseDto(1L, "2023-07-15T17:35", -1000, "구매", "거래자 이름1", "아이템 이름1", 1L),
                         new FindTransactionResponseDto(2L, "2023-06-23T15:16", 2000, "판매", "거래자 이름2", "아이템 이름2", 2L)
                 ));
         @Test
@@ -114,7 +114,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     class findTransactionById {
         Long userId, transactionId=1L;
         FindTransactionResponseDto findTransactionResponseDto =
-                new FindTransactionResponseDto(1L, "2023-07-15T17:35", 1000, "구매", "거래자 이름1", "아이템 이름1", 1L);
+                new FindTransactionResponseDto(1L, "2023-07-15T17:35", -1000, "구매", "거래자 이름1", "아이템 이름1", 1L);
 
         @Test
         @Order(1)
