@@ -3,6 +3,7 @@ package com.example.naejango.domain.item.repository;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.domain.QCategory;
+import com.example.naejango.domain.item.dto.MatchItemDto;
 import com.example.naejango.domain.item.dto.MatchingConditionDto;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
 import com.querydsl.core.BooleanBuilder;

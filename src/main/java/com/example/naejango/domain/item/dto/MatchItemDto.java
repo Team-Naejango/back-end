@@ -1,4 +1,4 @@
-package com.example.naejango.domain.item.repository;
+package com.example.naejango.domain.item.dto;
 
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
