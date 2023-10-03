@@ -12,6 +12,7 @@ import com.example.naejango.domain.transaction.domain.TransactionStatus;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionCommandDto;
 import com.example.naejango.domain.transaction.dto.request.ModifyTransactionCommandDto;
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
+import com.example.naejango.domain.transaction.dto.response.FindTransactionDataResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
 import com.example.naejango.domain.transaction.repository.TransactionRepository;
@@ -41,7 +42,7 @@ public class TransactionService {
     private final ApplicationEventPublisher eventPublisher;
 
     /** 거래 내역 조회 */
-    public List<FindTransactionResponseDto> findTransaction(Long userId){
+    public List<FindTransactionResponseDto> findTransactionList(Long userId){
         List<Transaction> transactionList = transactionRepository.findByUserIdOrTraderId(userId, userId);
 
         List<FindTransactionResponseDto> findTransactionResponseDtoList = new ArrayList<>();
@@ -50,6 +51,32 @@ public class TransactionService {
         }
 
         return findTransactionResponseDtoList;
+    }
+
+    /** 특정 거래의 정보 조회 */
+    public FindTransactionResponseDto findTransactionById(Long userId, Long transactionId){
+        Transaction transaction = transactionRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
+
+        validateFindTransaction(userId, transaction);
+
+        return new FindTransactionResponseDto(transaction, userId);
+    }
+
+    /** 상대 유저의 ID 요청 받아서 둘 사이의 완료 되지 않은 거래가 있다면 거래 Id와 해당 정보 return */
+    public List<FindTransactionDataResponseDto> findTransactionByTraderId(Long userId, Long traderId){
+        List<Transaction> transactionList = transactionRepository.findByUserIdAndTraderId(userId, traderId);
+
+        if (transactionList.isEmpty()) {
+            throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
+        }
+
+        List<FindTransactionDataResponseDto> findTransactionDataResponseDtoList = new ArrayList<>();
+        for (Transaction transaction : transactionList) {
+            findTransactionDataResponseDtoList.add(new FindTransactionDataResponseDto(transaction));
+        }
+
+        return findTransactionDataResponseDtoList;
     }
 
     /** 거래 예약 등록 */
@@ -138,6 +165,13 @@ public class TransactionService {
 
         // 거래 삭제
         transactionRepository.delete(transaction);
+    }
+
+    private void validateFindTransaction(Long userId, Transaction transaction) {
+        // 해당 거래의 정보를 요청한 사람이 거래의 판매자 혹은 구매자가 아니면 예외처리
+        if (!(transaction.getUser().getId().equals(userId) || transaction.getTrader().getId().equals(userId))) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_READ_REQUEST);
+        }
     }
 
     private void validateCreateTransaction(Long userId, Item item) {

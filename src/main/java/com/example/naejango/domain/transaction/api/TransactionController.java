@@ -13,6 +13,7 @@ import com.example.naejango.domain.transaction.dto.request.CreateTransactionRequ
 import com.example.naejango.domain.transaction.dto.request.ModifyTransactionCommandDto;
 import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
+import com.example.naejango.domain.transaction.dto.response.FindTransactionDataResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -36,11 +37,29 @@ public class TransactionController {
 
     /** 거래 내역 조회 */
     @GetMapping("")
-    public ResponseEntity<CommonResponseDto<List<FindTransactionResponseDto>>> findTransaction(Authentication authentication) {
+    public ResponseEntity<CommonResponseDto<List<FindTransactionResponseDto>>> findTransactionList(Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
-        List<FindTransactionResponseDto> findTransactionResponseDtoList = transactionService.findTransaction(userId);
+        List<FindTransactionResponseDto> findTransactionResponseDtoList = transactionService.findTransactionList(userId);
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", findTransactionResponseDtoList));
+    }
+
+    /** 특정 거래의 정보 조회 */
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<CommonResponseDto<FindTransactionResponseDto>> findTransactionById(Authentication authentication, @PathVariable Long transactionId) {
+        Long userId = authenticationHandler.getUserId(authentication);
+        FindTransactionResponseDto responseDto = transactionService.findTransactionById(userId, transactionId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", responseDto));
+    }
+
+    /** 상대 유저의 ID 요청 받아서 둘 사이의 거래가 있다면 거래 Id와 해당 정보 return */
+    @GetMapping("/trader/{traderId}")
+    public ResponseEntity<CommonResponseDto<List<FindTransactionDataResponseDto>>> findTransactionByTraderId(Authentication authentication, @PathVariable Long traderId) {
+        Long userId = authenticationHandler.getUserId(authentication);
+        List<FindTransactionDataResponseDto> responseDtoList = transactionService.findTransactionByTraderId(userId, traderId);
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", responseDtoList));
     }
 
     /** 거래 예약 등록 */
