@@ -67,10 +67,6 @@ public class TransactionService {
     public List<FindTransactionDataResponseDto> findTransactionByTraderId(Long userId, Long traderId){
         List<Transaction> transactionList = transactionRepository.findByUserIdAndTraderId(userId, traderId);
 
-        if (transactionList.isEmpty()) {
-            throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
-        }
-
         List<FindTransactionDataResponseDto> findTransactionDataResponseDtoList = new ArrayList<>();
         for (Transaction transaction : transactionList) {
             findTransactionDataResponseDtoList.add(new FindTransactionDataResponseDto(transaction));
