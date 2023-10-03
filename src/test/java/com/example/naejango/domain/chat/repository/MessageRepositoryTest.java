@@ -157,7 +157,7 @@ class MessageRepositoryTest {
 
             // then
             assertEquals(2, result.getContent().size());
-            assertEquals("두번째 인데요.", result.getContent().get(0).getContent());
+            assertEquals("처음 뵙겠습니다.", result.getContent().get(0).getContent());
         }
     }
 
