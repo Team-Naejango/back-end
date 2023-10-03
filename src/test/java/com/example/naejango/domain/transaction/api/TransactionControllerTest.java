@@ -142,7 +142,9 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("거래")
-                                    .description("특정 거래 정보 조회")
+                                    .summary("특정 거래 정보 조회")
+                                    .description("- 해당 거래의 정보를 요청한 사람이 거래의 판매자 혹은 구매자가 아니면 예외 처리\n\n" +
+                                            "- 요청한 유저가 판매자일 경우 거래 금액의 양수값, 구매자일 경우 거래 금액의 음수값 응답")
                                     .pathParameters(
                                             parameterWithName("transactionId").description("거래 ID")
                                     )
@@ -199,7 +201,10 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     resource(
                             ResourceSnippetParameters.builder()
                                     .tag("거래")
-                                    .description("거래 내역 조회")
+                                    .summary("상대 유저와 완료 되지 않은 거래 조회")
+                                    .description("- 두 유저 사이의 거래 중 완료되지 않은 거래가 있다면 리스트로 반환, 없다면 빈 리스트\n\n"+
+                                            "- 해당 API에서 status는 2개밖에 없음\n\n" +
+                                            "   'TRANSACTION_APPOINTMENT(거래 약속)', 'REMITTANCE_COMPLETION(송금 완료)'\n\n")
                                     .pathParameters(
                                             parameterWithName("traderId").description("상대 유저 ID")
                                     )
@@ -210,7 +215,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result[].status").description("거래 상태"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
-                                    .responseSchema(Schema.schema("거래 내역 조회 Response"))
+                                    .responseSchema(Schema.schema("상대 유저와 완료 되지 않은 거래 조회 Response"))
                                     .build()
                     )));
         }
