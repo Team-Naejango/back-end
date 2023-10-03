@@ -13,6 +13,11 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
+    /**
+     * 특정 유저의 거래 내역 조회.
+     * 거래의 userId, traderId를 조건으로 사용하는데 두 변수 모두 특정 유저의 Id 값으로 받는다.
+     * 따라서 유저가 판매자 일 경우, 구매자 일 경우 모두 조회.
+     */
     @Query("SELECT t from Transaction t " +
             "left join fetch t.item " +
             "left join fetch UserProfile up on up.id = t.trader.id or up.id = t.user.id " +
