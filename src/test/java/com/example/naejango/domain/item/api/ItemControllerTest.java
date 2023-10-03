@@ -4,11 +4,8 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.config.RestDocsSupportTest;
-import com.example.naejango.domain.item.application.CategoryService;
 import com.example.naejango.domain.item.application.ItemService;
-import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.dto.CategoryDto;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.item.dto.request.CreateItemCommandDto;
 import com.example.naejango.domain.item.dto.request.CreateItemRequestDto;
@@ -37,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
@@ -51,8 +47,6 @@ class ItemControllerTest extends RestDocsSupportTest {
 
     @MockBean
     ItemService itemService;
-    @MockBean
-    CategoryService categoryService;
     @MockBean
     AuthenticationHandler authenticationHandler;
     @MockBean
@@ -222,50 +216,10 @@ class ItemControllerTest extends RestDocsSupportTest {
         }
     }
 
+
+
     @Nested
     @Order(3)
-    @DisplayName("모든 카테고리 조회")
-    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class getCategory {
-        Category cat1 = new Category(1, "의류");
-        Category cat2 = new Category(2, "생필품");
-        Category cat3 = new Category(3, "디지털기기");
-        List<Category> result = List.of(cat1, cat2, cat3);
-        List<CategoryDto> resultDto = result.stream().map(CategoryDto::new).collect(Collectors.toList());
-
-        @Test
-        @Tag("api")
-        @DisplayName("성공")
-        void test1() throws Exception {
-            // given
-            BDDMockito.given(categoryService.findAllCategory()).willReturn(resultDto);
-
-            // when
-            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .get("/api/item/category")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
-            );
-
-            // then
-
-            // restDoc
-            resultActions.andDo(restDocs.document(resource(ResourceSnippetParameters.builder()
-                    .tag("카테고리")
-                    .summary("카테고리 조회")
-                    .description("저장되어 있는 카테고리를 전부 조회합니다.")
-                    .responseFields(
-                            fieldWithPath("message").description("결과 메세지"),
-                            fieldWithPath("result[].categoryId").description("카테고리 아이디"),
-                            fieldWithPath("result[].categoryName").description("카테고리 이름"))
-                    .requestSchema(
-                            Schema.schema("카테고리 조회 Response"))
-                    .build()))
-            );
-        }
-    }
-
-    @Nested
-    @Order(4)
     @DisplayName("아이템 검색")
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class SearchStorageByConditions {
@@ -350,7 +304,7 @@ class ItemControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(5)
+    @Order(4)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     @DisplayName("아이템 매치")
     class MatchItems {
@@ -432,7 +386,7 @@ class ItemControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(6)
+    @Order(5)
     @DisplayName("Controller 아이템 정보 수정")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -512,7 +466,7 @@ class ItemControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(7)
+    @Order(6)
     @DisplayName("Controller 아이템 삭제")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

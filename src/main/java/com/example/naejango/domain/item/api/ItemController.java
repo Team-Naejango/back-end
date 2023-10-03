@@ -1,9 +1,7 @@
 package com.example.naejango.domain.item.api;
 
 import com.example.naejango.domain.common.CommonResponseDto;
-import com.example.naejango.domain.item.application.CategoryService;
 import com.example.naejango.domain.item.application.ItemService;
-import com.example.naejango.domain.item.dto.CategoryDto;
 import com.example.naejango.domain.item.dto.MatchItemsRequestDto;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.item.dto.SearchingCommandDto;
@@ -32,7 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final CategoryService categoryService;
     private final AuthenticationHandler authenticationHandler;
     private final GeomUtil geomUtil;
 
@@ -60,14 +57,6 @@ public class ItemController {
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", findItemResponseDto));
     }
-
-    /** 카테고리 조회 */
-    @GetMapping("/category")
-    public ResponseEntity<CommonResponseDto<List<CategoryDto>>> getCategory() {
-        List<CategoryDto> result = categoryService.findAllCategory();
-        return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", result));
-    }
-
 
     /**
      * 아이템 검색
