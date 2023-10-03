@@ -8,10 +8,12 @@ import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.dto.CreateChannelDto;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.transaction.application.TransactionService;
+import com.example.naejango.domain.transaction.domain.TransactionStatus;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionCommandDto;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.request.ModifyTransactionRequestDto;
 import com.example.naejango.domain.transaction.dto.response.CreateTransactionResponseDto;
+import com.example.naejango.domain.transaction.dto.response.FindTransactionDataResponseDto;
 import com.example.naejango.domain.transaction.dto.response.FindTransactionResponseDto;
 import com.example.naejango.domain.transaction.dto.response.ModifyTransactionResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -54,7 +56,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     @DisplayName("Controller 거래 내역 조회")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class findTransaction {
+    class findTransactionList {
         Long userId;
         List<FindTransactionResponseDto> findTransactionResponseDtoList =
                 new ArrayList<>(List.of(
@@ -69,7 +71,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
             // given
             BDDMockito.given(authenticationHandler.getUserId(any()))
                     .willReturn(userId);
-            BDDMockito.given(transactionService.findTransaction(userId))
+            BDDMockito.given(transactionService.findTransactionList(userId))
                     .willReturn(findTransactionResponseDtoList);
 
             // when
@@ -106,6 +108,115 @@ class TransactionControllerTest extends RestDocsSupportTest {
 
     @Nested
     @Order(2)
+    @DisplayName("Controller 특정 거래 정보 조회")
+    @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class findTransactionById {
+        Long userId, transactionId=1L;
+        FindTransactionResponseDto findTransactionResponseDto =
+                new FindTransactionResponseDto(1L, "2023-07-15T17:35", 1000, "구매", "거래자 이름1", "아이템 이름1", 1L);
+
+        @Test
+        @Order(1)
+        @Tag("api")
+        @DisplayName("특정_거래_정보_조회")
+        void 특정_거래_정보_조회() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandler.getUserId(any()))
+                    .willReturn(userId);
+            BDDMockito.given(transactionService.findTransactionById(userId, transactionId))
+                    .willReturn(findTransactionResponseDto);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/transaction/{transactionId}", transactionId)
+                    .header("Authorization", "JWT")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("거래")
+                                    .description("특정 거래 정보 조회")
+                                    .pathParameters(
+                                            parameterWithName("transactionId").description("거래 ID")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("result.id").description("거래 ID"),
+                                            fieldWithPath("result.date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
+                                            fieldWithPath("result.amount").description("거래 금액"),
+                                            fieldWithPath("result.status").description("구매 or 판매"),
+                                            fieldWithPath("result.traderName").description("거래자 이름"),
+                                            fieldWithPath("result.itemName").description("아이템 이름"),
+                                            fieldWithPath("result.itemId").description("아이템 ID"),
+                                            fieldWithPath("message").description("결과 메시지")
+                                    )
+                                    .responseSchema(Schema.schema("특정 거래 정보 조회 Response"))
+                                    .build()
+                    )));
+        }
+    }
+    @Nested
+    @Order(3)
+    @DisplayName("Controller 상대 유저와 완료 되지 않은 거래 조회")
+    @WithMockUser()
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class findTransactionByTraderId {
+        Long userId=1L, traderId=1L;
+        List<FindTransactionDataResponseDto> responseDtoList =
+                new ArrayList<>(List.of(
+                        new FindTransactionDataResponseDto(1L, "2023-07-15T17:35", 1000, TransactionStatus.TRANSACTION_APPOINTMENT),
+                        new FindTransactionDataResponseDto(2L, "2023-06-23T15:16", 2000, TransactionStatus.REMITTANCE_COMPLETION)
+                ));
+        @Test
+        @Order(1)
+        @Tag("api")
+        @DisplayName("상대_유저와_완료_되지_않은_거래_조회")
+        void 상대_유저와_완료_되지_않은_거래_조회() throws Exception {
+            // given
+            BDDMockito.given(authenticationHandler.getUserId(any()))
+                    .willReturn(userId);
+            BDDMockito.given(transactionService.findTransactionByTraderId(userId, traderId))
+                    .willReturn(responseDtoList);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
+                    .get("/api/transaction/trader/{traderId}", traderId)
+                    .header("Authorization", "JWT")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+            );
+
+            // then
+            resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+
+            resultActions.andDo(restDocs.document(
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("거래")
+                                    .description("거래 내역 조회")
+                                    .pathParameters(
+                                            parameterWithName("traderId").description("상대 유저 ID")
+                                    )
+                                    .responseFields(
+                                            fieldWithPath("result[].id").description("거래 ID"),
+                                            fieldWithPath("result[].date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
+                                            fieldWithPath("result[].amount").description("거래 금액"),
+                                            fieldWithPath("result[].status").description("거래 상태"),
+                                            fieldWithPath("message").description("결과 메시지")
+                                    )
+                                    .responseSchema(Schema.schema("거래 내역 조회 Response"))
+                                    .build()
+                    )));
+        }
+    }
+    @Nested
+    @Order(4)
     @DisplayName("Controller 거래 등록")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -195,7 +306,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(3)
+    @Order(5)
     @DisplayName("Controller 송금 완료 요청")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -243,7 +354,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(4)
+    @Order(6)
     @DisplayName("Controller 거래 완료 요청")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -291,7 +402,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(5)
+    @Order(7)
     @DisplayName("Controller 거래 정보 수정")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -361,7 +472,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     }
 
     @Nested
-    @Order(6)
+    @Order(8)
     @DisplayName("Controller 거래 삭제")
     @WithMockUser()
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
