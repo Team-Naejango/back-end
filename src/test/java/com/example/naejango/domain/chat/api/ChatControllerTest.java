@@ -175,6 +175,8 @@ class ChatControllerTest extends RestDocsSupportTest {
         Channel channel1 = GroupChannel.builder()
                 .id(2L)
                 .defaultTitle("공동구매")
+                .channelLimit(5)
+                .participantsCount(3)
                 .channelType(ChannelType.GROUP)
                 .build();
 
@@ -237,6 +239,8 @@ class ChatControllerTest extends RestDocsSupportTest {
                                                     fieldWithPath("result[].channelId").description("채널 Id"),
                                                     fieldWithPath("result[].title").description("제목"),
                                                     fieldWithPath("result[].channelType").description("채널 타입(개인, 그룹)"),
+                                                    fieldWithPath("result[].participantsCount").description("현재 참여 인원"),
+                                                    fieldWithPath("result[].channelLimit").description("채널 정원"),
                                                     fieldWithPath("result[].lastMessage").description("마지막 대화 내용"),
                                                     fieldWithPath("result[].unreadCount").description("안읽은 메세지 수"),
                                                     fieldWithPath("result[].lastChatAt").description("마지막 대화 시각")
