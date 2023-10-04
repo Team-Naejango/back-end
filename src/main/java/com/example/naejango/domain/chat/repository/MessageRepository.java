@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    @Query("SELECT m FROM Message m JOIN m.chatMessages cm JOIN cm.chat c WHERE c.id = :chatId ORDER BY m.createdDate ASC")
+    @Query("SELECT m FROM Message m JOIN m.chatMessages cm JOIN cm.chat c WHERE c.id = :chatId ORDER BY m.createdDate DESC")
     Page<Message> findRecentMessages(@Param("chatId") Long chatId, Pageable pageable);
 
     @Modifying

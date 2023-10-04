@@ -15,7 +15,6 @@ public enum MessageType {
     SUBSCRIBE_CHANNEL("채팅 채널 구독을 시작합니다.", "/sub/channel/"),
     @JsonProperty("CHAT")
     CHAT("", "/pub/channel/"),
-
     @JsonProperty("ENTER")
     ENTER("채널에 입장하였습니다.", ""),
     @JsonProperty("EXIT")

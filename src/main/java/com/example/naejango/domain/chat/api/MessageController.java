@@ -33,15 +33,12 @@ public class MessageController {
     @GetMapping("/{chatId}/recent")
     public ResponseEntity<CommonResponseDto<List<MessageDto>>> getRecentMessages(@PathVariable("chatId") Long chatId,
                                                                                  @RequestParam(value = "page", defaultValue = "0") int page,
-                                                                                 @RequestParam(value = "size", defaultValue = "25") @Max(100) int size,
+                                                                                 @RequestParam(value = "size", defaultValue = "25") @Max(300) int size,
                                                                                  Authentication authentication) {
         Long userId = authenticationHandler.getUserId(authentication);
 
         // 조회
         List<MessageDto> serviceDto = messageService.recentMessages(userId, chatId, page, size);
-
-        // 메시지 읽음 처리
-        messageService.readMessages(chatId);
 
         // 반환
         return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", serviceDto));

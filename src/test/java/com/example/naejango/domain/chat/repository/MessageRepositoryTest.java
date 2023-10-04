@@ -116,18 +116,24 @@ class MessageRepositoryTest {
         chatRepository.save(chat5);
 
         // Message 생성
-        Message msg1 = Message.builder().content("처음 뵙겠습니다.").senderId(testUser2.getId()).channel(channel2).build();
-        Message msg2 = Message.builder().content("두번째 인데요.").senderId(testUser3.getId()).channel(channel2).build();
+        Message msg1 = Message.builder().content("첫번째 메세지.").senderId(testUser2.getId()).channel(channel1).build();
+        Message msg2 = Message.builder().content("두번째 메세지.").senderId(testUser2.getId()).channel(channel1).build();
+        Message msg3 = Message.builder().content("세번째 메세지.").senderId(testUser2.getId()).channel(channel1).build();
+        Message msg4 = Message.builder().content("네번째 메세지.").senderId(testUser2.getId()).channel(channel1).build();
         messageRepository.save(msg1);
         messageRepository.save(msg2);
+        messageRepository.save(msg3);
+        messageRepository.save(msg4);
 
         // Chat - Message 연결
-        ChatMessage chatMessage1 = ChatMessage.builder().message(msg1).isRead(false).chat(chat3).build();
-        ChatMessage chatMessage2 = ChatMessage.builder().message(msg1).isRead(true).chat(chat4).build();
-        ChatMessage chatMessage3 = ChatMessage.builder().message(msg2).isRead(true).chat(chat5).build();
-        ChatMessage chatMessage4 = ChatMessage.builder().message(msg2).isRead(true).chat(chat3).build();
-        ChatMessage chatMessage5 = ChatMessage.builder().message(msg2).isRead(true).chat(chat4).build();
-        ChatMessage chatMessage6 = ChatMessage.builder().message(msg2).isRead(true).chat(chat5).build();
+        ChatMessage chatMessage1 = ChatMessage.builder().message(msg1).isRead(true).chat(chat1).build();
+        ChatMessage chatMessage2 = ChatMessage.builder().message(msg2).isRead(true).chat(chat1).build();
+        ChatMessage chatMessage3 = ChatMessage.builder().message(msg3).isRead(true).chat(chat1).build();
+        ChatMessage chatMessage4 = ChatMessage.builder().message(msg4).isRead(true).chat(chat1).build();
+        ChatMessage chatMessage5 = ChatMessage.builder().message(msg1).isRead(true).chat(chat2).build();
+        ChatMessage chatMessage6 = ChatMessage.builder().message(msg2).isRead(true).chat(chat2).build();
+        ChatMessage chatMessage7 = ChatMessage.builder().message(msg3).isRead(true).chat(chat2).build();
+        ChatMessage chatMessage8 = ChatMessage.builder().message(msg4).isRead(true).chat(chat2).build();
 
         chatMessageRepository.save(chatMessage1);
         chatMessageRepository.save(chatMessage2);
@@ -135,6 +141,8 @@ class MessageRepositoryTest {
         chatMessageRepository.save(chatMessage4);
         chatMessageRepository.save(chatMessage5);
         chatMessageRepository.save(chatMessage6);
+        chatMessageRepository.save(chatMessage7);
+        chatMessageRepository.save(chatMessage8);
 
         channel1.updateLastMessage(msg1.getContent());
         channel2.updateLastMessage(msg2.getContent());
@@ -148,16 +156,17 @@ class MessageRepositoryTest {
         @DisplayName("조회 성공")
         void test1() {
             // given
-            User testUser2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel groupChannel = channelRepository.findGroupChannelByOwnerId(testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-            Chat chat = chatRepository.findChatByChannelIdAndOwnerId(groupChannel.getId(), testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
+            User testUser1 = userRepository.findByUserKey("test_1").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            List<Chat> chatList = chatRepository.findByOwner(testUser1);
+            Chat chat = chatList.stream().filter(c -> c.getTitle().equals("안씨"))
+                    .findAny().orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
 
             // when
-            Page<Message> result = messageRepository.findRecentMessages(chat.getId(), Pageable.ofSize(5));
+            Page<Message> result = messageRepository.findRecentMessages(chat.getId(), Pageable.ofSize(2));
 
             // then
             assertEquals(2, result.getContent().size());
-            assertEquals("처음 뵙겠습니다.", result.getContent().get(0).getContent());
+            assertEquals("네번째 메세지.", result.getContent().get(0).getContent());
         }
     }
 

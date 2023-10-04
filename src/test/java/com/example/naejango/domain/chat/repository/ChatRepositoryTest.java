@@ -81,8 +81,13 @@ class ChatRepositoryTest {
         testUser3.setUserProfile(userProfile4);
 
         // 채팅 채널 생성 (lastModifiedTime 을 임의로 주입합니다.)
-        PrivateChannel channel1 = PrivateChannel.builder().lastModifiedDate(LocalDateTime.now().minusSeconds(1)).build();
+        PrivateChannel channel1 = PrivateChannel.builder()
+                .channelType(ChannelType.PRIVATE)
+                .lastModifiedDate(LocalDateTime.now().minusSeconds(1))
+                .build();
+
         GroupChannel channel2 = GroupChannel.builder()
+                .channelType(ChannelType.GROUP)
                 .owner(testUser2)
                 .defaultTitle("공동구매")
                 .channelLimit(5)
