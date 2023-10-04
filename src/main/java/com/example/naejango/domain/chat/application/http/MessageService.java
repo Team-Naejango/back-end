@@ -54,6 +54,7 @@ public class MessageService {
         channel.updateLastMessage(commandDto.getContent());
     }
 
+    @Transactional
     public List<MessageDto> recentMessages(Long userId, Long chatId, int page, int size) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
 
@@ -66,12 +67,10 @@ public class MessageService {
         // 예외 처리 - Message 가 0 개 인 경우는 없음(채널 시작시 메세지 생성)
         if(findResult.isEmpty()) throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND);
 
-        return findResult.getContent().stream().map(MessageDto::new).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void readMessages(Long chatId) {
+        // 메세지 읽기
         chatMessageRepository.readMessage(chatId);
+
+        return findResult.getContent().stream().map(MessageDto::new).collect(Collectors.toList());
     }
 
 }

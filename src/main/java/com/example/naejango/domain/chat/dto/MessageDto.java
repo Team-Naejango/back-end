@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class MessageDto {
     private Long senderId;
     private MessageType messageType;
     private String content;
+    private LocalDateTime sentAt;
 
     public MessageDto(Message message) {
         this.messageId = message.getId();
@@ -24,5 +27,6 @@ public class MessageDto {
         this.senderId = message.getSenderId();
         this.messageType = message.getMessageType();
         this.content = message.getContent();
+        this.sentAt = message.getCreatedDate();
     }
 }
