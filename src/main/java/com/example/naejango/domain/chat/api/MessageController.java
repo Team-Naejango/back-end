@@ -21,16 +21,11 @@ public class MessageController {
     private final AuthenticationHandler authenticationHandler;
 
     /**
+     * 채팅 메세지 조회
      * 특정 채팅방의 최근 메세지를 불러 옵니다.
      * 해당 채팅의 모든 메세지는 읽음 처리 됩니다.
-     * @param chatId 채팅방 id
-     * @param page 조회할 페이지
-     * @param size 조회할 결과물 수
-     * @return 더 읽어올 메세지가 있는지(hasNext), 현재 조회한 페이지(page)
-     *         메세지 정보 리스트 (List<MessageDto>):
-     *         보낸사람 id(senderId), 내용(content), 보낸 시각(sentAt)
      */
-    @GetMapping("/{chatId}/recent")
+    @GetMapping("/{chatId}")
     public ResponseEntity<CommonResponseDto<List<MessageDto>>> getRecentMessages(@PathVariable("chatId") Long chatId,
                                                                                  @RequestParam(value = "page", defaultValue = "0") int page,
                                                                                  @RequestParam(value = "size", defaultValue = "25") @Max(300) int size,
