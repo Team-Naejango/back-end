@@ -3,6 +3,9 @@ package com.example.naejango.domain.chat.repository;
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.ChannelAndChatDto;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
+import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
@@ -44,6 +47,8 @@ class ChatRepositoryTest {
     @Autowired
     UserProfileRepository userProfileRepository;
     @Autowired
+    ItemRepository itemRepository;
+    @Autowired
     ChatMessageRepository chatMessageRepository;
     @Autowired
     MessageRepository messageRepository;
@@ -80,6 +85,18 @@ class ChatRepositoryTest {
         testUser3.setUserProfile(userProfile3);
         testUser3.setUserProfile(userProfile4);
 
+        // 공동구매 아이템 생성
+        Item item = Item.builder()
+                .name("테스트")
+                .description("테스트 창고")
+                .imgUrl("url")
+                .tag("")
+                .viewCount(0)
+                .status(true)
+                .itemType(ItemType.GROUP_BUY)
+                .build();
+        itemRepository.save(item);
+
         // 채팅 채널 생성 (lastModifiedTime 을 임의로 주입합니다.)
         PrivateChannel channel1 = PrivateChannel.builder()
                 .channelType(ChannelType.PRIVATE)
@@ -89,11 +106,11 @@ class ChatRepositoryTest {
         GroupChannel channel2 = GroupChannel.builder()
                 .channelType(ChannelType.GROUP)
                 .owner(testUser2)
+                .item(item)
                 .defaultTitle("공동구매")
                 .channelLimit(5)
                 .participantsCount(0)
                 .lastModifiedDate(LocalDateTime.now()).build();
-
 
         channelRepository.save(channel1);
         channelRepository.save(channel2);
