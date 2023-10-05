@@ -18,7 +18,7 @@ import java.util.Map;
 public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
-    private static final Long DEFAULT_TIMEOUT = 60L * 1000 ; // 1분
+    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // 1시간
 
     /** 알림 구독 요청 */
     public SseEmitter subscribe(Long userId, String lastEventId) {
