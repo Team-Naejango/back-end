@@ -97,7 +97,7 @@ class MessageControllerTest extends RestDocsSupportTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .get("/api/message/{chatId}/recent", 2L)
+                    .get("/api/message/{chatId}", 2L)
                     .queryParam("page", "0")
                     .queryParam("size", "20")
                     .with(SecurityMockMvcRequestPostProcessors.csrf())

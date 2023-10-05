@@ -10,6 +10,8 @@ import com.example.naejango.domain.chat.dto.JoinGroupChannelDto;
 import com.example.naejango.domain.chat.dto.request.ChangeChatTitleRequestDto;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.config.RestDocsSupportTest;
+import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
@@ -171,12 +173,14 @@ class ChatControllerTest extends RestDocsSupportTest {
     @DisplayName("내 채팅방 목록 조회")
     class myChatList {
         User user = User.builder().id(1L).role(Role.USER).userKey("test_me").password("").build();
+        Item item = Item.builder().id(324L).itemType(ItemType.GROUP_BUY).build();
 
         Channel channel1 = GroupChannel.builder()
                 .id(2L)
                 .defaultTitle("공동구매")
                 .channelLimit(5)
                 .participantsCount(3)
+                .item(item)
                 .channelType(ChannelType.GROUP)
                 .build();
 
@@ -237,6 +241,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                                                     fieldWithPath("result[]").description("채팅방 리스트"),
                                                     fieldWithPath("result[].chatId").description("채팅 Id"),
                                                     fieldWithPath("result[].channelId").description("채널 Id"),
+                                                    fieldWithPath("result[].itemId").description("아이템 Id"),
                                                     fieldWithPath("result[].title").description("제목"),
                                                     fieldWithPath("result[].channelType").description("채널 타입(개인, 그룹)"),
                                                     fieldWithPath("result[].participantsCount").description("현재 참여 인원"),

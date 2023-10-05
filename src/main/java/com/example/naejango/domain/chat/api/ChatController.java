@@ -25,11 +25,10 @@ public class ChatController {
     private final AuthenticationHandler authenticationHandler;
 
     /**
+     * 그룹 채널 입장
      * 그룹 채널에 입장 합니다. 해당 그룹 채널에 연결되는 Chat 객체를 생성합니다.
      * 이후 그룹 채널에서 메세지가 발송되면 해당 Chat 과 연관된 ChatMessage 이 생성되어 메세지를 받을 수 있습니다.
      * 채널의 최대 정원 도달시 입장이 불가합니다.
-     * @param channelId 그룹 채널 id
-     * @return 채널 id(channelId), 채팅방 id(chatId), 생성 결과(message)
      */
     @PostMapping("/group/{channelId}")
     public ResponseEntity<CommonResponseDto<ChannelAndChatDto>> joinGroupChannel(@PathVariable("channelId") Long channelId,
@@ -53,14 +52,8 @@ public class ChatController {
     }
 
     /**
+     * 채팅방 목록 조회
      * 나의 chat 목록을 가장 최근 대화한 순으로 조회합니다.
-     * @param page 요청 페이지
-     * @param size 요청 결과 개수
-     * @return 요청 유저 id(ownerId),
-     *         채팅방 Info 리스트 (List<ChatInfoDto>) :
-     *          채팅방 id(chatId), 채널 id(channelId), 채널 타입(channelType),
-     *          채팅방 제목(title), 마지막 대화(lastMessage), 안읽은 메세지(unreadMessages),
-     *          마지막 대화나눈 시간(lastChatAt)
      */
     @GetMapping("")
     public ResponseEntity<CommonResponseDto<List<ChatInfoDto>>> myChatList(@RequestParam(value = "page", defaultValue = "0") int page,
