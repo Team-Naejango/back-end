@@ -61,7 +61,7 @@ class ItemServiceTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
-                        .category("카테고리")
+                        .categoryId(1)
                         .hashTag(Arrays.asList("태그1", "태그2", "태그3"))
                         .storageId(storage.getId())
                         .build();
