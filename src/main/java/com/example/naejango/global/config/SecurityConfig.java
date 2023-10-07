@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .and()
                 .addFilter(corsConfig.corsFilter())
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtAuthenticator))
-                .addFilterAfter(exceptionHandlingFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(exceptionHandlingFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(customAuthenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler)
