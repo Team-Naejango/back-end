@@ -11,8 +11,8 @@ import lombok.*;
 @ToString
 public class ItemInfoDto {
     private Long itemId;
-
     private Long ownerId;
+    private int categoryId;
     private String category;
     private ItemType itemType;
     private String name;
@@ -22,6 +22,7 @@ public class ItemInfoDto {
     public ItemInfoDto(Item item) {
         this.itemId = item.getId();
         this.ownerId = item.getUser().getId();
+        this.categoryId = item.getCategory().getId();
         this.category = item.getCategory().getName();
         this.itemType = item.getItemType();
         this.name = item.getName();
