@@ -128,7 +128,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("hashTag").description("해쉬 태그"),
                                             fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("categoryId").description("카테고리"),
+                                            fieldWithPath("categoryId").description("카테고리 ID"),
                                             fieldWithPath("storageId").description("창고 ID")
                                     )
                                     .responseFields(
@@ -138,6 +138,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("result.hashTag").description("해쉬 태그"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.categoryId").description("카테고리 ID"),
                                             fieldWithPath("result.category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )

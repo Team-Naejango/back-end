@@ -24,7 +24,10 @@ public class CreateItemResponseDto {
     private String imgUrl;
 
     private ItemType itemType;
+
     private List<String> hashTag;
+
+    private int categoryId;
 
     private String category;
 
@@ -35,6 +38,7 @@ public class CreateItemResponseDto {
         this.imgUrl = item.getImgUrl();
         this.itemType = item.getItemType();
         this.hashTag = Arrays.asList(item.getTag().split(" "));
-        this.category = item.getCategory().toString();
+        this.categoryId = item.getCategory().getId();
+        this.category = item.getCategory().getName();
     }
 }
