@@ -1,5 +1,7 @@
 package com.example.naejango.global.config;
 
+import com.example.naejango.domain.account.domain.Account;
+import com.example.naejango.domain.account.repository.AccountRepository;
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
@@ -38,6 +40,7 @@ public class TestDBInitializer implements ApplicationRunner {
     private final ChatMessageRepository chatMessageRepository;
     private final ChannelRepository channelRepository;
     private final TransactionTemplate transactionTemplate;
+    private final AccountRepository accountRepository;
 
     @PersistenceContext EntityManager em;
 
@@ -54,11 +57,14 @@ public class TestDBInitializer implements ApplicationRunner {
             User testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
             User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
             User testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
+            User testUser5 = User.builder().role(Role.TEMPORAL).userKey("test_5").password("").build();
+
 
             userRepository.save(testUser1);
             userRepository.save(testUser2);
             userRepository.save(testUser3);
             userRepository.save(testUser4);
+            userRepository.save(testUser5);
 
             UserProfile userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
             UserProfile userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
@@ -74,6 +80,16 @@ public class TestDBInitializer implements ApplicationRunner {
             testUser2.setUserProfile(userProfile2);
             testUser3.setUserProfile(userProfile3);
             testUser3.setUserProfile(userProfile4);
+
+            Account account1 = Account.builder().user(testUser1).balance(0).build();
+            Account account2 = Account.builder().user(testUser2).balance(0).build();
+            Account account3 = Account.builder().user(testUser3).balance(0).build();
+            Account account4 = Account.builder().user(testUser4).balance(0).build();
+
+            accountRepository.save(account1);
+            accountRepository.save(account2);
+            accountRepository.save(account3);
+            accountRepository.save(account4);
 
             // 아이템 1개 생성
             Item testItem1 = Item.builder()
