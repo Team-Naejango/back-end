@@ -23,6 +23,7 @@ public class MatchItemDto {
         return MatchResponseDto.builder()
                 .itemId(item.getId())
                 .name(item.getName())
+                .categoryId(category.getId())
                 .category(category.getName())
                 .tag(Arrays.asList(item.getTag().split(" ")))
                 .imgUrl(item.getImgUrl())

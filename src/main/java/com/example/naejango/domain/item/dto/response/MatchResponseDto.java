@@ -12,6 +12,7 @@ import java.util.List;
 @ToString
 public class MatchResponseDto {
     private Long itemId;
+    private int categoryId;
     private String category;
     private String name;
     private String imgUrl;

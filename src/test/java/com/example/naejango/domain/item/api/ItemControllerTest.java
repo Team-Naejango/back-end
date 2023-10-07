@@ -316,6 +316,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                 .name("매치 결과 아이템1")
                 .itemType(ItemType.INDIVIDUAL_BUY)
                 .imgUrl("이미지 url")
+                .categoryId(1)
                 .category("카테고리")
                 .tag(Arrays.asList("태그1", "태그2"))
                 .distance(100)
@@ -327,6 +328,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                 .name("매치 결과 아이템2")
                 .itemType(ItemType.GROUP_BUY)
                 .imgUrl("이미지 url")
+                .categoryId(1)
                 .category("카테고리")
                 .tag(Arrays.asList("태그1", "태그2"))
                 .distance(150)
@@ -371,6 +373,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
                                     fieldWithPath("result[].itemId").description("아이템 ID"),
+                                    fieldWithPath("result[].categoryId").description("카테고리 ID"),
                                     fieldWithPath("result[].category").description("카테고리 명"),
                                     fieldWithPath("result[].name").description("아이템 이름"),
                                     fieldWithPath("result[].imgUrl").description("이미지 url"),
