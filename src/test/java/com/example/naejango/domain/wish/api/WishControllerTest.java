@@ -43,8 +43,8 @@ class WishControllerTest extends RestDocsSupportTest {
         Long userId;
         List<FindWishResponseDto> findWishResponseDtoList =
                 new ArrayList<>(List.of(
-                        new FindWishResponseDto(1L, "아이템1 이름", "아이템1 설명", "이미지1 Url", ItemType.INDIVIDUAL_BUY, "카테고리"),
-                        new FindWishResponseDto(2L, "아이템2 이름", "아이템2 설명", "이미지2 Url", ItemType.INDIVIDUAL_BUY, "카테고리")
+                        new FindWishResponseDto(1L, "아이템1 이름", "아이템1 설명", "이미지1 Url", ItemType.INDIVIDUAL_BUY, 1, "카테고리"),
+                        new FindWishResponseDto(2L, "아이템2 이름", "아이템2 설명", "이미지2 Url", ItemType.INDIVIDUAL_BUY, 1, "카테고리")
                 ));
 
         @Test
