@@ -80,6 +80,7 @@ class WishControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result[].description").description("아이템 설명"),
                                             fieldWithPath("result[].imgUrl").description("이미지 URL"),
                                             fieldWithPath("result[].itemType").description("아이템 타입"),
+                                            fieldWithPath("result[].categoryId").description("카테고리 ID"),
                                             fieldWithPath("result[].category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
