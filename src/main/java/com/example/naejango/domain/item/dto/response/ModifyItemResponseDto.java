@@ -22,6 +22,8 @@ public class ModifyItemResponseDto {
 
     private ItemType itemType;
 
+    private int categoryId;
+
     private String category;
 
     public ModifyItemResponseDto(Item item) {
@@ -30,6 +32,7 @@ public class ModifyItemResponseDto {
         this.description = item.getDescription();
         this.imgUrl = item.getImgUrl();
         this.itemType = item.getItemType();
+        this.categoryId = item.getCategory().getId();
         this.category = item.getCategory().getName();
     }
 }

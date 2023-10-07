@@ -400,7 +400,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .category(1)
+                        .categoryId(1)
                         .build();
 
         ModifyItemResponseDto modifyItemResponseDto =
@@ -410,6 +410,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
+                        .categoryId(1)
                         .category("카테고리")
                         .build();
 
@@ -449,7 +450,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("category").description("카테고리")
+                                            fieldWithPath("categoryId").description("카테고리")
                                     )
                                     .responseFields(
                                             fieldWithPath("result.id").description("아이템 id"),
@@ -457,6 +458,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.description").description("아이템 설명"),
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.categoryId").description("카테고리 ID"),
                                             fieldWithPath("result.category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
