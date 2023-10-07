@@ -20,6 +20,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     @Query("SELECT i FROM Item i WHERE i.storage.id = :storageId AND i.status = :status")
     Page<Item> findItemWithCategoryByStorageIdAndStatus(@Param("storageId") Long storageId, @Param("status") boolean status, Pageable pageable);
 
+    @Modifying
     @Query("DELETE FROM Item i WHERE i.storage.id = :storageId")
     void deleteByStorageId(@Param("storageId") Long storageId);
 
