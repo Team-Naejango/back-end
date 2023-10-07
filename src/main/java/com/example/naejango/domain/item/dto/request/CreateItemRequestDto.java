@@ -36,7 +36,7 @@ CreateItemRequestDto {
     @EnumConstraint(enumClass = ItemType.class, message = "올바른 Type을 입력하세요. (INDIVIDUAL_BUY/INDIVIDUAL_SELL/GROUP_BUY)")
     private ItemType itemType;
 
-    private String category;
+    private int categoryId;
 
     private Long storageId;
 

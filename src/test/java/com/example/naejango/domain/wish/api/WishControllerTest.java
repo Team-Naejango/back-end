@@ -43,8 +43,8 @@ class WishControllerTest extends RestDocsSupportTest {
         Long userId;
         List<FindWishResponseDto> findWishResponseDtoList =
                 new ArrayList<>(List.of(
-                        new FindWishResponseDto(1L, "아이템1 이름", "아이템1 설명", "이미지1 Url", ItemType.INDIVIDUAL_BUY, "카테고리"),
-                        new FindWishResponseDto(2L, "아이템2 이름", "아이템2 설명", "이미지2 Url", ItemType.INDIVIDUAL_BUY, "카테고리")
+                        new FindWishResponseDto(1L, "아이템1 이름", "아이템1 설명", "이미지1 Url", ItemType.INDIVIDUAL_BUY, 1, "카테고리"),
+                        new FindWishResponseDto(2L, "아이템2 이름", "아이템2 설명", "이미지2 Url", ItemType.INDIVIDUAL_BUY, 1, "카테고리")
                 ));
 
         @Test
@@ -80,6 +80,7 @@ class WishControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result[].description").description("아이템 설명"),
                                             fieldWithPath("result[].imgUrl").description("이미지 URL"),
                                             fieldWithPath("result[].itemType").description("아이템 타입"),
+                                            fieldWithPath("result[].categoryId").description("카테고리 ID"),
                                             fieldWithPath("result[].category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )

@@ -70,7 +70,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
-                        .category("카테고리")
+                        .categoryId(1)
                         .hashTag(Arrays.asList("태그1", "태그2"))
                         .storageId(1L)
                         .build();
@@ -83,6 +83,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
                         .hashTag(Arrays.asList("태그1", "태그2"))
+                        .categoryId(1)
                         .category("카테고리")
                         .build();
 
@@ -127,7 +128,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("hashTag").description("해쉬 태그"),
                                             fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("category").description("카테고리"),
+                                            fieldWithPath("categoryId").description("카테고리 ID"),
                                             fieldWithPath("storageId").description("창고 ID")
                                     )
                                     .responseFields(
@@ -137,6 +138,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("result.hashTag").description("해쉬 태그"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.categoryId").description("카테고리 ID"),
                                             fieldWithPath("result.category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )
@@ -226,8 +228,8 @@ class ItemControllerTest extends RestDocsSupportTest {
         Point center = geomUtil.createPoint(127.02, 37.49);
         List<SearchItemInfoDto> searchItemInfoDtoList =
                 new ArrayList<>(List.of(
-                        new SearchItemInfoDto(1L, "창고1 이름", new Coord(127.03, 37.49), 500, 1L, "아이템1 이름", "아이템1 설명", "이미지 URL", ItemType.INDIVIDUAL_BUY, "카테고리 이름"),
-                        new SearchItemInfoDto(2L, "창고2 이름", new Coord(127.01, 37.49), 300, 1L, "아이템2 이름", "아이템2 설명", "이미지 URL", ItemType.INDIVIDUAL_SELL, "카테고리 이름")
+                        new SearchItemInfoDto(1L, "창고1 이름", new Coord(127.03, 37.49), 500, 1L, "아이템1 이름", "아이템1 설명", "이미지 URL", ItemType.INDIVIDUAL_BUY, 1, "카테고리 이름"),
+                        new SearchItemInfoDto(2L, "창고2 이름", new Coord(127.01, 37.49), 300, 1L, "아이템2 이름", "아이템2 설명", "이미지 URL", ItemType.INDIVIDUAL_SELL, 1, "카테고리 이름")
                 ));
 
         @Test
@@ -247,7 +249,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                     .queryParam("rad","1000")
                     .queryParam("page", "0")
                     .queryParam("size", "10")
-                    .queryParam("category", "의류")
+                    .queryParam("categoryId", "1")
                     .queryParam("keyword", "유니클로 청바지")
                     .queryParam("itemType", "INDIVIDUAL_BUY")
                     .queryParam("status", "true")
@@ -273,7 +275,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     parameterWithName("rad").description("반경 (1,000~5,000m)"),
                                     parameterWithName("page").description("페이지"),
                                     parameterWithName("size").description("사이즈"),
-                                    parameterWithName("category").description("카테고리 이름"),
+                                    parameterWithName("categoryId").description("카테고리 ID"),
                                     parameterWithName("keyword").description("검색 키워드(2~10자)"),
                                     parameterWithName("itemType").description("타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)"),
                                     parameterWithName("status").description("상태 (true 거래중/false 거래완료)"),
@@ -291,6 +293,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     fieldWithPath("result[].description").description("아이템 설명"),
                                     fieldWithPath("result[].imgUrl").description("아이템 이미지 URL"),
                                     fieldWithPath("result[].itemType").description("아이템 타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)"),
+                                    fieldWithPath("result[].categoryId").description("카테고리 ID"),
                                     fieldWithPath("result[].categoryName").description("카테고리 이름")
 
                             ).requestSchema(
@@ -313,6 +316,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                 .name("매치 결과 아이템1")
                 .itemType(ItemType.INDIVIDUAL_BUY)
                 .imgUrl("이미지 url")
+                .categoryId(1)
                 .category("카테고리")
                 .tag(Arrays.asList("태그1", "태그2"))
                 .distance(100)
@@ -324,6 +328,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                 .name("매치 결과 아이템2")
                 .itemType(ItemType.GROUP_BUY)
                 .imgUrl("이미지 url")
+                .categoryId(1)
                 .category("카테고리")
                 .tag(Arrays.asList("태그1", "태그2"))
                 .distance(150)
@@ -368,6 +373,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
                                     fieldWithPath("result[].itemId").description("아이템 ID"),
+                                    fieldWithPath("result[].categoryId").description("카테고리 ID"),
                                     fieldWithPath("result[].category").description("카테고리 명"),
                                     fieldWithPath("result[].name").description("아이템 이름"),
                                     fieldWithPath("result[].imgUrl").description("이미지 url"),
@@ -398,7 +404,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .name("아이템 이름")
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
-                        .category(1)
+                        .categoryId(1)
                         .build();
 
         ModifyItemResponseDto modifyItemResponseDto =
@@ -408,6 +414,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
+                        .categoryId(1)
                         .category("카테고리")
                         .build();
 
@@ -447,7 +454,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("name").description("아이템 이름"),
                                             fieldWithPath("description").description("아이템 설명"),
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
-                                            fieldWithPath("category").description("카테고리")
+                                            fieldWithPath("categoryId").description("카테고리")
                                     )
                                     .responseFields(
                                             fieldWithPath("result.id").description("아이템 id"),
@@ -455,6 +462,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.description").description("아이템 설명"),
                                             fieldWithPath("result.imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("result.itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
+                                            fieldWithPath("result.categoryId").description("카테고리 ID"),
                                             fieldWithPath("result.category").description("카테고리"),
                                             fieldWithPath("message").description("결과 메시지")
                                     )

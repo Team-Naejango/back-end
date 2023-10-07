@@ -28,6 +28,7 @@ public class SearchItemInfoDto {
     private ItemType itemType;
 
     // 카테고리
+    private int categoryId;
     private String categoryName;
 
     public SearchItemInfoDto(Item item, Storage storage, Category category, int distance) {
@@ -45,6 +46,7 @@ public class SearchItemInfoDto {
         this.itemType = item.getItemType();
 
         // 카테고리
+        this.categoryId = category.getId();
         this.categoryName = category.getName();
     }
 }

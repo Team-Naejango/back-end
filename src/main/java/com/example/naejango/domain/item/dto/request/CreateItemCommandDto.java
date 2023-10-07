@@ -24,9 +24,10 @@ public class CreateItemCommandDto {
     private String imgUrl;
 
     private ItemType itemType;
+
     private List<String> tag;
 
-    private String category;
+    private int categoryId;
 
     private Long storageId;
 
@@ -36,7 +37,7 @@ public class CreateItemCommandDto {
         this.imgUrl = createItemRequestDto.getImgUrl();
         this.itemType = createItemRequestDto.getItemType();
         this.tag = createItemRequestDto.getHashTag();
-        this.category = createItemRequestDto.getCategory();
+        this.categoryId = createItemRequestDto.getCategoryId();
         this.storageId = createItemRequestDto.getStorageId();
     }
 

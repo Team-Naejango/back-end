@@ -25,7 +25,7 @@ public class ModifyItemCommandDto {
         this.name = modifyItemRequestDto.getName();
         this.description = modifyItemRequestDto.getDescription();
         this.imgUrl = modifyItemRequestDto.getImgUrl();
-        this.category = modifyItemRequestDto.getCategory();
+        this.category = modifyItemRequestDto.getCategoryId();
     }
 
     public void toEntity(Item item, Category category) {

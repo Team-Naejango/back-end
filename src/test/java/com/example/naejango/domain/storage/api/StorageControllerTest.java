@@ -323,6 +323,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("message").description("조회 결과 메세지"),
                                             fieldWithPath("result[].itemId").description("아이템 id"),
                                             fieldWithPath("result[].ownerId").description("아이템 소유 회원 id"),
+                                            fieldWithPath("result[].categoryId").description("아이템 카테고리 ID"),
                                             fieldWithPath("result[].category").description("아이템 카테고리"),
                                             fieldWithPath("result[].itemType").description("아이템 타입(BUY / SELL)"),
                                             fieldWithPath("result[].name").description("아이템 제목"),

@@ -53,7 +53,7 @@ class ItemServiceTest {
     class createItem {
 
         User user = User.builder().id(1L).userKey("TEST_1234").build();
-        Category category = new Category();
+        Category category = Category.builder().id(1).name("생필품").build();
         Storage storage = Storage.builder().id(1L).build();
         CreateItemRequestDto createItemRequestDto =
                 CreateItemRequestDto.builder()
@@ -61,7 +61,7 @@ class ItemServiceTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
-                        .category("카테고리")
+                        .categoryId(1)
                         .hashTag(Arrays.asList("태그1", "태그2", "태그3"))
                         .storageId(storage.getId())
                         .build();
@@ -73,7 +73,7 @@ class ItemServiceTest {
         @DisplayName("성공")
         void 성공() {
             // given
-            BDDMockito.given(categoryRepository.findByName(any())).willReturn(Optional.ofNullable(category));
+            BDDMockito.given(categoryRepository.findById(any())).willReturn(Optional.ofNullable(category));
             BDDMockito.given(storageRepository.findByIdAndUserId(storage.getId(), user.getId())).willReturn(Optional.of(storage));
 
             // when
@@ -91,7 +91,7 @@ class ItemServiceTest {
         @DisplayName("실패_잘못된_카테고리_이름으로_요청_예외처리")
         void 실패_잘못된_카테고리_이름으로_요청_예외처리() {
             // given
-            BDDMockito.given(categoryRepository.findByName(any())).willReturn(Optional.empty());
+            BDDMockito.given(categoryRepository.findById(any())).willReturn(Optional.empty());
 
             // when & then
             CustomException exception = Assertions.assertThrows(CustomException.class,
@@ -107,7 +107,7 @@ class ItemServiceTest {
         @DisplayName("실패_등록되지_않은_창고_ID_값으로_요청_예외처리")
         void 실패_창고_생성_전에_아이템_등록_요청_예외처리() {
             // given
-            BDDMockito.given(categoryRepository.findByName(any())).willReturn(Optional.ofNullable(category));
+            BDDMockito.given(categoryRepository.findById(any())).willReturn(Optional.ofNullable(category));
             BDDMockito.given(storageRepository.findByIdAndUserId(any(Long.class), any(Long.class))).willReturn(Optional.empty());
 
             // when & then

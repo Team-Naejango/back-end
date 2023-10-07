@@ -26,6 +26,6 @@ public class ModifyItemRequestDto {
     @Size(max = 100)
     private String imgUrl;
 
-    private Integer category;
+    private Integer categoryId;
 
 }
