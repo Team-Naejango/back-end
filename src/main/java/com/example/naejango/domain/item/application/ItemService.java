@@ -47,7 +47,7 @@ public class ItemService {
     /** 아이템 생성 */
     @Transactional
     public CreateItemResponseDto createItem(Long userId, CreateItemCommandDto createItemCommandDto) {
-        Category category = findCategoryByName(createItemCommandDto.getCategory());
+        Category category = findCategoryById(createItemCommandDto.getCategoryId());
 
         // 본인이 등록한 창고에만 아이템 등록 가능
         Storage storage = storageRepository.findByIdAndUserId(createItemCommandDto.getStorageId(), userId)
@@ -152,16 +152,9 @@ public class ItemService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
     }
 
-    private Category findCategoryByName(String categoryName) {
-
-        return categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
-    }
     private Category findCategoryById(Integer categoryId) {
 
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }
-
-
 }

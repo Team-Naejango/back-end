@@ -70,7 +70,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .description("아이템 설명")
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
-                        .category("카테고리")
+                        .categoryId(1)
                         .hashTag(Arrays.asList("태그1", "태그2"))
                         .storageId(1L)
                         .build();
@@ -83,6 +83,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                         .imgUrl("이미지 URL")
                         .itemType(ItemType.INDIVIDUAL_SELL)
                         .hashTag(Arrays.asList("태그1", "태그2"))
+                        .categoryId(1)
                         .category("카테고리")
                         .build();
 
@@ -127,7 +128,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("imgUrl").description("아이템 이미지 Url"),
                                             fieldWithPath("hashTag").description("해쉬 태그"),
                                             fieldWithPath("itemType").description("아이템 타입 (INDIVIDUAL_BUY, INDIVIDUAL_SELL, GROUP_BUY)"),
-                                            fieldWithPath("category").description("카테고리"),
+                                            fieldWithPath("categoryId").description("카테고리"),
                                             fieldWithPath("storageId").description("창고 ID")
                                     )
                                     .responseFields(
