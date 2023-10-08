@@ -45,14 +45,14 @@ public class DBDateInitializer implements ApplicationRunner {
     @PersistenceContext EntityManager em;
 
     @Override
+    @Transactional
     public void run(ApplicationArguments args) {
         createBasicUser(10);
         createCategory();
         createStorageAndItem(10);
     }
 
-    @Transactional
-    void createBasicUser(int n) {
+    private void createBasicUser(int n) {
         transactionTemplate.execute(status -> {
             for (int i = 0; i < n; i++) {
                     // 유저 생성
@@ -75,8 +75,7 @@ public class DBDateInitializer implements ApplicationRunner {
         });
     }
 
-    @Transactional
-    void createCategory() {
+    private void createCategory() {
         Category cat1 = Category.builder().name("주방용품").build();
         Category cat2 = Category.builder().name("세탁용품").build();
         Category cat3 = Category.builder().name("화장실").build();
@@ -91,8 +90,7 @@ public class DBDateInitializer implements ApplicationRunner {
         catIdList.add(cat4.getId());
     }
 
-    @Transactional
-    void createStorageAndItem(int itemN) {
+    private void createStorageAndItem(int itemN) {
         transactionTemplate.execute(status -> {
             for (Long useId : userIdList) {
                 User testUser = em.getReference(User.class, useId);
