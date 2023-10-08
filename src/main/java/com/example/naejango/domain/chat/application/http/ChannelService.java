@@ -194,10 +194,17 @@ public class ChannelService {
 
     @Transactional
     public void closeChannelByItemId(Long itemId, Long userId) {
-        Channel channel = channelRepository.findGroupChannelByItemId(itemId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
+        Optional<GroupChannel> optionalGroupChannel= channelRepository.findGroupChannelByItemId(itemId);
 
-        closeChannel(channel, userId);
+        if (optionalGroupChannel.isPresent()) {
+            GroupChannel groupChannel = optionalGroupChannel.get();
+
+            // 종료 메세지 전송
+            sendCloseMessage(groupChannel.getId(), userId);
+
+            // 채널 종료
+            groupChannel.closeChannel();
+        }
     }
 
     private void closeChannel(Channel channel, Long userId) {
