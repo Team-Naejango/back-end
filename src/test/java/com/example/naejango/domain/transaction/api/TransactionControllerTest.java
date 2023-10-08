@@ -60,8 +60,8 @@ class TransactionControllerTest extends RestDocsSupportTest {
         Long userId;
         List<FindTransactionResponseDto> findTransactionResponseDtoList =
                 new ArrayList<>(List.of(
-                        new FindTransactionResponseDto(1L, "2023-07-15T17:35", -1000, "구매", "거래자 이름1", "아이템 이름1", 1L),
-                        new FindTransactionResponseDto(2L, "2023-06-23T15:16", 2000, "판매", "거래자 이름2", "아이템 이름2", 2L)
+                        new FindTransactionResponseDto(1L, "2023-07-15T17:35", -1000, "구매", 1L, "거래자 이름1", "아이템 이름1", 1L),
+                        new FindTransactionResponseDto(2L, "2023-06-23T15:16", 2000, "판매", 2L, "거래자 이름2", "아이템 이름2", 2L)
                 ));
         @Test
         @Order(1)
@@ -95,6 +95,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result[].date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
                                             fieldWithPath("result[].amount").description("거래 금액"),
                                             fieldWithPath("result[].status").description("구매 or 판매"),
+                                            fieldWithPath("result[].traderId").description("거래자 ID"),
                                             fieldWithPath("result[].traderName").description("거래자 이름"),
                                             fieldWithPath("result[].itemName").description("아이템 이름"),
                                             fieldWithPath("result[].itemId").description("아이템 ID"),
@@ -114,7 +115,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
     class findTransactionById {
         Long userId, transactionId=1L;
         FindTransactionResponseDto findTransactionResponseDto =
-                new FindTransactionResponseDto(1L, "2023-07-15T17:35", -1000, "구매", "거래자 이름1", "아이템 이름1", 1L);
+                new FindTransactionResponseDto(1L, "2023-07-15T17:35", -1000, "구매", 1L, "거래자 이름1", "아이템 이름1", 1L);
 
         @Test
         @Order(1)
@@ -153,6 +154,7 @@ class TransactionControllerTest extends RestDocsSupportTest {
                                             fieldWithPath("result.date").description("거래 날짜 및 시간 ex) 2023-08-10T15:30"),
                                             fieldWithPath("result.amount").description("거래 금액"),
                                             fieldWithPath("result.status").description("구매 or 판매"),
+                                            fieldWithPath("result.traderId").description("거래자 ID"),
                                             fieldWithPath("result.traderName").description("거래자 이름"),
                                             fieldWithPath("result.itemName").description("아이템 이름"),
                                             fieldWithPath("result.itemId").description("아이템 ID"),

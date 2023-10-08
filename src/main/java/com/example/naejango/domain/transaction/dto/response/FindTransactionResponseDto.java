@@ -19,6 +19,8 @@ public class FindTransactionResponseDto {
 
     private String status; // 구매 or 판매
 
+    private Long traderId;
+
     private String traderName;
 
     private String itemName;
@@ -32,10 +34,12 @@ public class FindTransactionResponseDto {
         if (transaction.getUser().getId().equals(userId)) {
             this.amount = transaction.getAmount();
             this.status = "판매";
+            this.traderId = transaction.getTrader().getId();
             this.traderName = transaction.getTrader().getUserProfile().getNickname();
         } else if (transaction.getTrader().getId().equals(userId)) {
             this.amount = -1 * transaction.getAmount();
             this.status = "구매";
+            this.traderId = transaction.getUser().getId();
             this.traderName = transaction.getUser().getUserProfile().getNickname();
         }
 
