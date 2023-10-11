@@ -43,4 +43,7 @@ public class Notification extends TimeAuditingEntity {
         this.receiver = receiver;
     }
 
+    public void checkNotification() {
+        this.isRead = true;
+    }
 }

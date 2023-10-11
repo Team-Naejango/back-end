@@ -6,14 +6,20 @@ import com.example.naejango.domain.notification.dto.response.NotificationRespons
 import com.example.naejango.domain.notification.repository.EmitterRepository;
 import com.example.naejango.domain.notification.repository.NotificationRepository;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class NotificationService {
     private final EmitterRepository emitterRepository;
@@ -21,6 +27,7 @@ public class NotificationService {
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // 1시간
 
     /** 알림 구독 요청 */
+    @Transactional
     public SseEmitter subscribe(Long userId, String lastEventId) {
         String emitterId = userId + "_" + System.currentTimeMillis();
 
@@ -44,6 +51,7 @@ public class NotificationService {
     }
 
     /** 알림 전송 메서드 */
+    @Transactional
     public void send(User receiver, NotificationType notificationType, String content, String url) {
         Notification notification = Notification.builder()
                 .receiver(receiver)
@@ -61,6 +69,22 @@ public class NotificationService {
                     sendNotification(emitter, key, new NotificationResponseDto(savedNotification));
                 }
         );
+    }
+
+    /** 알림 목록 조회 */
+    public List<NotificationResponseDto> findNotification(Long userId){
+        List<Notification> notificationList = notificationRepository.findByUserId(userId);
+
+        return notificationList.stream().map(NotificationResponseDto::new).collect(Collectors.toList());
+    }
+
+    /** 알림 확인 */
+    @Transactional
+    public void checkNotification(Long notificationId){
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+
+        notification.checkNotification();
     }
 
     private void sendNotification(SseEmitter emitter, String emitterId, Object data) {
