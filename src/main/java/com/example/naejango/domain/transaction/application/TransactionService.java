@@ -6,7 +6,7 @@ import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.notification.domain.NotificationType;
-import com.example.naejango.domain.notification.dto.request.NotificationRequestDto;
+import com.example.naejango.domain.notification.dto.NotificationPublishDto;
 import com.example.naejango.domain.transaction.domain.Transaction;
 import com.example.naejango.domain.transaction.domain.TransactionStatus;
 import com.example.naejango.domain.transaction.dto.request.CreateTransactionCommandDto;
@@ -90,9 +90,8 @@ public class TransactionService {
         // 거래 예약 상태로 생성
         Transaction transaction = createTransactionCommandDto.toEntity(em.getReference(User.class, userId), trader, item);
         Transaction savedTransaction = transactionRepository.save(transaction);
-
-        // url 부분은 수정 해야함
-        eventPublisher.publishEvent(new NotificationRequestDto(trader, NotificationType.TRANSACTION, "거래 요청 알림", ""));
+        
+        eventPublisher.publishEvent(new NotificationPublishDto(trader, NotificationType.TRANSACTION, "거래 요청 알림", "/api/transaction/"+savedTransaction.getId()));
 
         return new CreateTransactionResponseDto(savedTransaction);
     }
