@@ -28,6 +28,7 @@ public class Notification extends TimeAuditingEntity {
     private Boolean isRead; // 알림 확인 여부
 
     @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private NotificationType notificationType;
 
     @ManyToOne(fetch = FetchType.LAZY)
