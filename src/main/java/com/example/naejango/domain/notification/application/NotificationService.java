@@ -80,9 +80,14 @@ public class NotificationService {
 
     /** 알림 확인 */
     @Transactional
-    public void checkNotification(Long notificationId){
+    public void checkNotification(Long userId, Long notificationId){
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+
+        // 알림을 수신한 유저가 맞는지 체크
+        if (!notification.getReceiver().getId().equals(userId)){
+            throw new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND);
+        }
 
         notification.checkNotification();
     }

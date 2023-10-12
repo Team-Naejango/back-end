@@ -40,9 +40,10 @@ public class NotificationController {
     }
 
     /** 알림 확인 */
-    @GetMapping("/api/notification/{id}")
-    public ResponseEntity<CommonResponseDto<Void>> checkNotification(Authentication authentication, @PathVariable Long id){
-        notificationService.checkNotification(id);
+    @GetMapping("/api/notification/{notificationId}")
+    public ResponseEntity<CommonResponseDto<Void>> checkNotification(Authentication authentication, @PathVariable Long notificationId){
+        Long userId = authenticationHandler.getUserId(authentication);
+        notificationService.checkNotification(userId, notificationId);
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("알림 확인 성공", null));
     }
