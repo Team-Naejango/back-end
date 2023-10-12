@@ -1,7 +1,6 @@
 package com.example.naejango.domain.wish.repository;
 
 import com.example.naejango.domain.wish.domain.Wish;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,8 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface WishRepository extends JpaRepository<Wish, Long> {
-    @EntityGraph(attributePaths = {"item"})
-    List<Wish> findByUserId(Long userId);
+
+    @Query("select w from Wish w " +
+            "left join fetch w.item i " +
+            "left join fetch i.category c " +
+            "where w.user.id = :userId")
+    List<Wish> findByUserIdWithItemAndCategory(@Param("userId") Long userId);
 
     Optional<Wish> findByUserIdAndItemId(Long userId, Long itemId);
 

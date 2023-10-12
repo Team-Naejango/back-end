@@ -26,7 +26,7 @@ public class WishService {
 
     /** 관심 목록 조회 */
     public List<FindWishResponseDto> findWish(Long userId){
-        List<Wish> wishList = wishRepository.findByUserId(userId);
+        List<Wish> wishList = wishRepository.findByUserIdWithItemAndCategory(userId);
 
         List<FindWishResponseDto> findWishResponseDtoList = new ArrayList<>();
         for(Wish wish: wishList){
