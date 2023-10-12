@@ -27,9 +27,9 @@ public class SearchingCommandDto {
         this.rad = searchItemRequestDto.getRad();
         this.page = searchItemRequestDto.getPage();
         this.size = searchItemRequestDto.getSize();
-        this.categoryId = searchItemRequestDto.getCategoryId();
+        this.categoryId = searchItemRequestDto.getCategoryId() != null ? searchItemRequestDto.getCategoryId() : null;
         this.keyword = keywords;
-        this.itemType = searchItemRequestDto.getItemType();
-        this.status = searchItemRequestDto.getStatus();
+        this.itemType = searchItemRequestDto.getItemType() != null ? searchItemRequestDto.getItemType() : null;
+        this.status = searchItemRequestDto.getStatus() != null ? searchItemRequestDto.getStatus() : null;
     }
 }

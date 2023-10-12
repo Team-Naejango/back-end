@@ -4,6 +4,7 @@ import com.example.naejango.domain.chat.application.http.ChannelService;
 import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
+import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
 import com.example.naejango.domain.item.dto.SearchingCommandDto;
@@ -68,10 +69,16 @@ public class ItemService {
 
     /** 아이템 검색 */
     public List<SearchItemInfoDto> searchItem(SearchingCommandDto conditions) {
-        Category category = findCategoryById(conditions.getCategoryId());
+        // NULL 체크 및 값 할당
+        Category category = conditions.getCategoryId() != null
+                ? findCategoryById(conditions.getCategoryId()) : null;
+        ItemType itemType = conditions.getItemType() != null
+                ? conditions.getItemType() : null;
+        Boolean status = conditions.getStatus() != null
+                ? conditions.getStatus() : null;
 
         List<SearchItemsDto> resultList = itemRepository.findItemsByConditions(conditions.getLocation(), conditions.getRad(), conditions.getPage(), conditions.getSize(),
-                category, conditions.getKeyword(), conditions.getItemType(), conditions.getStatus());
+                category, conditions.getKeyword(), itemType, status);
 
         return resultList.stream().map(result -> new SearchItemInfoDto(result.getItem(), result.getStorage(), result.getCategory(), result.getDistance()))
                 .collect(Collectors.toList());
