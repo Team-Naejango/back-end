@@ -236,8 +236,8 @@ class ChatControllerTest extends RestDocsSupportTest {
                                             .summary("내 채팅방 목록 조회")
                                             .description("내가 참여하고 있는 채널의 내 채팅방의 정보가 담긴 목록을 가지고 옵니다. \n\n")
                                             .requestParameters(
-                                                    parameterWithName("page").description("조회 페이지").defaultValue(0).optional(),
-                                                    parameterWithName("size").description("조회 결과물 수").defaultValue(10).optional()
+                                                    parameterWithName("page").description("조회 페이지").defaultValue("0").optional(),
+                                                    parameterWithName("size").description("조회 결과물 수").defaultValue("10").optional()
                                             )
                                             .responseFields(
                                                     fieldWithPath("message").description("결과 메세지"),
