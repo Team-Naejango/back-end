@@ -14,6 +14,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateStorageRequestDto {
+    @NotNull
     @Size(min = 2, max = 25)
     private String name;
 
