@@ -218,7 +218,6 @@ class ChatControllerTest extends RestDocsSupportTest {
                             .get("/api/chat")
                             .queryParam("page", "0")
                             .queryParam("size", "10")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
