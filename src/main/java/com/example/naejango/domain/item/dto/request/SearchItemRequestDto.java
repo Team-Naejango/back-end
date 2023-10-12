@@ -14,8 +14,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @Builder
 @ToString
-public class
-SearchItemRequestDto {
+public class SearchItemRequestDto {
     @DecimalMin(value = "-180.0", message = "올바른 경위도 값을 입력하세요 (-180.0 ~ 180.0)")
     @DecimalMax(value = "180.0", message = "올바른 경위도 값을 입력하세요 (-180.0 ~ 180.0)")
     @NotNull
@@ -47,4 +46,9 @@ SearchItemRequestDto {
 
     private Boolean status; // 상태 (거래중 / 거래완료)
 
+    public SearchItemRequestDto() {
+        this.rad = 1000;
+        this.page = 0;
+        this.size = 10;
+    }
 }

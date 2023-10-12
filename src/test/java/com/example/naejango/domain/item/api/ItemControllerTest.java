@@ -272,13 +272,13 @@ class ItemControllerTest extends RestDocsSupportTest {
                             .requestParameters(
                                     parameterWithName("lon").description("중심 경도 좌표"),
                                     parameterWithName("lat").description("중심 위도 좌표"),
-                                    parameterWithName("rad").description("반경 (1,000~5,000m)"),
-                                    parameterWithName("page").description("페이지"),
-                                    parameterWithName("size").description("사이즈"),
-                                    parameterWithName("categoryId").description("카테고리 ID"),
-                                    parameterWithName("keyword").description("검색 키워드(2~10자)"),
-                                    parameterWithName("itemType").description("타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)"),
-                                    parameterWithName("status").description("상태 (true 거래중/false 거래완료)"),
+                                    parameterWithName("rad").description("반경 (1,000~5,000m)").defaultValue(1000).optional(),
+                                    parameterWithName("page").description("페이지").defaultValue(0).optional(),
+                                    parameterWithName("size").description("사이즈").defaultValue(10).optional(),
+                                    parameterWithName("categoryId").description("카테고리 ID").optional(),
+                                    parameterWithName("keyword").description("검색 키워드(2~10자)").optional(),
+                                    parameterWithName("itemType").description("타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)").optional(),
+                                    parameterWithName("status").description("상태 (true 거래중/false 거래완료)").optional(),
                                     parameterWithName("_csrf").ignored()
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
@@ -366,8 +366,8 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     "size, radius 및 itemId 를 요청하고\n\n" +
                                     "아이템 정보를 응답합니다.")
                             .requestParameters(
-                                    parameterWithName("rad").description("반경 (1,000~5,000m)"),
-                                    parameterWithName("size").description("매치 결과물 수 (1~10)"),
+                                    parameterWithName("rad").description("반경 (1,000~5,000m)").defaultValue(1000).optional(),
+                                    parameterWithName("size").description("매치 결과물 수 (1~10)").defaultValue(5).optional(),
                                     parameterWithName("itemId").description("아이템 ID"),
                                     parameterWithName("_csrf").ignored()
                             ).responseFields(

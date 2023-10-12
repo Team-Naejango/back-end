@@ -238,9 +238,9 @@ class StorageControllerTest extends RestDocsSupportTest {
                             .requestParameters(
                                     parameterWithName("lon").description("경도"),
                                     parameterWithName("lat").description("위도"),
-                                    parameterWithName("rad").description("반경").defaultValue("1000"),
-                                    parameterWithName("page").description("조회 페이지").defaultValue("0"),
-                                    parameterWithName("size").description("조회 결과물 수").defaultValue("20"),
+                                    parameterWithName("rad").description("반경").defaultValue("1000").optional(),
+                                    parameterWithName("page").description("조회 페이지").defaultValue("0").optional(),
+                                    parameterWithName("size").description("조회 결과물 수").defaultValue("20").optional(),
                                     parameterWithName("_csrf").ignored()
                             ).responseFields(
                                     fieldWithPath("message").description("조회결과 메세지"),
@@ -316,8 +316,8 @@ class StorageControllerTest extends RestDocsSupportTest {
                                     )
                                     .requestParameters(
                                             parameterWithName("status").description("아이템의 상태값 (true=거래중, false=거래완료)"),
-                                            parameterWithName("page").description("요청 페이지(0부터 시작)"),
-                                            parameterWithName("size").description("페이지 당 결과물 수")
+                                            parameterWithName("page").description("요청 페이지(0부터 시작)").defaultValue(0).optional(),
+                                            parameterWithName("size").description("페이지 당 결과물 수").defaultValue(10).optional()
                                     )
                                     .responseFields(
                                             fieldWithPath("message").description("조회 결과 메세지"),

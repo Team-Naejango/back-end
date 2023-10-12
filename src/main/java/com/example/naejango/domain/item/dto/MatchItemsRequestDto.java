@@ -20,4 +20,9 @@ public class MatchItemsRequestDto {
     private Integer size;
 
     private Long itemId;
+
+    public MatchItemsRequestDto() {
+        this.rad = 1000;
+        this.size = 5;
+    }
 }

@@ -113,8 +113,8 @@ class MessageControllerTest extends RestDocsSupportTest {
                             .description("채팅방의 최근 메세지를 조회 합니다. 해당 채팅방의 메세지는 모두 읽음 처리 됩니다.\n\n" +
                                     "한번에 최대 300개의 메세지를 로드합니다.")
                             .requestParameters(
-                                    parameterWithName("page").description("페이지"),
-                                    parameterWithName("size").description("사이즈"),
+                                    parameterWithName("page").description("조회 페이지").defaultValue(0).optional(),
+                                    parameterWithName("size").description("조회 결과물 수").defaultValue(25).optional(),
                                     parameterWithName("_csrf").ignored())
                             .responseFields(
                                     fieldWithPath("message").description("결과 메세지"),
