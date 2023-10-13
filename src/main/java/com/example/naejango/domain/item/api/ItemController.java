@@ -78,8 +78,6 @@ public class ItemController {
 
     /**
      * 아이템 매칭
-     * 검색 조건은 좌표 / 반경 / 카테고리 / 아이템 타입 / 키워드 / 아이템 상태 입니다.
-     * @param requestDto 좌표(lon, lat), 카테고리(cat), 키워드(keyword), 아이템 타입(type)
      */
     @GetMapping("/match")
     public ResponseEntity<CommonResponseDto<List<MatchResponseDto>>> matchItems(@Valid @ModelAttribute MatchItemsRequestDto requestDto) {
