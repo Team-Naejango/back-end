@@ -2,6 +2,12 @@ package com.example.naejango.domain.transaction.application;
 
 import com.example.naejango.domain.account.domain.Account;
 import com.example.naejango.domain.account.repository.AccountRepository;
+import com.example.naejango.domain.chat.application.http.ChannelService;
+import com.example.naejango.domain.chat.application.http.MessageService;
+import com.example.naejango.domain.chat.application.websocket.WebSocketService;
+import com.example.naejango.domain.chat.domain.MessageType;
+import com.example.naejango.domain.chat.dto.CreateChannelDto;
+import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -40,6 +46,9 @@ public class TransactionService {
     private final AccountRepository accountRepository;
     private final EntityManager em;
     private final ApplicationEventPublisher eventPublisher;
+    private final WebSocketService webSocketService;
+    private final ChannelService channelService;
+    private final MessageService messageService;
 
     /** 거래 내역 조회 */
     public List<FindTransactionResponseDto> findTransactionList(Long userId){
@@ -90,8 +99,20 @@ public class TransactionService {
         // 거래 예약 상태로 생성
         Transaction transaction = createTransactionCommandDto.toEntity(em.getReference(User.class, userId), trader, item);
         Transaction savedTransaction = transactionRepository.save(transaction);
-        
+
+        // trader에게 거래 알림 발송
         eventPublisher.publishEvent(new NotificationPublishDto(trader, NotificationType.TRANSACTION, "거래 요청 알림", "/api/transaction/"+savedTransaction.getId()));
+
+        // Channel 로드 (없는 경우 생성)
+        CreateChannelDto findResult = channelService.createPrivateChannel(userId, createTransactionCommandDto.getTraderId());
+        Long channelId = findResult.getChannelId();
+
+        // 거래 예약 메세지 생성
+        WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.TRADE, userId, channelId);
+
+        // 메세지 발송 및 저장
+        webSocketService.publishMessage(commandDto);
+        messageService.publishMessage(commandDto);
 
         return new CreateTransactionResponseDto(savedTransaction);
     }
