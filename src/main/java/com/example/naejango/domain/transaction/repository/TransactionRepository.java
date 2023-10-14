@@ -19,15 +19,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
      * 따라서 유저가 판매자 일 경우, 구매자 일 경우 모두 조회.
      */
     @Query("SELECT t from Transaction t " +
-            "left join fetch t.item " +
-            "left join fetch UserProfile up on up.id = t.trader.id or up.id = t.user.id " +
+            "left join fetch t.item i " +
+            "left join fetch t.user u " +
+            "left join fetch u.userProfile up " +
+            "left join fetch t.trader tu " +
+            "left join fetch tu.userProfile tup " +
             "where t.user.id = :userId or t.trader.id = :traderId")
     List<Transaction> findByUserIdOrTraderId(@Param("userId") Long userId, @Param("traderId") Long traderId);
 
     /** 특정 거래 id로 조회 */
     @Query("SELECT t from Transaction t " +
-            "left join fetch t.item " +
-            "left join fetch UserProfile up on up.id = t.trader.id or up.id = t.user.id " +
+            "left join fetch t.item i " +
+            "left join fetch t.user u " +
+            "left join fetch u.userProfile up " +
+            "left join fetch t.trader tu " +
+            "left join fetch tu.userProfile tup " +
             "where t.id = :transactionId")
     Optional<Transaction> findByTransactionId(@Param("transactionId") Long transactionId);
 
