@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 public class Chat extends TimeAuditingEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chatroom_id")
     private Long id;
 
@@ -25,10 +25,12 @@ public class Chat extends TimeAuditingEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "channel_id")
     private Channel channel;
+
     private String title;
 
     @OneToMany(mappedBy = "chat")
     private List<ChatMessage> chatMessages;
+
     public void changeTitle(String title) {
         this.title = title;
     }

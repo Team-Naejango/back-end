@@ -14,11 +14,14 @@ import java.util.List;
 @ToString
 public class Message extends TimeAuditingEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
     private Long id;
+
     private MessageType messageType;
+
     private Long senderId;
+
     private String content;
 
     @OneToMany(mappedBy = "message")

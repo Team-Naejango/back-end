@@ -28,7 +28,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @ToString
 public class Channel {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "channel_id")
     private Long id;
 
