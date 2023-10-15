@@ -2,7 +2,6 @@ package com.example.naejango.domain.item.repository;
 
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.ItemType;
-import com.example.naejango.domain.item.domain.QCategory;
 import com.example.naejango.domain.item.dto.MatchItemDto;
 import com.example.naejango.domain.item.dto.MatchingConditionDto;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-import static com.example.naejango.domain.item.domain.QCategory.*;
+import static com.example.naejango.domain.item.domain.QCategory.category;
 import static com.example.naejango.domain.item.domain.QItem.item;
 import static com.example.naejango.domain.storage.domain.QStorage.storage;
 import static com.example.naejango.domain.user.domain.QUser.user;
@@ -44,10 +43,12 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .from(storage)
                 .join(storage.items, item)
                 .join(item.category, category)
-                .where(catEq(cat),
+                .where(
+                        catEq(cat),
                         itemTypeEq(itemType),
                         nameLikeAnd(keywords),
-                        distanceWithin(center, radius)
+                        distanceWithin(center, radius),
+                        statusEq(status)
                 )
                 .offset((long) page * size)
                 .limit(size)
@@ -105,7 +106,12 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return itemType != null? item.itemType.eq(itemType) : null;
     }
 
-    private BooleanExpression catEq(Category category) {
-        return category != null? QCategory.category.eq(category) : null;
+    private BooleanExpression catEq(Category cat) {
+        return cat != null? category.eq(cat) : null;
     }
+
+    private BooleanExpression statusEq(Boolean status) {
+        return status != null? item.status.eq(status) : null;
+    }
+
 }
