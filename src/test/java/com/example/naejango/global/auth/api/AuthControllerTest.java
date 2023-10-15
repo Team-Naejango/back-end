@@ -4,7 +4,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
+import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
@@ -34,7 +34,7 @@ public class AuthControllerTest extends RestDocsSupportTest {
     @MockBean AuthenticationHandler authenticationHandlerMock;
     @MockBean JwtCookieHandler jwtCookieHandlerMock;
     @MockBean JwtValidator jwtValidatorMock;
-    @MockBean AccessTokenReissuer accessTokenReissuerMock;
+    @MockBean JwtIssuer jwtIssuerMock;
 
     @Nested
     @DisplayName("로그아웃")
@@ -76,7 +76,7 @@ public class AuthControllerTest extends RestDocsSupportTest {
         @DisplayName("성공")
         void test1 () throws Exception {
             // given
-            BDDMockito.given(accessTokenReissuerMock.reissueAccessToken(any())).willReturn(Optional.of("재발급 된 토큰"));
+            BDDMockito.given(jwtIssuerMock.reissueAccessToken(any())).willReturn(Optional.of("재발급 된 토큰"));
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
