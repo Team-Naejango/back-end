@@ -130,15 +130,17 @@ public class ChannelService {
                 .channelLimit(channelLimit)
                 .isClosed(false)
                 .build();
-        channelRepository.save(newGroupChannel);
+
+        Channel savedGroupChannel = channelRepository.save(newGroupChannel);
 
         // 채팅방을 생성합니다.
         Chat chat = Chat.builder()
                 .owner(em.getReference(User.class, userId))
-                .channel(newGroupChannel)
+                .channel(savedGroupChannel)
                 .title(defaultTitle)
                 .build();
-        chatRepository.save(chat);
+
+        Chat savedChat = chatRepository.save(chat);
 
         // 채널 시작 메세지를 생성합니다.
         WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
@@ -150,7 +152,7 @@ public class ChannelService {
         // 메세지 저장
         messageService.publishMessage(commandDto);
 
-        return new CreateChannelDto(true, newGroupChannel.getId(), chat.getId());
+        return new CreateChannelDto(true, newGroupChannel.getId(), savedChat.getId());
     }
 
     /** 공동 구매 아이템에 등록된 그룹 채널 조회 */
