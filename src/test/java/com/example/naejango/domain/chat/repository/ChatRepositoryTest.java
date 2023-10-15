@@ -57,23 +57,28 @@ class ChatRepositoryTest {
     @PersistenceContext
     EntityManager em;
 
+    User testUser1; User testUser2; User testUser3; User testUser4;
+    UserProfile userProfile1; UserProfile userProfile2; UserProfile userProfile3; UserProfile userProfile4;
+    Item item;
+    PrivateChannel channel1; GroupChannel channel2;
+
     @BeforeEach
     void setup() {
         // 테스트 유저 4명 등록
-        User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
-        User testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
-        User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
-        User testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
+        testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
+        testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
+        testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
+        testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
 
         userRepository.save(testUser1);
         userRepository.save(testUser2);
         userRepository.save(testUser3);
         userRepository.save(testUser4);
 
-        UserProfile userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-        UserProfile userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-        UserProfile userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-        UserProfile userProfile4 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 4 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile4 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 4 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
 
         userProfileRepository.save(userProfile1);
         userProfileRepository.save(userProfile2);
@@ -86,24 +91,21 @@ class ChatRepositoryTest {
         testUser3.setUserProfile(userProfile4);
 
         // 공동구매 아이템 생성
-        Item item = Item.builder()
-                .name("테스트")
-                .description("테스트 창고")
-                .imgUrl("url")
-                .tag("")
-                .viewCount(0)
-                .status(true)
-                .itemType(ItemType.GROUP_BUY)
-                .build();
+        item = Item.builder()
+                .name("테스트").description("테스트 창고")
+                .imgUrl("url").tag("")
+                .viewCount(0).status(true)
+                .itemType(ItemType.GROUP_BUY).build();
+
         itemRepository.save(item);
 
         // 채팅 채널 생성 (lastModifiedTime 을 임의로 주입합니다.)
-        PrivateChannel channel1 = PrivateChannel.builder()
+        channel1 = PrivateChannel.builder()
                 .channelType(ChannelType.PRIVATE)
                 .lastModifiedDate(LocalDateTime.now().minusSeconds(1))
                 .build();
 
-        GroupChannel channel2 = GroupChannel.builder()
+        channel2 = GroupChannel.builder()
                 .channelType(ChannelType.GROUP)
                 .owner(testUser2)
                 .item(item)
@@ -250,10 +252,9 @@ class ChatRepositoryTest {
         void test1() {
             // given
             User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel channel = channelRepository.findGroupChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
             // when
-            Optional<Chat> result = chatRepository.findChatByChannelIdAndOwnerId(channel.getId(), user2.getId());
+            Optional<Chat> result = chatRepository.findChatByChannelIdAndOwnerId(channel2.getId(), user2.getId());
 
             // then
             assertTrue(result.isPresent());

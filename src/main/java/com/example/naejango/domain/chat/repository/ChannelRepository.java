@@ -35,6 +35,4 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
             "WHERE cnl.id = :channelId")
     List<User> findParticipantsByChannelId(@Param("channelId") Long channelId);
 
-    @Query("SELECT gc FROM GroupChannel gc WHERE gc.owner.id = :ownerId")
-    Optional<GroupChannel> findGroupChannelByOwnerId(@Param("ownerId") Long ownerId);
 }
