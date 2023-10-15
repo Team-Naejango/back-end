@@ -31,8 +31,6 @@ public class ChannelController {
      * 특정 회원과의 Private Channel 을 개설합니다.
      * 만약 이미 채팅방이 존재한다면 해당 채팅방의 채널 id 및 요청자의 chatId 값을 반환하고
      * 존재하지 않으면 채널을 생성한 뒤 해당 값을 반환 합니다.
-     * @param otherUserId 상대방 id
-     * @return 개설된 채팅 채널(channelId), 채팅방(chatId), 생성 결과(message)
      */
     @PostMapping ("/private/{otherUserId}")
     public ResponseEntity<CommonResponseDto<ChannelAndChatDto>> startPrivateChannel(@PathVariable("otherUserId") Long otherUserId,
@@ -61,8 +59,6 @@ public class ChannelController {
      * 그룹 채널을 개설합니다.
      * 그룹 채널은 ItemsStorage 에 종속된 것으로, 특정 Storage 에서 조회하여 해당 item 에 할당된 그룹 채널에 접근 가능합니다.
      * 해당 item 이 등록된 storage 의 위치 정보를 통해 주변의 그룹 채널 검색이 가능합니다.
-     * @param requestDto 창고 id (storageId), 기본 채널 제목(defaultTitle), 방 정원(limit)
-     * @return 개설된 채팅 채널(channelId), 채팅방(chatId)
      */
     @PostMapping("/group")
     public ResponseEntity<CommonResponseDto<ChannelAndChatDto>> startGroupChannel(@RequestBody StartGroupChannelRequestDto requestDto,
@@ -87,11 +83,7 @@ public class ChannelController {
         }
     }
 
-    /**
-     * 공동구매 아이템에 등록된 그룹 채팅 조회
-     * @param itemId 아이템1 id
-     * @return FindStorageChannelResponseDto 채널 id(channelId), 결과 메세지(message)
-     */
+    /** 공동구매 아이템에 등록된 그룹 채팅 조회 */
     @GetMapping("/group/{itemId}")
     public ResponseEntity<CommonResponseDto<GroupChannelDto>> findGroupChannel(@PathVariable Long itemId) {
 
@@ -103,11 +95,7 @@ public class ChannelController {
         return ResponseEntity.ok().body(new CommonResponseDto<>("조회 성공", serviceDtoOptional.get()));
     }
 
-    /**
-     * 근처에 있는 GroupChannel 을 조회합니다.
-     * @param requestDto 경도(lon) 위도(lat), 반경(rad)
-     * @return 근처 그룹 채널 정보
-     */
+    /** 근처에 있는 GroupChannel 조회 */
     @GetMapping("/group/nearby")
     public ResponseEntity<CommonResponseDto<List<GroupChannelDto>>> findGroupChannelNearby(@Valid @ModelAttribute FindGroupChannelNearbyRequestDto requestDto) {
         // 요청 정보 확인
@@ -128,13 +116,7 @@ public class ChannelController {
 
     }
 
-    /**
-     * 채팅 채널(channel)에 참여중인 유저의 정보를 조회합니다.
-     * @param channelId 조회하고자 하는 채널 id
-     * @return 총 참여자(total)
-     *         참여자 정보(List<ParticipantInfoDto>) :
-     *         참여자 id(participantId), 닉네임(nickname), 이미지링크(imgUrl)
-     */
+    /** 채팅 채널(channel)에 참여중인 유저의 정보 조회 */
     @GetMapping("/{channelId}/participants")
     public ResponseEntity<CommonResponseDto<List<ParticipantInfoDto>>> findChannelParticipants(@PathVariable("channelId") Long channelId,
                                                                                                Authentication authentication) {
@@ -148,7 +130,7 @@ public class ChannelController {
     }
 
     /**
-     * 채널을 종료 합니다.
+     * 채널 종료
      * 채널의 isClosed 필드를 이용하여 종료 처리 합니다.
      */
     @DeleteMapping("/{channelId}")
