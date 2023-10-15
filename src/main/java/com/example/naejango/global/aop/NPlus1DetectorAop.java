@@ -52,13 +52,22 @@ public class NPlus1DetectorAop {
             loggingForm.setApiUrl(request.getRequestURI());
         }
 
-        if (getCurrentLoggingForm().getQueryCounts() > 8) {
+        // 거래 등록 요청만 요청 쿼리 개수가 많아서 따로 관리, 나머지 API는 요청 쿼리가 많은것 기준으로 조건 설정
+        if (getCurrentLoggingForm().getApiMethod().equals("POST") && getCurrentLoggingForm().getApiUrl().equals("/api/transaction")){
+            printLog(21);
+        } else {
+            printLog(8);
+        }
+
+        currentLoggingForm.remove();
+    }
+
+    private void printLog(int queryCounts) {
+        if (getCurrentLoggingForm().getQueryCounts() > queryCounts) {
             logger.error(getCurrentLoggingForm().toLog());
         } else {
             logger.info(getCurrentLoggingForm().toLog());
         }
-
-        currentLoggingForm.remove();
     }
 
     private boolean isInRequestScope(final ServletRequestAttributes attributes) {
