@@ -72,7 +72,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                         distanceWithin(center, radius),
                         catEq(condition.getCategory()),
                         itemTypeIn(condition.getItemTypes()),
-                        nameLikeOr(condition.getHashTags())
+                        nameLikeOr(condition.getHashTags()),
+                        statusEq(true)
                 )
                 .limit(size)
                 .orderBy(Expressions.numberPath(Integer.class, "distance").asc())
