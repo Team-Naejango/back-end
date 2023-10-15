@@ -46,23 +46,26 @@ class MessageRepositoryTest {
     UserProfileRepository userProfileRepository;
     @PersistenceContext
     EntityManager em;
+    User testUser1; User testUser2; User testUser3; User testUser4;
+    UserProfile userProfile1; UserProfile userProfile2; UserProfile userProfile3; UserProfile userProfile4;
+    PrivateChannel channel1; GroupChannel channel2;
     @BeforeEach
     void setup() {
         // 테스트 유저 4명 등록
-        User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
-        User testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
-        User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
-        User testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
+        testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
+        testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
+        testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
+        testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
 
         userRepository.save(testUser1);
         userRepository.save(testUser2);
         userRepository.save(testUser3);
         userRepository.save(testUser4);
 
-        UserProfile userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-        UserProfile userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-        UserProfile userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-        UserProfile userProfile4 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 4 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        userProfile4 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 4 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
 
         userProfileRepository.save(userProfile1);
         userProfileRepository.save(userProfile2);
@@ -75,8 +78,8 @@ class MessageRepositoryTest {
         testUser3.setUserProfile(userProfile4);
 
         // 채팅 채널 생성
-        PrivateChannel channel1 = PrivateChannel.builder().build();
-        GroupChannel channel2 = GroupChannel.builder()
+        channel1 = PrivateChannel.builder().build();
+        channel2 = GroupChannel.builder()
                 .channelType(ChannelType.GROUP)
                 .channelLimit(5)
                 .defaultTitle("기본 설정 방제")
@@ -178,14 +181,13 @@ class MessageRepositoryTest {
         void test1() {
             // given
             User testUser2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel groupChannel = channelRepository.findGroupChannelByOwnerId(testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-            Chat chat = chatRepository.findChatByChannelIdAndOwnerId(groupChannel.getId(), testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
+            Chat chat = chatRepository.findChatByChannelIdAndOwnerId(channel2.getId(), testUser2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
 
             // when
-            List<Chat> chatList = chatRepository.findByChannelId(groupChannel.getId());
+            List<Chat> chatList = chatRepository.findByChannelId(channel2.getId());
             chatList.forEach(c -> chatMessageRepository.deleteChatMessageByChatId(c.getId()));
             em.flush(); em.clear();
-            messageRepository.deleteMessagesByChannelId(groupChannel.getId());
+            messageRepository.deleteMessagesByChannelId(channel2.getId());
             em.flush(); em.clear();
             Page<Message> result = messageRepository.findRecentMessages(chat.getId(), Pageable.ofSize(5));
 

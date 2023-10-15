@@ -13,8 +13,6 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
-import com.example.naejango.global.common.exception.CustomException;
-import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,24 +64,28 @@ class ChannelRepositoryTest {
     @Nested
     @DisplayName("채널 참여자 조회")
     class findParticipantsByChannelId {
+        User testUser1; User testUser2; User testUser3; User testUser4;
+        UserProfile userProfile1; UserProfile userProfile2; UserProfile userProfile3; UserProfile userProfile4;
+        Storage storage; Item item1;
+        PrivateChannel channel1; GroupChannel channel2;
         @BeforeEach
         @Transactional
         void setup() {
             // 테스트 유저 4명 등록
-            User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
-            User testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
-            User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
-            User testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
+            testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
+            testUser2 = User.builder().role(Role.USER).userKey("test_2").password("").build();
+            testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
+            testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
 
             userRepository.save(testUser1);
             userRepository.save(testUser2);
             userRepository.save(testUser3);
             userRepository.save(testUser4);
 
-            UserProfile userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-            UserProfile userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-            UserProfile userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
-            UserProfile userProfile4 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 4 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+            userProfile1 = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+            userProfile2 = UserProfile.builder().nickname("안씨").imgUrl("imgUrl").intro("테스트 유저 2 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+            userProfile3 = UserProfile.builder().nickname("이씨").imgUrl("imgUrl").intro("테스트 유저 3 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+            userProfile4 = UserProfile.builder().nickname("박씨").imgUrl("imgUrl").intro("테스트 유저 4 입니다.").birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
 
             userProfileRepository.save(userProfile1);
             userProfileRepository.save(userProfile2);
@@ -95,7 +97,7 @@ class ChannelRepositoryTest {
             testUser3.setUserProfile(userProfile3);
             testUser4.setUserProfile(userProfile4);
 
-            Storage storage = Storage.builder()
+            storage = Storage.builder()
                     .name("테스트 창고1")
                     .user(testUser1)
                     .location(geomUtil.createPoint(127.0368, 37.4949))
@@ -104,27 +106,20 @@ class ChannelRepositoryTest {
 
             storageRepository.save(storage);
 
-            Item item1 = Item.builder()
+            item1 = Item.builder()
                     .itemType(ItemType.GROUP_BUY)
-                    .name("테스트 아이템1")
-                    .description("")
-                    .status(true)
-                    .imgUrl("이미지 링크")
-                    .tag("아이")
-                    .viewCount(0)
-                    .storage(storage)
-                    .build();
+                    .name("테스트 아이템1").description("")
+                    .status(true).imgUrl("이미지 링크")
+                    .tag("아이템").viewCount(0).storage(storage).build();
 
             itemRepository.save(item1);
 
             // 채팅 채널 생성
-            PrivateChannel channel1 = PrivateChannel.builder().build();
-            GroupChannel channel2 = GroupChannel.builder()
+            channel1 = PrivateChannel.builder().build();
+            channel2 = GroupChannel.builder()
                     .channelType(ChannelType.GROUP)
-                    .item(item1)
-                    .channelLimit(5)
-                    .defaultTitle("기본 설정 방제")
-                    .owner(testUser2)
+                    .item(item1).owner(testUser2)
+                    .channelLimit(5).defaultTitle("기본 설정 방제")
                     .build();
 
             channelRepository.save(channel1);
@@ -190,13 +185,8 @@ class ChannelRepositoryTest {
         @Test
         @DisplayName("성공")
         void test1(){
-            // given
-            User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-            Channel channel = channelRepository.findGroupChannelByOwnerId(user2.getId()).orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
-
             // when
-            List<User> participants = channelRepository.findParticipantsByChannelId(channel.getId());
-            System.out.println("participants = " + participants);
+            List<User> participants = channelRepository.findParticipantsByChannelId(channel2.getId());
 
             // then
             assertEquals(3, participants.size());

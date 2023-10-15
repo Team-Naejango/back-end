@@ -42,10 +42,7 @@ public class ChatMessageListener implements MessageListener {
         try {
             WebSocketMessageCommandDto commandDto = objectMapper.readValue(message.getBody(), WebSocketMessageCommandDto.class);
             WebSocketMessageSendDto sendDto = commandDto.toSendDto();
-            // 채팅을 실시간으로 읽고 있는 사람에게는 완전한 정보를 보내줍니다.
             messageSender.convertAndSend(SUBSCRIBE_CHANNEL.getEndpointPrefix() + commandDto.getChannelId(), sendDto);
-            // 채팅탭에 머물고 있는 사람은 보낸 사람의 정보를 주지 않습니다.
-            messageSender.convertAndSend(SUBSCRIBE_LOUNGE.getEndpointPrefix() + commandDto.getChannelId(), sendDto.toLoungeMessage());
         } catch (IOException e) {
             throw new WebSocketException(ErrorCode.FORGED_REQUEST);
         }
