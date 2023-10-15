@@ -99,6 +99,7 @@ public class UserService {
         return new UserProfileDto(user.getUserProfile());
     }
 
+    /** 유저 프로필 수정 */
     @Transactional
     public void modifyUserProfile(ModifyUserProfileCommandDto commandDto) {
         UserProfile userProfile = userProfileRepository.findUserProfileByUserId(commandDto.getUserId())
