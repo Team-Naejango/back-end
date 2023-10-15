@@ -185,7 +185,7 @@ class ItemRepositoryTest {
                     .findItemsByConditions(center, 1000, 0, 5, null, new String[]{}, ItemType.INDIVIDUAL_BUY, true);
 
             // then
-            assertEquals(itemsByConditions.size(), 4); // 청바지, 모니터, 휴지, 셔츠
+            assertEquals(3, itemsByConditions.size()); // 청바지, 모니터, 휴지
 
         }
 
@@ -239,7 +239,7 @@ class ItemRepositoryTest {
             Category cat3 = categoryRepository.findByName("생필품").orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
             Item item1 = Item.builder().storage(testStorage4).name("청바지").tag("청바지").status(true).itemType(ItemType.INDIVIDUAL_BUY).category(cat1).description("").imgUrl("").viewCount(0).build();
-            Item item2 = Item.builder().storage(testStorage5).name("자켓").tag("자켓").status(true).itemType(ItemType.INDIVIDUAL_SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
+            Item item2 = Item.builder().storage(testStorage5).name("자켓").tag("자켓").status(false).itemType(ItemType.INDIVIDUAL_SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
             Item item3 = Item.builder().storage(testStorage6).name("셔츠").tag("셔츠").status(false).itemType(ItemType.INDIVIDUAL_BUY).category(cat1).description("").imgUrl("").viewCount(0).build();
             Item item4 = Item.builder().storage(testStorage7).name("면바지").tag("면바지").status(false).itemType(ItemType.INDIVIDUAL_SELL).category(cat1).description("").imgUrl("").viewCount(0).build();
             Item item5 = Item.builder().storage(testStorage4).name("모니터").tag("모니터").status(true).itemType(ItemType.INDIVIDUAL_BUY).category(cat2).description("").imgUrl("").viewCount(0).build();
@@ -299,7 +299,7 @@ class ItemRepositoryTest {
         }
 
         @Test
-        @DisplayName("매칭 실패")
+        @DisplayName("매칭 실패 : status 가 false")
         void test3() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
@@ -308,7 +308,7 @@ class ItemRepositoryTest {
                     .name("자켓")
                     .tag("자켓 청자켓 리바이스")
                     .category(category)
-                    .itemType(ItemType.INDIVIDUAL_SELL)
+                    .itemType(ItemType.INDIVIDUAL_BUY)
                     .status(true)
                     .build();
 
