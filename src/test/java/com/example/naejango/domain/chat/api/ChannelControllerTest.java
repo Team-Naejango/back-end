@@ -572,7 +572,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .summary("채널 종료")
                             .description("채널을 종료 합니다. \n\n" +
                                     "채널에 참여할 수 없고, 메세지를 주고 받지 못합니다. \n\n" +
-                                    "그룹 채팅의 경우 근처 채널 조회에서 조회되지 않습니다.")
+                                    "근처 채널 조회에서 조회되지 않습니다.")
                             .responseFields(
                                     fieldWithPath("message").description("메세지"),
                                     fieldWithPath("result").description("null")
