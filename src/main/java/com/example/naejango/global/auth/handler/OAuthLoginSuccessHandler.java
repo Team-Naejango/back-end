@@ -1,8 +1,7 @@
 package com.example.naejango.global.auth.handler;
 
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
-import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.auth.repository.RefreshTokenRepository;
+import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +18,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtGenerator jwtGenerator;
     private final AuthenticationHandler authenticationHandler;
+    private final JwtIssuer jwtIssuer;
     private final JwtCookieHandler jwtCookieHandler;
     private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
     private final String localRedirectUrl = "https://localhost:3000/oauth/kakaoCallback";
@@ -42,20 +40,10 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) throws IOException {
-        String redirection = localRedirectUrl;
-
-        String role = authenticationHandler.getRole(authentication).name();
         Long userId = authenticationHandler.getUserId(authentication);
 
-        String accessToken = jwtGenerator.generateAccessToken(userId);
-        String refreshToken = jwtGenerator.generateRefreshToken(userId);
-        jwtCookieHandler.addAccessTokenCookie(accessToken, response);
-        jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
-        refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+        jwtIssuer.issueTokenCookie(userId, response);
 
-        redirection += "?loginStatus=" + role;
-        redirection += "&accessToken=" + accessToken; // 로컬 개발 환경
-
-        response.sendRedirect(redirection);
+        response.sendRedirect(localRedirectUrl);
     }
 }

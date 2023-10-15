@@ -1,6 +1,6 @@
 package com.example.naejango.global.auth.filter;
 
-import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
+import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final JwtCookieHandler jwtCookieHandler;
-    private final AccessTokenReissuer accessTokenReissuer;
+    private final JwtIssuer jwtIssuer;
 
     /**
      * Authentication 에 실패한 경우 진입하는 EntryPoint 입니다.
@@ -32,8 +32,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null && jwtCookieHandler.hasRefreshTokenCookie(request)) {
-            jwtCookieHandler.deleteAccessTokenCookie(request, response);
-            String reissuedAccessToken = accessTokenReissuer.reissueAccessToken(request)
+            String reissuedAccessToken = jwtIssuer.reissueAccessToken(request)
                     .orElseThrow(() -> new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE));
             throw new TokenException(ErrorCode.ACCESS_TOKEN_REISSUE, reissuedAccessToken);
         }
