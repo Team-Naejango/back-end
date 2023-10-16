@@ -197,16 +197,15 @@ tasks.named('test', Test) {
 
 task copyPrivateConfig(type: Copy) {
 	copy {
-		from './submodule-data'
+		from './submodule-data/main'
 		include "*.yml"
-		exclude "application-test.yml"
 		into 'src/main/resources'
 	}
 }
 task copyTestConfig(type: Copy) {
 	copy {
-		from './submodule-data'
-		include"application-test.yml"
+		from './submodule-data/test'
+		include "*.yml"
 		into 'src/test/resources'
 	}
 }
