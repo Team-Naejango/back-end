@@ -27,7 +27,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
@@ -84,7 +83,6 @@ class UserControllerTest extends RestDocsSupportTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson)
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -220,7 +218,6 @@ class UserControllerTest extends RestDocsSupportTest {
                     RestDocumentationRequestBuilders
                             .get("/api/user/profile/{userId}", user.getId())
                             .header("Authorization", "access token")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             verify(userServiceMock, times(1)).findUserProfile(user.getId());
@@ -335,7 +332,6 @@ class UserControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .delete("/api/user")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then

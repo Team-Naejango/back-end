@@ -6,14 +6,15 @@ import com.example.naejango.domain.notification.application.NotificationService;
 import com.example.naejango.domain.notification.domain.NotificationType;
 import com.example.naejango.domain.notification.dto.response.NotificationResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -50,7 +51,6 @@ class NotificationControllerTest extends RestDocsSupportTest {
                 .get("/api/subscribe")
                 .header("Authorization", "JWT")
                 .contentType(MediaType.TEXT_EVENT_STREAM_VALUE)
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
         // then

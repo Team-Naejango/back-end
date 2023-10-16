@@ -26,7 +26,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -106,7 +105,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -185,7 +183,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                     .get("/api/item/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -255,7 +252,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                     .queryParam("status", "true")
                     .characterEncoding(StandardCharsets.UTF_8)
                     .header("Authorization", "엑세스 토큰")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -278,8 +274,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                                     parameterWithName("categoryId").description("카테고리 ID").optional(),
                                     parameterWithName("keyword").description("검색 키워드(2~10자)").optional(),
                                     parameterWithName("itemType").description("타입 (INDIVIDUAL_BUY/ INDIVIDUAL_SELL/ GROUP_BUY)").optional(),
-                                    parameterWithName("status").description("상태 (true 거래중/false 거래완료)").optional(),
-                                    parameterWithName("_csrf").ignored()
+                                    parameterWithName("status").description("상태 (true 거래중/false 거래완료)").optional()
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
                                     fieldWithPath("result[].storageId").description("창고 ID"),
@@ -351,7 +346,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                     .queryParam("itemId", "32452")
                     .characterEncoding(StandardCharsets.UTF_8)
                     .header("Authorization", "엑세스 토큰")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -368,8 +362,7 @@ class ItemControllerTest extends RestDocsSupportTest {
                             .requestParameters(
                                     parameterWithName("rad").description("반경 (1,000~5,000m)").defaultValue("1000").optional(),
                                     parameterWithName("size").description("매치 결과물 수 (1~10)").defaultValue("5").optional(),
-                                    parameterWithName("itemId").description("아이템 ID"),
-                                    parameterWithName("_csrf").ignored()
+                                    parameterWithName("itemId").description("아이템 ID")
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
                                     fieldWithPath("result[].itemId").description("아이템 ID"),
@@ -436,7 +429,6 @@ class ItemControllerTest extends RestDocsSupportTest {
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then

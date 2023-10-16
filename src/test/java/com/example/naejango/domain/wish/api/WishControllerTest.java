@@ -14,7 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -63,7 +62,6 @@ class WishControllerTest extends RestDocsSupportTest {
                     .get("/api/wish")
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -113,7 +111,6 @@ class WishControllerTest extends RestDocsSupportTest {
                     .post("/api/wish/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -160,7 +157,6 @@ class WishControllerTest extends RestDocsSupportTest {
                     .delete("/api/wish/{itemId}", itemId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then

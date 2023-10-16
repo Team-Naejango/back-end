@@ -30,7 +30,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
@@ -78,7 +77,6 @@ class StorageControllerTest extends RestDocsSupportTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
                 .header("Authorization", "엑세스 토큰")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
         );
 
         // then
@@ -144,7 +142,6 @@ class StorageControllerTest extends RestDocsSupportTest {
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .get("/api/storage")
                     .header("Authorization", "엑세스 토큰")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -219,7 +216,6 @@ class StorageControllerTest extends RestDocsSupportTest {
                     .queryParam("rad", "1000")
                     .queryParam("page", "0")
                     .queryParam("size", "10")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -240,8 +236,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                                     parameterWithName("lat").description("위도"),
                                     parameterWithName("rad").description("반경").defaultValue("1000").optional(),
                                     parameterWithName("page").description("조회 페이지").defaultValue("0").optional(),
-                                    parameterWithName("size").description("조회 결과물 수").defaultValue("20").optional(),
-                                    parameterWithName("_csrf").ignored()
+                                    parameterWithName("size").description("조회 결과물 수").defaultValue("20").optional()
                             ).responseFields(
                                     fieldWithPath("message").description("조회결과 메세지"),
                                     fieldWithPath("result[]").description("조회된 창고 리스트"),
@@ -356,7 +351,7 @@ class StorageControllerTest extends RestDocsSupportTest {
                 .header("Authorization", "엑세스 토큰")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto))
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+        );
 
         // then
         verify(storageServiceMock, times(1)).modifyStorageInfo(anyLong(), anyLong(), anyString(), anyString(), anyString());
@@ -398,7 +393,7 @@ class StorageControllerTest extends RestDocsSupportTest {
         ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                 .delete("/api/storage/{storageId}", storage.getId())
                 .header("Authorization", "엑세스 토큰")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+        );
 
         // then
         verify(storageServiceMock, times(1)).deleteStorage(anyLong(), anyLong());

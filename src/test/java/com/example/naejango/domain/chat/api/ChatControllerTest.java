@@ -79,7 +79,6 @@ class ChatControllerTest extends RestDocsSupportTest {
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
                             .post("/api/chat/group/{channelId}", channel.getId())
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -105,7 +104,6 @@ class ChatControllerTest extends RestDocsSupportTest {
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
                             .post("/api/chat/group/{channelId}", channel.getId())
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -129,7 +127,6 @@ class ChatControllerTest extends RestDocsSupportTest {
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
                             .post("/api/chat/group/{channelId}", channel.getId())
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -297,7 +294,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                     RestDocumentationRequestBuilders
                             .get("/api/chat/{channelId}", channel1.getId())
                             .header("Authorization", "Bearer {accessToken}")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -320,7 +317,7 @@ class ChatControllerTest extends RestDocsSupportTest {
                     RestDocumentationRequestBuilders
                             .get("/api/chat/{channelId}", channel1.getId())
                             .header("Authorization", "Bearer {accessToken}")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -379,7 +376,6 @@ class ChatControllerTest extends RestDocsSupportTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .characterEncoding(StandardCharsets.UTF_8)
                             .content(objectMapper.writeValueAsString(requestDto))
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -435,7 +431,6 @@ class ChatControllerTest extends RestDocsSupportTest {
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
                             .delete("/api/chat/{channelId}", channel.getId())
-                            .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then

@@ -32,7 +32,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
@@ -81,7 +80,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     RestDocumentationRequestBuilders
                             .post("/api/channel/private/{receiverId}", receiver.getId())
                             .header("Authorization", "Bearer {accessToken}")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -108,7 +107,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     RestDocumentationRequestBuilders
                             .post("/api/channel/private/{receiverId}", receiver.getId())
                             .header("Authorization", "Bearer {accessToken}")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -207,7 +206,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .content(objectMapper.writeValueAsString(normalRequestDto))
                             .header("Authorization", "Bearer {accessToken}")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -237,7 +236,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .characterEncoding(StandardCharsets.UTF_8)
                             .content(objectMapper.writeValueAsString(normalRequestDto))
                             .header("Authorization", "Bearer {accessToken}")
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -305,7 +304,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .get("/api/channel/group/{itemId}", item.getId())
-                    .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             resultActions.andExpect(status().isOk())
@@ -324,7 +323,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .get("/api/channel/group/{itemId}", item.getId())
-                    .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             resultActions.andExpect(status().isOk())
@@ -424,7 +423,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     .queryParam("lon", String.valueOf(coord.getLongitude()))
                     .queryParam("lat", String.valueOf(coord.getLatitude()))
                     .queryParam("rad", String.valueOf(radius))
-                    .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             resultActions.andExpect(status().isNotFound());
@@ -448,7 +447,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                     .queryParam("lon", String.valueOf(coord.getLongitude()))
                     .queryParam("lat", String.valueOf(coord.getLatitude()))
                     .queryParam("rad", String.valueOf(radius))
-                    .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             resultActions.andExpect(status().isOk());
@@ -464,8 +463,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
                             .requestParameters(
                                     parameterWithName("lon").description("조회하고자 하는 중심 경도"),
                                     parameterWithName("lat").description("조회하고자 하는 중심 위도"),
-                                    parameterWithName("rad").description("조회 반경").defaultValue("1000").optional(),
-                                    parameterWithName("_csrf").ignored()
+                                    parameterWithName("rad").description("조회 반경").defaultValue("1000").optional()
                             ).responseFields(
                                     fieldWithPath("message").description("조회 결과 메세지"),
                                     fieldWithPath("result[]").description("조회한 그룹 채널 정보"),
@@ -512,7 +510,7 @@ class ChannelControllerTest extends RestDocsSupportTest {
             ResultActions resultActions = mockMvc.perform(
                     RestDocumentationRequestBuilders
                             .get("/api/channel/{channelId}/participants", groupChannel.getId())
-                            .with(SecurityMockMvcRequestPostProcessors.csrf()));
+            );
 
             // then
             verify(authenticationHandlerMock, times(1)).getUserId(any());
@@ -561,7 +559,6 @@ class ChannelControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .delete("/api/channel/{channelId}", 1L)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then

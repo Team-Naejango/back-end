@@ -16,7 +16,6 @@ import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
@@ -100,7 +99,6 @@ class MessageControllerTest extends RestDocsSupportTest {
                     .get("/api/message/{chatId}", 2L)
                     .queryParam("page", "0")
                     .queryParam("size", "20")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -114,8 +112,8 @@ class MessageControllerTest extends RestDocsSupportTest {
                                     "한번에 최대 300개의 메세지를 로드합니다.")
                             .requestParameters(
                                     parameterWithName("page").description("조회 페이지").defaultValue("0").optional(),
-                                    parameterWithName("size").description("조회 결과물 수").defaultValue("25").optional(),
-                                    parameterWithName("_csrf").ignored())
+                                    parameterWithName("size").description("조회 결과물 수").defaultValue("25").optional()
+                            )
                             .responseFields(
                                     fieldWithPath("message").description("결과 메세지"),
                                     fieldWithPath("result[].messageId").description("메세지 id"),

@@ -24,7 +24,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -79,7 +78,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .get("/api/transaction")
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -134,7 +132,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .get("/api/transaction/{transactionId}", transactionId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -195,7 +192,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .get("/api/transaction/trader/{traderId}", traderId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -275,7 +271,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -337,7 +332,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .patch("/api/transaction/{transactionId}/remit", transactionId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -385,7 +379,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .patch("/api/transaction/{transactionId}/complete", transactionId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -449,7 +442,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
@@ -503,7 +495,6 @@ class TransactionControllerTest extends RestDocsSupportTest {
                     .delete("/api/transaction/{transactionId}", transactionId)
                     .header("Authorization", "JWT")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then

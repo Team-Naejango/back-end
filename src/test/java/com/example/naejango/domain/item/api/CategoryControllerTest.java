@@ -11,7 +11,6 @@ import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 @WebMvcTest(CategoryController.class)
@@ -50,7 +48,6 @@ class CategoryControllerTest extends RestDocsSupportTest {
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                     .get("/api/category")
-                    .with(SecurityMockMvcRequestPostProcessors.csrf())
             );
 
             // then
