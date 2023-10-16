@@ -34,7 +34,7 @@ public class JwtValidator {
     public Optional<Long> validateAccessToken(String accessToken) {
         if (accessToken == null) return Optional.empty();
 
-        DecodedJWT decodedAccessToken = decodeJwt(accessToken);
+        DecodedJWT decodedAccessToken = decodeAccessToken(accessToken);
         if (isExpiredToken(decodedAccessToken)) return Optional.empty();
 
         return Optional.of(decodedAccessToken.getClaim("userId").asLong());
@@ -49,7 +49,7 @@ public class JwtValidator {
     public Optional<Long> validateRefreshToken(String refreshToken) {
         if (refreshToken == null) return Optional.empty();
 
-        DecodedJWT decodedRefreshToken = decodeJwt(refreshToken);
+        DecodedJWT decodedRefreshToken = decodeRefreshToken(refreshToken);
         if(isExpiredToken(decodedRefreshToken)) return Optional.empty();
 
         Long userId = decodedRefreshToken.getClaim("userId").asLong();
@@ -76,9 +76,18 @@ public class JwtValidator {
         return null;
     }
 
-    private DecodedJWT decodeJwt(String token){
+    private DecodedJWT decodeAccessToken(String accessToken){
         try {
-            return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token);
+            return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET_A)).build().verify(accessToken);
+        } catch (JWTVerificationException | IllegalArgumentException e) {
+            // Token 이 있으나 복호화 실패
+            throw new CustomException(ErrorCode.TOKEN_DECRYPTION_FAILURE);
+        }
+    }
+
+    private DecodedJWT decodeRefreshToken(String refreshToken){
+        try {
+            return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET_B)).build().verify(refreshToken);
         } catch (JWTVerificationException | IllegalArgumentException e) {
             // Token 이 있으나 복호화 실패
             throw new CustomException(ErrorCode.TOKEN_DECRYPTION_FAILURE);

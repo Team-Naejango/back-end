@@ -21,7 +21,7 @@ public class JwtGenerator {
                 .withClaim("userId", userId)
                 .withExpiresAt(LocalDateTime.now().plusMinutes(JwtProperties.ACCESS_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
     }
 
     /**
@@ -34,6 +34,6 @@ public class JwtGenerator {
                     .withClaim("userId", userId)
                     .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME).toInstant(ZoneOffset.of("+9")))
                     .withIssuer(JwtProperties.ISS)
-                    .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                    .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
     }
 }
