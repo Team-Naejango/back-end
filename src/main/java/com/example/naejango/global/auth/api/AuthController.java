@@ -96,13 +96,13 @@ public class AuthController {
                 .withClaim("userId", guestId)
                 .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
 
         String refreshToken = JWT.create()
                 .withClaim("userId", guestId)
                 .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
 
         refreshTokenRepository.saveRefreshToken(guestId, refreshToken);
         jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);

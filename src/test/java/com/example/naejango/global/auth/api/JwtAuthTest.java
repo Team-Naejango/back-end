@@ -61,7 +61,7 @@ public class JwtAuthTest {
                 .withClaim("userId", testUser.getId())
                 .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME + 1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
 
         accessTokenInvalid = "fake";
         refreshTokenInvalid = "fake";
