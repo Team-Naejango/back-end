@@ -22,14 +22,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -186,8 +185,8 @@ class ChatRepositoryTest {
 
             // when
             Optional<ChannelAndChatDto> result = chatRepository.findPrivateChannelBetweenUsers(owner.getId(), theOther.getId());
-            Page<ChatInfoDto> chat = chatRepository.findChatByOwnerIdOrderByLastChat(owner.getId(), PageRequest.of(0, 1));
-            Long channelId = chat.getContent().get(0).getChannelId();
+            List<ChatInfoDto> chat = chatRepository.findChatByOwnerIdOrderByLastChat(owner.getId(), 0, 1);
+            Long channelId = chat.get(0).getChannelId();
 
             // then
             assertTrue(result.isPresent());
@@ -208,7 +207,6 @@ class ChatRepositoryTest {
             assertTrue(result.isEmpty());
         }
 
-
     }
 
     @Nested
@@ -221,10 +219,10 @@ class ChatRepositoryTest {
             User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
             // when
-            Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(user2.getId(), PageRequest.of(0, 5));
+            List<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(user2.getId(), 0, 5);
 
             // then
-            assertEquals(2, result.getTotalElements());
+            assertEquals(2, result.size());
         }
 
         @Test
@@ -235,11 +233,11 @@ class ChatRepositoryTest {
 
 
             // when
-            Page<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(user2.getId(), PageRequest.of(0, 5));
+            List<ChatInfoDto> result = chatRepository.findChatByOwnerIdOrderByLastChat(user2.getId(), 0, 5);
 
             // then
-            assertEquals(2, result.getTotalElements());
-            ChatInfoDto chatInfoDto = result.getContent().get(0);
+            assertEquals(2, result.size());
+            ChatInfoDto chatInfoDto = result.get(0);
             assertEquals("메세지2", chatInfoDto.getLastMessage());
         }
     }
