@@ -71,7 +71,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                         distanceWithin(center, radius),
                         catEq(condition.getCategory()),
                         itemTypeIn(condition.getItemTypes()),
-                        nameLikeOr(condition.getHashTags())
+                        nameLikeOr(condition.getHashTags()),
+                        statusTrue()
                 )
                 .limit(size)
                 .orderBy(Expressions.numberPath(Integer.class, "distance").asc())
@@ -107,5 +108,9 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
     private BooleanExpression catEq(Category category) {
         return category != null? QCategory.category.eq(category) : null;
+    }
+
+    private BooleanExpression statusTrue() {
+        return item.status.eq(true);
     }
 }
