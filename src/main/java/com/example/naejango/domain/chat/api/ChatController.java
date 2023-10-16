@@ -8,7 +8,6 @@ import com.example.naejango.domain.chat.dto.request.ChangeChatTitleRequestDto;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -62,18 +61,16 @@ public class ChatController {
         Long userId = authenticationHandler.getUserId(authentication);
 
         // 조회
-        Page<ChatInfoDto> serviceDto = chatService.myChatList(userId, page, size);
+        List<ChatInfoDto> serviceDto = chatService.myChatList(userId, page, size);
 
         return ResponseEntity.ok().body(
-                new CommonResponseDto<>("조회 성공", serviceDto.getContent())
+                new CommonResponseDto<>("조회 성공", serviceDto)
         );
     }
 
     /**
-     * 요청 회원이 참여한 채널의 채팅방 id 를 찾습니다.
+     * 요청 회원이 참여한 채널의 ChatId 를 찾습니다.
      * 채널에 참여 중이면 Chat 을 반환 합니다.
-     * @param channelId 채널 id
-     * @return 채널 참여 여부(hasChat), 챗 id(chatId)
      */
     @GetMapping("/{channelId}")
     public ResponseEntity<CommonResponseDto<Long>> findChatByChannelId(@PathVariable("channelId") Long channelId,
@@ -87,10 +84,7 @@ public class ChatController {
     }
 
     /**
-     * 채팅방의 제목을 변경합니다. *채널 제목 아님
-     * @param requestDto 새로운 채팅방 제목(title)
-     * @param chatId 변경하고자 하는 채팅방 id
-     * @return 변경된 채팅방 id, 새로운 채팅방 제목(changedTitle)
+     * Chat 의 제목을 변경합니다.
      */
     @PatchMapping("/{chatId}")
     public ResponseEntity<CommonResponseDto<String>> changeChatTitle(@RequestBody @Valid ChangeChatTitleRequestDto requestDto,
@@ -112,8 +106,6 @@ public class ChatController {
      * 그룹 채팅의 경우, Chat 과 연관된 ChatMessage 모두 삭제되며, channel 의 participantsCount 가 감소합니다.
      * Channel 과 연관된 ChatMessage 가 없으면 채널에 아무도 남지 않았다고 판단합니다.
      * 채널에 아무도 남지 않으면 Channel, Chat, ChatMessage, Message 가 전부 삭제됩니다.
-     * @param channelId 나가고자 하는 채널 id(channelId)
-     * @return 삭제된 채팅방 id(chatId), 삭제 메세지(message)
      */
     @DeleteMapping("/{channelId}")
     public ResponseEntity<CommonResponseDto<Long>> deleteChat(@PathVariable("channelId") Long channelId,

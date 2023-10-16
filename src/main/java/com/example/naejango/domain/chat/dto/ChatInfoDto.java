@@ -21,11 +21,11 @@ public class ChatInfoDto {
     private Long itemId;
     private Long chatId;
     private String title;
-    private long unreadCount;
+    private int unreadCount;
     private String lastMessage;
     private LocalDateTime lastChatAt;
 
-    public ChatInfoDto(Chat chat, Channel channel, long unreadCount) {
+    public ChatInfoDto(Chat chat, Channel channel, Integer unreadCount) {
         this.channelId = chat.getChannel().getId();
         this.channelType = chat.getChannel().getChannelType();
         this.participantsCount = channel.getChannelType().equals(ChannelType.GROUP)? ((GroupChannel)channel).getParticipantsCount() : 0;
