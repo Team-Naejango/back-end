@@ -2,12 +2,17 @@ package com.example.naejango.global.auth.api;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.naejango.domain.account.domain.Account;
+import com.example.naejango.domain.account.repository.AccountRepository;
+import com.example.naejango.domain.user.domain.Gender;
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
+import com.example.naejango.domain.user.domain.UserProfile;
+import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
-import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +27,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -30,16 +37,17 @@ import java.time.ZoneOffset;
 import static com.example.naejango.global.auth.jwt.JwtProperties.*;
 
 @SpringBootTest
-@ActiveProfiles("Test")
+@ActiveProfiles({"Test"})
+@Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @AutoConfigureMockMvc
 public class JwtAuthTest {
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RefreshTokenRepository refreshTokenRepository;
+    @Autowired MockMvc mockMvc;
+    @Autowired UserRepository userRepository;
+    @Autowired UserProfileRepository userProfileRepository;
+    @Autowired RefreshTokenRepository refreshTokenRepository;
+    @Autowired AccountRepository accountRepository;
+    @Autowired EntityManager em;
     @Autowired
     JwtGenerator jwtGenerator;
     User testUser;
@@ -51,8 +59,17 @@ public class JwtAuthTest {
     String refreshTokenNotRegistered;
 
     @BeforeEach
+    @Transactional
     void setup(){
-        testUser = userRepository.findByUserKey("test_1").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        testUser = User.builder().role(Role.USER).userKey("test_1").password("").build();
+        UserProfile userProfile = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").
+                birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
+        Account account = Account.builder().user(testUser).build();
+        userRepository.save(testUser);
+        userProfileRepository.save(userProfile);
+        accountRepository.save(account);
+
+        testUser.setUserProfile(userProfile);
 
         accessTokenNormal = jwtGenerator.generateAccessToken(testUser.getId());
         refreshTokenNormal = jwtGenerator.generateRefreshToken(testUser.getId());
@@ -61,15 +78,13 @@ public class JwtAuthTest {
                 .withClaim("userId", testUser.getId())
                 .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME + 1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
 
         accessTokenInvalid = "fake";
         refreshTokenInvalid = "fake";
 
         accessTokenUserNotFound = jwtGenerator.generateAccessToken(90384769835L);
         accessTokenUserNotFound = jwtGenerator.generateAccessToken(90384769835L);
-
-
     }
 
     @Nested

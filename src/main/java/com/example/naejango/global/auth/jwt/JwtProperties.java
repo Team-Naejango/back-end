@@ -7,8 +7,10 @@ import javax.annotation.PostConstruct;
 
 @Component
 public class JwtProperties {
-    @Value("${jwt.secret}")
-    private String secret;
+    @Value("${jwt.secretA}")
+    private String secretA;
+    @Value("${jwt.secretB}")
+    private String secretB;
     @Value("${jwt.access-token.cookieName}")
     private String accessTokenCookieName;
     @Value("${jwt.access-token.header}")
@@ -24,7 +26,8 @@ public class JwtProperties {
     @Value("${jwt.iss}")
     private String iss;
 
-    public static String SECRET;
+    public static String SECRET_A;
+    public static String SECRET_B;
     public static String ACCESS_TOKEN_COOKIE_NAME;
     public static String ACCESS_TOKEN_HEADER;
     public static String ACCESS_TOKEN_PREFIX;
@@ -35,7 +38,8 @@ public class JwtProperties {
 
     @PostConstruct
     public void init(){
-        SECRET = secret;
+        SECRET_A = secretA;
+        SECRET_B = secretB;
 
         ACCESS_TOKEN_COOKIE_NAME = accessTokenCookieName;
         ACCESS_TOKEN_HEADER = accessTokenHeader;

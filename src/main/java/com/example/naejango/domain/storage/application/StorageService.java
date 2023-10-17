@@ -69,7 +69,7 @@ public class StorageService {
     }
 
     public List<StorageInfoWithDistanceDto> searchStorage (Point center, int radius, int page, int size) {
-        List<StorageAndDistanceDto> storages = storageRepository.findStorageNearby(center, radius, PageRequest.of(page, size));
+        List<StorageAndDistanceDto> storages = storageRepository.findStorageNearby(center, radius, page, size);
         return storages.stream().map(storage -> new StorageInfoWithDistanceDto(storage.getStorage(), storage.getDistance())).collect(Collectors.toList());
     }
 

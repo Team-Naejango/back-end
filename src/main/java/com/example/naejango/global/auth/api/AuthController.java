@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.global.auth.jwt.AccessTokenReissuer;
+import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.jwt.JwtValidator;
@@ -38,7 +38,7 @@ public class AuthController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtCookieHandler jwtCookieHandler;
     private final JwtValidator jwtValidator;
-    private final AccessTokenReissuer accessTokenReissuer;
+    private final JwtIssuer jwtIssuer;
 
     /**
      * 현재 가지고 있는 RefreshToken 쿠키(및 AccessToken 쿠키)를 만료시키고
@@ -61,7 +61,7 @@ public class AuthController {
 
     @GetMapping("/refresh")
     public ResponseEntity<CommonResponseDto<String>> refreshAccessToken(HttpServletRequest request) {
-        String reissuedAccessToken = accessTokenReissuer.reissueAccessToken(request)
+        String reissuedAccessToken = jwtIssuer.reissueAccessToken(request)
                 .orElseThrow(() -> new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE));
 
         return ResponseEntity.ok().body(new CommonResponseDto<>("엑세스 토큰을 재발급 합니다.", reissuedAccessToken));
@@ -77,7 +77,7 @@ public class AuthController {
                                                            Authentication authentication) {
         if (jwtCookieHandler.hasRefreshTokenCookie(request)){
             jwtCookieHandler.deleteAccessTokenCookie(request, response);
-            String reissueAccessToken = accessTokenReissuer.reissueAccessToken(request)
+            String reissueAccessToken = jwtIssuer.reissueAccessToken(request)
                     .orElseThrow(() -> new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE));
             jwtCookieHandler.addAccessTokenCookie(reissueAccessToken, response);
             throw new TokenException(ErrorCode.TOKEN_ALREADY_EXIST, reissueAccessToken);
@@ -96,13 +96,13 @@ public class AuthController {
                 .withClaim("userId", guestId)
                 .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
 
         String refreshToken = JWT.create()
                 .withClaim("userId", guestId)
                 .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
 
         refreshTokenRepository.saveRefreshToken(guestId, refreshToken);
         jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);

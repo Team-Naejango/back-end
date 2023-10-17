@@ -1,9 +1,6 @@
 package com.example.naejango.domain.storage.repository;
 
 import com.example.naejango.domain.storage.domain.Storage;
-import com.example.naejango.domain.storage.dto.StorageAndDistanceDto;
-import org.locationtech.jts.geom.Point;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,20 +10,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface StorageRepository extends JpaRepository<Storage, Long> {
+public interface StorageRepository extends JpaRepository<Storage, Long>, StorageRepositoryCustom {
 
     /* 회원 id를 기준으로 조회 */
     @Query("select s from Storage s where s.user.id = :userId ORDER BY s.createdDate DESC")
     List<Storage> findByUserId(@Param("userId") Long userId);
 
-    /* 특정 좌표 및 반경 내에 있는 모든 창고 조회 */
-    @Query("select NEW com.example.naejango.domain.storage.dto.StorageAndDistanceDto(s, ROUND(CAST(ST_DistanceSphere(:center, s.location) AS double)) AS distance) " +
-            "from Storage s where St_DWithin(:center, s.location, :radius, false) = true ORDER BY distance ASC ")
-    List<StorageAndDistanceDto> findStorageNearby (@Param("center") Point center, @Param("radius") int radius, Pageable pageable);
-
+    /* 창고 id로 회원 id 조회 */
     @Query("select s.user.id from Storage s where s.id = :storageId")
     Long findUserIdByStorageId(@Param("storageId") Long StorageId);
 
-    /** 창고 id와 회원 id로 창고 조회 */
+    /* 창고 id와 회원 id로 창고 조회 */
     Optional<Storage> findByIdAndUserId(Long id, Long userId);
 }

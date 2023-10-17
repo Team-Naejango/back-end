@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @DataJpaTest
+@ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class StorageRepositoryTest {
@@ -95,8 +96,8 @@ class StorageRepositoryTest {
         storageRepository.save(testStorage3);
 
         // when
-        List<StorageAndDistanceDto> result1 = storageRepository.findStorageNearby(testStorage2.getLocation(), 2000, PageRequest.of(0, 10));
-        List<StorageAndDistanceDto> result2 = storageRepository.findStorageNearby(testStorage1.getLocation(), 3000, PageRequest.of(0, 10));
+        List<StorageAndDistanceDto> result1 = storageRepository.findStorageNearby(testStorage2.getLocation(), 2000, 0, 10);
+        List<StorageAndDistanceDto> result2 = storageRepository.findStorageNearby(testStorage1.getLocation(), 3000, 0, 10);
 
         // then
 

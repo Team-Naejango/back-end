@@ -47,7 +47,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .where(catEq(cat),
                         itemTypeEq(itemType),
                         nameLikeAnd(keywords),
-                        distanceWithin(center, radius)
+                        distanceWithin(center, radius),
+                        statusEq(status)
                 )
                 .offset((long) page * size)
                 .limit(size)
@@ -72,7 +73,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                         catEq(condition.getCategory()),
                         itemTypeIn(condition.getItemTypes()),
                         nameLikeOr(condition.getHashTags()),
-                        statusTrue()
+                        statusEq(true)
                 )
                 .limit(size)
                 .orderBy(Expressions.numberPath(Integer.class, "distance").asc())
@@ -110,7 +111,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return category != null? QCategory.category.eq(category) : null;
     }
 
-    private BooleanExpression statusTrue() {
-        return item.status.eq(true);
+    private BooleanExpression statusEq(Boolean status) {
+        return status != null? item.status.eq(status) : null;
     }
 }

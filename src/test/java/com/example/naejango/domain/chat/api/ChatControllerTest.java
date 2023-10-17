@@ -21,9 +21,6 @@ import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -205,9 +202,8 @@ class ChatControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             List<ChatInfoDto> dtoList = List.of(chatInfo3, chatInfo2, chatInfo1);
-            Page<ChatInfoDto> pagingResult = new PageImpl<>(dtoList, Pageable.unpaged(), dtoList.size());
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(user.getId());
-            BDDMockito.given(chatServiceMock.myChatList(user.getId(), 0, 10)).willReturn(pagingResult);
+            BDDMockito.given(chatServiceMock.myChatList(user.getId(), 0, 10)).willReturn(dtoList);
 
             // when
             ResultActions resultActions = mockMvc.perform(

@@ -29,6 +29,7 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -48,30 +49,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ActiveProfiles("Test")
+@ActiveProfiles({"test"})
+@Transactional
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Slf4j
 public class WebSocketTest {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    UserProfileRepository userProfileRepository;
-    @Autowired
-    ChatRepository chatRepository;
-    @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
-    MessageRepository messageRepository;
-    @Autowired
-    ChatMessageRepository chatMessageRepository;
-    @Autowired
-    ChannelRepository channelRepository;
-    @Autowired
-    JwtGenerator jwtGenerator;
-
-    @Autowired
-    DataSourceProperties dataSourceProperties;
+    @Autowired UserRepository userRepository;
+    @Autowired UserProfileRepository userProfileRepository;
+    @Autowired ChatRepository chatRepository;
+    @Autowired ObjectMapper objectMapper;
+    @Autowired MessageRepository messageRepository;
+    @Autowired ChatMessageRepository chatMessageRepository;
+    @Autowired ChannelRepository channelRepository;
+    @Autowired JwtGenerator jwtGenerator;
+    @Autowired DataSourceProperties dataSourceProperties;
 
     private final String ENDPOINT = "/ws-endpoint";
     private final String INFO_CHANNEL = "/user/sub/info";

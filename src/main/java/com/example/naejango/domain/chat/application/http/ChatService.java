@@ -13,12 +13,11 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -86,8 +85,8 @@ public class ChatService {
     }
 
     /** 내 채팅 리스트 조회 */
-    public Page<ChatInfoDto> myChatList(Long userId, int page, int size) {
-        return chatRepository.findChatByOwnerIdOrderByLastChat(userId, PageRequest.of(page, size));
+    public List<ChatInfoDto> myChatList(Long userId, int page, int size) {
+        return chatRepository.findChatByOwnerIdOrderByLastChat(userId, page, size);
     }
 
     /** 내 Chat ID 조회 */
