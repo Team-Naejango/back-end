@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -28,6 +29,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
+@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EnableJpaAuditing
 class MessageRepositoryTest {
@@ -50,6 +52,7 @@ class MessageRepositoryTest {
     UserProfile userProfile1; UserProfile userProfile2; UserProfile userProfile3; UserProfile userProfile4;
     PrivateChannel channel1; GroupChannel channel2;
     @BeforeEach
+    @Transactional
     void setup() {
         // 테스트 유저 4명 등록
         testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();

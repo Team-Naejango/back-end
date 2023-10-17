@@ -21,6 +21,8 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
+@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ItemRepositoryTest {
 
@@ -44,7 +47,6 @@ class ItemRepositoryTest {
     @Autowired
     CategoryRepository categoryRepository;
     GeomUtil geomUtil = new GeomUtil();
-
 
     @Nested
     @DisplayName("아이템 조회")
@@ -98,7 +100,15 @@ class ItemRepositoryTest {
     class SearchItemByConditions {
 
         @BeforeEach
+        @Transactional
         void setup() {
+            categoryRepository.save(Category.builder().name("생필품").build());
+            categoryRepository.save(Category.builder().name("의류").build());
+            categoryRepository.save(Category.builder().name("도서").build());
+            categoryRepository.save(Category.builder().name("디지털기기").build());
+            categoryRepository.save(Category.builder().name("생활가전").build());
+            categoryRepository.save(Category.builder().name("뷰티").build());
+
             Storage testStorage4 = Storage.builder().name("테스트 창고 4").location(geomUtil.createPoint(127.021, 37.491)).address("").build();
             Storage testStorage5 = Storage.builder().name("테스트 창고 5").location(geomUtil.createPoint(127.022, 37.492)).address("").build();
             Storage testStorage6 = Storage.builder().name("테스트 창고 6").location(geomUtil.createPoint(127.023, 37.493)).address("").build();
@@ -175,7 +185,7 @@ class ItemRepositoryTest {
         }
 
         @Test
-        @DisplayName("타입, 상태 조건 적용")
+        @DisplayName("타입, 상경 조건 적용")
         void test4() {
             // given
             Point center = geomUtil.createPoint(127.02, 37.49);
@@ -211,7 +221,15 @@ class ItemRepositoryTest {
     class MatchItemByConditions {
 
         @BeforeEach
+        @Transactional
         void setup() {
+            categoryRepository.save(Category.builder().name("생필품").build());
+            categoryRepository.save(Category.builder().name("의류").build());
+            categoryRepository.save(Category.builder().name("도서").build());
+            categoryRepository.save(Category.builder().name("디지털기기").build());
+            categoryRepository.save(Category.builder().name("생활가전").build());
+            categoryRepository.save(Category.builder().name("뷰티").build());
+
             User user1 = User.builder().userKey("test_1").password("null").role(Role.GUEST).build();
             User user2 = User.builder().userKey("test_2").password("null").role(Role.GUEST).build();
             User user3 = User.builder().userKey("test_3").password("null").role(Role.GUEST).build();

@@ -24,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@ActiveProfiles("Test")
+@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ChatRepositoryTest {
 
@@ -62,6 +63,7 @@ class ChatRepositoryTest {
     PrivateChannel channel1; GroupChannel channel2;
 
     @BeforeEach
+    @Transactional
     void setup() {
         // 테스트 유저 4명 등록
         testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();

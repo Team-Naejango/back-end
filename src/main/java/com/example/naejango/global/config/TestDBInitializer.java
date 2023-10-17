@@ -7,8 +7,10 @@ import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
 import com.example.naejango.domain.chat.repository.MessageRepository;
+import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
@@ -28,7 +30,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Component
-@Profile("Test")
+@Profile("TestDB")
 @RequiredArgsConstructor
 public class TestDBInitializer implements ApplicationRunner {
 
@@ -41,16 +43,28 @@ public class TestDBInitializer implements ApplicationRunner {
     private final ChannelRepository channelRepository;
     private final TransactionTemplate transactionTemplate;
     private final AccountRepository accountRepository;
+    private final CategoryRepository categoryRepository;
 
     @PersistenceContext EntityManager em;
 
     @Override
     public void run(ApplicationArguments args) {
-        chatTestSetup();
+        TestSetup();
+        categorySetup();
     }
 
     @Transactional
-    public void chatTestSetup() {
+    public void categorySetup(){
+        categoryRepository.save(Category.builder().name("생필품").build());
+        categoryRepository.save(Category.builder().name("의류").build());
+        categoryRepository.save(Category.builder().name("도서").build());
+        categoryRepository.save(Category.builder().name("디지털기기").build());
+        categoryRepository.save(Category.builder().name("생활가전").build());
+        categoryRepository.save(Category.builder().name("뷰티").build());
+    }
+
+    @Transactional
+    public void TestSetup() {
         transactionTemplate.execute(status -> {
             // 테스트 유저 4명 등록
             User testUser1 = User.builder().role(Role.USER).userKey("test_1").password("").build();
@@ -58,7 +72,6 @@ public class TestDBInitializer implements ApplicationRunner {
             User testUser3 = User.builder().role(Role.USER).userKey("test_3").password("").build();
             User testUser4 = User.builder().role(Role.USER).userKey("test_4").password("").build();
             User testUser5 = User.builder().role(Role.TEMPORAL).userKey("test_5").password("").build();
-
 
             userRepository.save(testUser1);
             userRepository.save(testUser2);
