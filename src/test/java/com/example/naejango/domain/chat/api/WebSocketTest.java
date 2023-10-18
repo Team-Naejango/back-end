@@ -17,8 +17,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -28,8 +30,6 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -47,11 +47,8 @@ import static com.example.naejango.domain.chat.domain.MessageType.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ActiveProfiles({"test"})
-@Transactional
-@TestClassOrder(ClassOrderer.OrderAnnotation.class)
+@ActiveProfiles({"test", "WebSocketTestDB"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Slf4j
 public class WebSocketTest {
@@ -85,7 +82,7 @@ public class WebSocketTest {
     @DisplayName("웹소켓 Endpoint 연결 테스트")
     public void testWebSocketConnection() throws Exception {
         // given
-        User user1 = userRepository.findByUserKey("test_1").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user1 = userRepository.findByUserKey("test1").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user1.getId());
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
@@ -104,7 +101,7 @@ public class WebSocketTest {
     @DisplayName("Info 채널 구독 및 에러메세지 수신")
     void chatChannelSubscribeTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user2 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user2 = userRepository.findByUserKey("test2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user2.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
@@ -134,51 +131,11 @@ public class WebSocketTest {
     }
 
     @Test
-    @Order(3)
-    @DisplayName("라운지 채널만 구독시 전송 실패")
-    void sendLoungeChannelTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
-        // given
-        User user4 = userRepository.findByUserKey("test_2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        String accessToken = jwtGenerator.generateAccessToken(user4.getId());
-        DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
-        stompSession = stompClient.connect("ws://localhost:8080" + ENDPOINT, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
-        // when
-        // INFO 채널 구독
-        StompHeaders subscribeInfoHeaders = new StompHeaders();
-        subscribeInfoHeaders.setDestination(INFO_CHANNEL);
-        stompSession.subscribe(subscribeInfoHeaders, defaultStompFrameHandler);
-        Thread.sleep(200);
-
-        // 라운지 채널 구독
-        StompHeaders subscribeChatHeaders = new StompHeaders();
-        subscribeChatHeaders.setDestination(SUBSCRIBE_LOUNGE.getEndpointPrefix() + "2");
-        stompSession.subscribe(subscribeChatHeaders, defaultStompFrameHandler);
-        Thread.sleep(100);
-
-        // 메세지 전송
-        StompHeaders sendMessageHeaders = new StompHeaders();
-        sendMessageHeaders.setDestination(CHAT.getEndpointPrefix() + "2");
-        stompSession.send(sendMessageHeaders, "메세지 전송".getBytes());
-        Thread.sleep(100);
-
-        // then
-        assertEquals(SUBSCRIBE_INFO, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
-        assertEquals(SUBSCRIBE_LOUNGE, objectMapper.readValue(blockingQueue.poll(), WebSocketMessageSendDto.class).getMessageType());
-        assertEquals(objectMapper.writeValueAsString(WebSocketErrorResponse.response(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST))
-                , blockingQueue.poll());
-
-        // 종료
-        stompSession.disconnect();
-    }
-
-    @Test
     @Order(4)
     @DisplayName("채팅 채널에 메세지 전송 및 수신")
     void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
-        User user4 = userRepository.findByUserKey("test_3").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user4 = userRepository.findByUserKey("test3").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String accessToken = jwtGenerator.generateAccessToken(user4.getId());
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
@@ -205,7 +162,6 @@ public class WebSocketTest {
         // 종료
         stompSession.disconnect();
     }
-
 
 
 

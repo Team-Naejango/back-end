@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
+    private final EntityManager em;
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // 1시간
 
     /** 알림 구독 요청 */
@@ -52,16 +54,16 @@ public class NotificationService {
 
     /** 알림 전송 메서드 */
     @Transactional
-    public void send(User receiver, NotificationType notificationType, String content, String url) {
+    public void send(Long receiverId, NotificationType notificationType, String content, String url) {
         Notification notification = Notification.builder()
-                .receiver(receiver)
+                .receiver(em.getReference(User.class, receiverId))
                 .notificationType(notificationType)
                 .content(content)
                 .url(url)
                 .build();
         Notification savedNotification = notificationRepository.save(notification);
 
-        Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByUserId(String.valueOf(receiver.getId()));
+        Map<String, SseEmitter> emitters = emitterRepository.findAllEmitterStartWithByUserId(String.valueOf(receiverId));
 
         emitters.forEach(
                 (key, emitter) -> {

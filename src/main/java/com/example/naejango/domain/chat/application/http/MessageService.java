@@ -2,11 +2,14 @@ package com.example.naejango.domain.chat.application.http;
 
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.MessageDto;
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 import com.example.naejango.domain.chat.repository.*;
+import com.example.naejango.domain.notification.domain.NotificationType;
+import com.example.naejango.domain.notification.dto.NotificationPublishDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -24,9 +27,10 @@ public class MessageService {
     private final ChannelRepository channelRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SubscribeRepository subscribeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void publishMessage(WebSocketMessageCommandDto commandDto) {
+    public void publishMessage(MessagePublishCommandDto commandDto) {
         // 메세지를 저장합니다.
         Channel channel = channelRepository.findById(commandDto.getChannelId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
@@ -47,6 +51,15 @@ public class MessageService {
             ChatMessage chatMessage = ChatMessage.builder().isRead(false).message(sentMessage).chat(chat).build();
             // 현재 구독중인(보고 있는) 유저의 경우 읽음 처리를 합니다.
             if(subscribers.contains(chat.getOwner().getId())) chatMessage.read();
+            else {
+                // 보고 있지 않은 사람들은 알림을 보내줍니다.
+                eventPublisher.publishEvent(new NotificationPublishDto(
+                        chat.getOwner().getId(),
+                        NotificationType.CHAT,
+                        commandDto.getContent(),
+                        String.valueOf(commandDto.getChannelId())
+                ));
+            }
             chatMessageRepository.save(chatMessage);
         });
 

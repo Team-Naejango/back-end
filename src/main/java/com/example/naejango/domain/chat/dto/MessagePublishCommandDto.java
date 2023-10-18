@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
-public class WebSocketMessageCommandDto {
+public class MessagePublishCommandDto {
     private MessageType messageType;
     private Long senderId;
     private Long channelId;
     private String content;
 
-    public WebSocketMessageCommandDto(MessageType messageType, Long senderId, Long channelId) {
+    public MessagePublishCommandDto(MessageType messageType, Long senderId, Long channelId) {
         this.messageType = messageType;
         this.senderId = senderId;
         this.channelId = channelId;

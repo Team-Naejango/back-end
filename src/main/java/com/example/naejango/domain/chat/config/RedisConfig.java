@@ -26,7 +26,6 @@ public class RedisConfig {
     public RedisTemplate<String, Long> LongRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Long> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
-        redisTemplate.setEnableTransactionSupport(true);
 
         // 시리얼라이저 설정
         redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -34,12 +33,12 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+    /** 이 템플릿에 한해서 Transactional 에 참여합니다. */
     @Bean
     public RedisTemplate<String, Object> defaultRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setEnableTransactionSupport(true);
-
 
         // 시리얼라이저 설정
         redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -50,7 +49,6 @@ public class RedisConfig {
     @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         StringRedisTemplate redisTemplate = new StringRedisTemplate(redisConnectionFactory);
-        redisTemplate.setEnableTransactionSupport(true);
 
         return redisTemplate;
     }

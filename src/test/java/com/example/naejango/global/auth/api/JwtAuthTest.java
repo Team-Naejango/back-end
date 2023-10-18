@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -47,6 +48,7 @@ public class JwtAuthTest {
     @Autowired UserProfileRepository userProfileRepository;
     @Autowired RefreshTokenRepository refreshTokenRepository;
     @Autowired AccountRepository accountRepository;
+    @Autowired StringRedisTemplate redisTemplate;
     @Autowired EntityManager em;
     @Autowired
     JwtGenerator jwtGenerator;
@@ -59,7 +61,6 @@ public class JwtAuthTest {
     String refreshTokenNotRegistered;
 
     @BeforeEach
-    @Transactional
     void setup(){
         testUser = User.builder().role(Role.USER).userKey("test_1").password("").build();
         UserProfile userProfile = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").
@@ -85,13 +86,12 @@ public class JwtAuthTest {
         accessTokenUserNotFound = jwtGenerator.generateAccessToken(90384769835L);
         accessTokenUserNotFound = jwtGenerator.generateAccessToken(90384769835L);
     }
-
     @Nested
     @DisplayName("RefreshToken 이 없는 경우")
     class NoRefreshToken {
 
         @Test
-        @DisplayName("accessToken 이 없는 경우 : CustomAuthenticationEntryPoint 발생")
+        @DisplayName("accessToken 이 없는 경우 : CustomAuthenticationEntryPoint 진입")
         void test1() throws Exception {
             // given
             ResultActions resultActions = mockMvc
@@ -104,7 +104,7 @@ public class JwtAuthTest {
         }
 
         @Test
-        @DisplayName("accessToken 이 유효하지 않은 경우 : JwtAuthenticationFilter 발생, ExceptionHandlingFilter 핸들링")
+        @DisplayName("accessToken 이 유효하지 않은 경우 : JwtAuthenticationFilter 진입, ExceptionHandlingFilter 핸들링")
         void test2() throws Exception {
             // given
             ResultActions resultActions = mockMvc
@@ -120,7 +120,7 @@ public class JwtAuthTest {
         }
 
         @Test
-        @DisplayName("accessToken 의 User 를 인식하지 못하는 경우 : JwtAuthenticationFilter 발생, ExceptionHandlingFilter 핸들링")
+        @DisplayName("accessToken 의 User 를 인식하지 못하는 경우 : JwtAuthenticationFilter 진입, ExceptionHandlingFilter 핸들링")
         void test3() throws Exception {
             // given
             ResultActions resultActions = mockMvc
@@ -138,11 +138,11 @@ public class JwtAuthTest {
     }
 
     @Nested
-    @DisplayName("AccessToken 이 없는 경우")
+    @DisplayName("AccessToken 이 없고, RefreshToken 은 있는 경우")
     class RefreshToken {
 
         @Test
-        @DisplayName("유효한 RefreshToken 이 있는 경우")
+        @DisplayName("유효한 RefreshToken 이 있는 경우 : 토큰 재발급")
         void test1() throws Exception {
             // given
             ResultActions resultActions = mockMvc

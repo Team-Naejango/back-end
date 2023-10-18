@@ -80,7 +80,7 @@ public class ChannelService {
         chatRepository.save(otherUserChat);
 
         // 채널 시작 메세지를 생성합니다.
-        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+        MessagePublishCommandDto commandDto = MessagePublishCommandDto.builder()
                 .messageType(MessageType.OPEN)
                 .channelId(newPrivateChannel.getId())
                 .senderId(null)
@@ -143,7 +143,7 @@ public class ChannelService {
         Chat savedChat = chatRepository.save(chat);
 
         // 채널 시작 메세지를 생성합니다.
-        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+        MessagePublishCommandDto commandDto = MessagePublishCommandDto.builder()
                 .messageType(MessageType.OPEN)
                 .channelId(newGroupChannel.getId())
                 .senderId(null)
@@ -236,7 +236,7 @@ public class ChannelService {
     }
 
     public void sendCloseMessage(Long channelId, Long userId) {
-        WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.CLOSE, userId, channelId);
+        MessagePublishCommandDto commandDto = new MessagePublishCommandDto(MessageType.CLOSE, userId, channelId);
         messageService.publishMessage(commandDto);
         webSocketService.publishMessage(commandDto);
     }

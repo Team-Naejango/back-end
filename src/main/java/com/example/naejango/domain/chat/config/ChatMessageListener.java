@@ -1,6 +1,6 @@
 package com.example.naejango.domain.chat.config;
 
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
 import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.exception.WebSocketException;
@@ -40,7 +40,7 @@ public class ChatMessageListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            WebSocketMessageCommandDto commandDto = objectMapper.readValue(message.getBody(), WebSocketMessageCommandDto.class);
+            MessagePublishCommandDto commandDto = objectMapper.readValue(message.getBody(), MessagePublishCommandDto.class);
             WebSocketMessageSendDto sendDto = commandDto.toSendDto();
             messageSender.convertAndSend(SUBSCRIBE_CHANNEL.getEndpointPrefix() + commandDto.getChannelId(), sendDto);
         } catch (IOException e) {

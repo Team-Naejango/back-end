@@ -1,8 +1,8 @@
 package com.example.naejango.domain.chat.application.websocket;
 
 
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 
 public interface WebSocketService {
-    void publishMessage(WebSocketMessageCommandDto commandDto);
+    void publishMessage(MessagePublishCommandDto commandDto);
 }

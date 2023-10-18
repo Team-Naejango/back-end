@@ -9,8 +9,6 @@ public enum MessageType {
 
     @JsonProperty("SUBSCRIBE_INFO")
     SUBSCRIBE_INFO("웹소켓 채널 정보를 수신합니다.", "/sub/info/"),
-    @JsonProperty("SUBSCRIBE_LOUNGE")
-    SUBSCRIBE_LOUNGE("라운지 채널 구독을 시작합니다.", "/sub/lounge/"),
     @JsonProperty("SUBSCRIBE_CHANNEL")
     SUBSCRIBE_CHANNEL("채팅 채널 구독을 시작합니다.", "/sub/channel/"),
     @JsonProperty("CHAT")
