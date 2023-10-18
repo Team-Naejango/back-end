@@ -4,7 +4,7 @@ import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.JoinGroupChannelDto;
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.domain.chat.repository.ChatMessageRepository;
 import com.example.naejango.domain.chat.repository.ChatRepository;
@@ -69,7 +69,7 @@ public class ChatService {
         em.clear();
 
         // 채널 입장 메세지 생성
-        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+        MessagePublishCommandDto commandDto = MessagePublishCommandDto.builder()
                 .messageType(MessageType.ENTER)
                 .channelId(channelId)
                 .senderId(userId)
@@ -154,7 +154,7 @@ public class ChatService {
             GroupChannel groupChannel = (GroupChannel) channel;
 
             // 퇴장 메세지 발행
-            WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+            MessagePublishCommandDto commandDto = MessagePublishCommandDto.builder()
                     .messageType(MessageType.EXIT)
                     .channelId(channel.getId())
                     .senderId(userId)

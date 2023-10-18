@@ -4,7 +4,7 @@ import com.example.naejango.domain.chat.application.http.MessageService;
 import com.example.naejango.domain.chat.application.websocket.SubscribeService;
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.dto.SubScribeCommandDto;
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 import com.example.naejango.domain.chat.dto.WebSocketMessageSendDto;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -47,21 +47,6 @@ public class WebSocketController {
                 .messageType(SUBSCRIBE_CHANNEL).content(SUBSCRIBE_CHANNEL.getDefaultMessage()).build();
     }
 
-    /** 특정 라운지 채널을 구독하는 WebSocket Endpoint */
-    @SubscribeMapping("/sub/lounge/{channelId}")
-    public WebSocketMessageSendDto subscribeLoungeChannel(@DestinationVariable("channelId") Long channelId,
-                                                             @Headers SimpMessageHeaderAccessor accessor) {
-        Long userId = authenticationHandler.getUserId(accessor.getUser());
-
-        // 구독
-        SubScribeCommandDto commandDto = new SubScribeCommandDto(userId, accessor, channelId);
-        subscribeService.subscribe(commandDto);
-
-        // 유저 개인만 받으면 되기 때문에 Redis 로 Pub/Sub 을 관리하지 않습니다.
-        return WebSocketMessageSendDto.builder().sentAt(LocalDateTime.now()).senderId(userId).channelId(channelId)
-                .messageType(SUBSCRIBE_LOUNGE).content(SUBSCRIBE_LOUNGE.getDefaultMessage()).build();
-    }
-
     /** 채팅 Channel 에 메세지를 보내는 WebSocket Endpoint */
     @MessageMapping("/pub/channel/{channelId}")
     public void sendMessage(@Payload String content,
@@ -75,7 +60,7 @@ public class WebSocketController {
             throw new WebSocketException(ErrorCode.UNAUTHORIZED_SEND_MESSAGE_REQUEST);
         }
 
-        WebSocketMessageCommandDto commandDto = WebSocketMessageCommandDto.builder()
+        MessagePublishCommandDto commandDto = MessagePublishCommandDto.builder()
                 .channelId(channelId)
                 .senderId(userId)
                 .messageType(CHAT)

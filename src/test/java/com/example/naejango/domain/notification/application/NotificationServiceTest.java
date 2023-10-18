@@ -11,9 +11,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.persistence.EntityManager;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,18 +26,16 @@ import static org.mockito.Mockito.verify;
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class NotificationServiceTest {
-    @InjectMocks
-    private NotificationService notificationService;
-    @Mock
-    private EmitterRepository emitterRepository;
-    @Mock
-    private NotificationRepository notificationRepository;
+    @InjectMocks private NotificationService notificationService;
+    @Mock private EmitterRepository emitterRepository;
+    @Mock private NotificationRepository notificationRepository;
+    @Spy private EntityManager em;
     private final Long DEFAULT_TIMEOUT = 60L * 1000L * 60L;
 
     @Test
     @Order(1)
     @DisplayName("알림 구독 요청")
-    public void subscribe() throws Exception {
+    public void subscribe() {
         //given
         User user = User.builder().id(1L).build();
         String lastEventId = "";
@@ -50,7 +50,7 @@ class NotificationServiceTest {
     @Test
     @Order(2)
     @DisplayName("알림 전송")
-    public void send() throws Exception {
+    public void send() {
         //given
         User user = User.builder().id(1L).build();
         String lastEventId = "";
@@ -74,7 +74,7 @@ class NotificationServiceTest {
         notificationService.subscribe(user.getId(), lastEventId);
 
 
-        Assertions.assertDoesNotThrow(() -> notificationService.send(user, NotificationType.TRANSACTION, "알림 내용", "알림 url"));
+        Assertions.assertDoesNotThrow(() -> notificationService.send(user.getId(), NotificationType.TRANSACTION, "알림 내용", "알림 url"));
         verify(emitterRepository).saveEventCache(any(), any());
     }
 }

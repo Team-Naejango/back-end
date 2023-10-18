@@ -2,7 +2,7 @@ package com.example.naejango.domain.chat.application.websocket;
 
 import com.example.naejango.domain.chat.domain.Channel;
 import com.example.naejango.domain.chat.domain.MessageType;
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 import com.example.naejango.domain.chat.repository.ChannelRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -18,7 +18,7 @@ public class RedisWebSocketService implements WebSocketService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChannelRepository channelRepository;
 
-    public void publishMessage(WebSocketMessageCommandDto commandDto) {
+    public void publishMessage(MessagePublishCommandDto commandDto) {
         // 채널이 있는지 확인
         Channel channel = channelRepository.findById(commandDto.getChannelId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));

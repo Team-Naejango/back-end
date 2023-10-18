@@ -16,11 +16,4 @@ public class WebSocketMessageSendDto {
     private Long channelId;
     private LocalDateTime sentAt;
     private String content;
-
-    public WebSocketLoungeMessageSendDto toLoungeMessage() {
-        return WebSocketLoungeMessageSendDto.builder()
-                .channelId(channelId)
-                .content(content)
-                .sentAt(sentAt).build();
-    }
 }

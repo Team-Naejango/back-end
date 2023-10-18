@@ -7,7 +7,7 @@ import com.example.naejango.domain.chat.application.http.MessageService;
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
 import com.example.naejango.domain.chat.domain.MessageType;
 import com.example.naejango.domain.chat.dto.CreateChannelDto;
-import com.example.naejango.domain.chat.dto.WebSocketMessageCommandDto;
+import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.repository.ItemRepository;
@@ -101,14 +101,14 @@ public class TransactionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // trader에게 거래 알림 발송
-        eventPublisher.publishEvent(new NotificationPublishDto(trader, NotificationType.TRANSACTION, "거래 요청 알림", "/api/transaction/"+savedTransaction.getId()));
+        eventPublisher.publishEvent(new NotificationPublishDto(trader.getId(), NotificationType.TRANSACTION, "거래 요청 알림", "/api/transaction/"+savedTransaction.getId()));
 
         // Channel 로드 (없는 경우 생성)
         CreateChannelDto findResult = channelService.createPrivateChannel(userId, createTransactionCommandDto.getTraderId());
         Long channelId = findResult.getChannelId();
 
         // 거래 예약 메세지 생성
-        WebSocketMessageCommandDto commandDto = new WebSocketMessageCommandDto(MessageType.TRADE, userId, channelId);
+        MessagePublishCommandDto commandDto = new MessagePublishCommandDto(MessageType.TRADE, userId, channelId);
 
         // 메세지 발송 및 저장
         webSocketService.publishMessage(commandDto);
