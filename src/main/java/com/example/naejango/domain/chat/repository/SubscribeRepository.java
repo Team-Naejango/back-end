@@ -20,6 +20,7 @@ public interface SubscribeRepository {
 
     /* 세션의 구독 id 를 관리하는 메서드 */
     void saveSubscriptionIdBySessionId(String subscriptionId, String sessionId);
+    void deleteSubscriptionIdBySessionId(String subscriptionId, String sessionId);
     Set<String> findSubscriptionIdBySessionId(String sessionId);
     void deleteAllSubscriptionsBySessionId(String sessionId);
 

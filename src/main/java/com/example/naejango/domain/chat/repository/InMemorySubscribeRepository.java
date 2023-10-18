@@ -98,9 +98,16 @@ public class InMemorySubscribeRepository implements SubscribeRepository {
         if (subscribersId.isEmpty()) channelSubscribersMap.remove(channelId);
     }
 
-
     @Override
     public void deleteSubscriptionId(String subscriptionId) {
         subscriptionIdChannelIdMap.remove(subscriptionId);
+    }
+
+    @Override
+    public void deleteSubscriptionIdBySessionId(String subscriptionId, String sessionId) {
+        sessionIdSubscriptionIdMap.computeIfPresent(sessionId, (k, m) -> {
+            m.remove(subscriptionId);
+            return m;
+        });
     }
 }

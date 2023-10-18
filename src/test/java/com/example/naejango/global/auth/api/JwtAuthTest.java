@@ -68,7 +68,6 @@ public class JwtAuthTest {
         userRepository.save(testUser);
         userProfileRepository.save(userProfile);
         accountRepository.save(account);
-
         testUser.setUserProfile(userProfile);
 
         accessTokenNormal = jwtGenerator.generateAccessToken(testUser.getId());

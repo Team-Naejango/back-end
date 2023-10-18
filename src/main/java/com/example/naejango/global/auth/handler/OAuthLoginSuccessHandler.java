@@ -44,6 +44,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         jwtIssuer.issueTokenCookie(userId, response);
 
-        response.sendRedirect(localRedirectUrl);
+        response.sendRedirect(localRedirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication));
     }
 }
