@@ -42,9 +42,6 @@ public class SubscribeService {
         // 세션의 구독 정보를 삭제합니다.
         subscribeRepository.deleteAllSubscriptionsBySessionId(sessionId);
 
-        // 롤백 테스트용
-//        rollback(sessionId, "disconnect");
-
         // 세션의 유저 정보를 삭제합니다.
         subscribeRepository.deleteSessionId(sessionId);
     }
@@ -61,9 +58,6 @@ public class SubscribeService {
 
         // 구독 ID 삭제
         subscribeRepository.deleteSubscriptionId(subscriptionId);
-
-        // 롤백 테스트를 위한 코드
-//        rollback(sessionId, "unsubscribe");
 
         // 채널에서 구독자 삭제
         subscribeRepository.deleteSubscriberFromChannel(userId, channelId);
@@ -93,9 +87,6 @@ public class SubscribeService {
         // 구독 id 가 어떤 채널을 가리키는지 저장합니다.
         String subscriptionId = commandDto.getSubscriptionId();
         subscribeRepository.setSubscriptionIdToChannel(subscriptionId, channelId);
-
-        // Transaction 테스트를 위한 예외 설정
-//        rollback(commandDto.getSessionId(), "subscribe");
 
         // 세션에 구독 id 를 등록합니다.
         String sessionId = commandDto.getSessionId();
