@@ -1,4 +1,4 @@
-package com.example.naejango.domain.user.application;
+package com.example.naejango.domain.chat.application.http;
 
 import com.example.naejango.domain.account.domain.Account;
 import com.example.naejango.domain.account.repository.AccountRepository;
@@ -15,6 +15,7 @@ import com.example.naejango.domain.item.repository.ItemRepository;
 import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
+import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
@@ -22,56 +23,39 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
-import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.util.GeomUtil;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-@Rollback
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class UserServiceTest {
+class ChannelServiceTest {
     @Autowired UserService userService;
     @Autowired JwtGenerator jwtGenerator;
     @Autowired UserRepository userRepository;
-    @Autowired
-    UserProfileRepository userProfileRepository;
-    @Autowired
-    ItemRepository itemRepository;
-    @Autowired
-    AccountRepository accountRepository;
-    @Autowired
-    StorageRepository storageRepository;
-    @Autowired
-    StorageService storageService;
-    @Autowired
-    ChannelRepository channelRepository;
-    @Autowired
-    ChatRepository chatRepository;
-    @Autowired
-    MessageRepository messageRepository;
-    @Autowired
-    ChatMessageRepository chatMessageRepository;
-    @Autowired
-    FollowRepository followRepository;
+    @Autowired UserProfileRepository userProfileRepository;
+    @Autowired ItemRepository itemRepository;
+    @Autowired AccountRepository accountRepository;
+    @Autowired StorageRepository storageRepository;
+    @Autowired StorageService storageService;
+    @Autowired ChannelRepository channelRepository;
+    @Autowired ChatRepository chatRepository;
+    @Autowired MessageRepository messageRepository;
+    @Autowired ChatMessageRepository chatMessageRepository;
+    @Autowired FollowRepository followRepository;
     @Autowired RefreshTokenRepository refreshTokenRepository;
-    @Autowired JwtValidator jwtValidator;
+    @Autowired ChannelService channelService;
     @Autowired GeomUtil geomUtil;
     User user, otherUser;
     UserProfile userProfile1, userProfile2;
@@ -137,32 +121,48 @@ public class UserServiceTest {
         refreshTokenRepository.saveRefreshToken(user.getId(), refreshToken);
     }
 
-    @Test
-    @DisplayName("유저 삭제")
-    void test1(){
-        // when
-        userService.deleteUser(user.getId(), Optional.ofNullable(refreshToken));
+    @Nested
+    @DisplayName("채널 종료")
+    class CloseChannelTest {
+        @Test
+        @DisplayName("채널 닫기 : 그룹 채널")
+        void test1(){
+            // when
+            channelService.closeChannelById(groupChannel.getId(), user.getId());
 
-        // then
-        // 유저 삭제 여부
-        userRepository.findById(user.getId()).ifPresentOrElse(
-                user -> assertEquals(user.getRole(), Role.DELETED),
-                Assertions::fail
-        );
-        // 창고 삭제 여부
-        assertTrue(storageRepository.findById(storage.getId()).isEmpty());
+            // then
+            // 채널 닫힘
+            channelRepository.findById(groupChannel.getId()).ifPresentOrElse(
+                    channel -> assertTrue(channel.getIsClosed()),
+                    Assertions::fail
+            );
+            // 종료 메세지 확인
+            List<Message> message = messageRepository.findRecentMessages(chat1.getId(), PageRequest.of(0, 1)).getContent();
+            assertEquals(message.get(0).getMessageType(), MessageType.CLOSE);
+            message = messageRepository.findRecentMessages(chat2.getId(), PageRequest.of(0, 1)).getContent();
+            assertEquals(message.get(0).getMessageType(), MessageType.CLOSE);
+        }
 
-        // 채널 닫힘 여부
-        Optional<Channel> channel = channelRepository.findById(groupChannel.getId());
-        assertTrue(channel.isPresent());
-        assertTrue(channel.get().getIsClosed());
+        @Test
+        @DisplayName("채널 닫기 : 일대일 채널")
+        void test2(){
+            // when
+            channelService.closeChannelById(privateChannel.getId(), user.getId());
 
-        // 아이템 삭제 여부
-        assertTrue(itemRepository.findById(item.getId()).isEmpty());
+            // then
+            // 채널 닫힘
+            channelRepository.findById(privateChannel.getId()).ifPresentOrElse(
+                    channel -> assertTrue(channel.getIsClosed()),
+                    Assertions::fail
+            );
 
-        // 챗 삭제 여부
-        assertTrue(chatRepository.findById(chat1.getId()).isEmpty());
+            // 종료 메세지 확인
+            List<Message> message = messageRepository.findRecentMessages(chat3.getId(), PageRequest.of(0, 1)).getContent();
+            assertEquals(message.get(0).getMessageType(), MessageType.CLOSE);
+            message = messageRepository.findRecentMessages(chat4.getId(), PageRequest.of(0, 1)).getContent();
+            assertEquals(message.get(0).getMessageType(), MessageType.CLOSE);
+        }
     }
 
-}
 
+}

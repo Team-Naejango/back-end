@@ -10,6 +10,7 @@ import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class UserController {
     private final UserService userService;
     private final AccountService accountService;
     private final AuthenticationHandler authenticationHandler;
+    private final JwtCookieHandler jwtCookieHandler;
 
     /**
      * 회원 가입
@@ -105,7 +107,7 @@ public class UserController {
     @DeleteMapping("")
     public ResponseEntity<CommonResponseDto<Long>> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
         Long userId = authenticationHandler.getUserId(authentication);
-        userService.deleteUser(userId, request);
+        userService.deleteUser(userId, jwtCookieHandler.getRefreshToken(request));
         return ResponseEntity.ok().body(new CommonResponseDto<>("삭제 완료", userId));
     }
 

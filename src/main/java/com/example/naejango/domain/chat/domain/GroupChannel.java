@@ -16,7 +16,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@ToString
+@ToString(exclude = {"item"})
 public class GroupChannel extends Channel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -30,4 +30,8 @@ public class GroupChannel extends Channel {
     private int channelLimit;
     public void increaseParticipantCount() { participantsCount++; }
     public void decreaseParticipantCount() { participantsCount--; }
+    public void closeChannel() {
+        super.closeChannel();
+        item = null;
+    }
 }

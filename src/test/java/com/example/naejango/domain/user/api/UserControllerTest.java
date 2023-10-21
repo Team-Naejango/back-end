@@ -15,6 +15,7 @@ import com.example.naejango.domain.user.dto.ModifyUserProfileCommandDto;
 import com.example.naejango.domain.user.dto.UserProfileDto;
 import com.example.naejango.domain.user.dto.request.CreateUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -43,14 +44,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 class UserControllerTest extends RestDocsSupportTest {
 
-    @MockBean
-    JwtValidator jwtValidatorMock;
-    @MockBean
-    UserService userServiceMock;
-    @MockBean
-    AccountService accountServiceMock;
-    @MockBean
-    AuthenticationHandler authenticationHandlerMock;
+    @MockBean JwtValidator jwtValidatorMock;
+    @MockBean UserService userServiceMock;
+    @MockBean AccountService accountServiceMock;
+    @MockBean AuthenticationHandler authenticationHandlerMock;
+    @MockBean JwtCookieHandler jwtCookieHandler;
 
     @Nested
     @DisplayName("유저 프로필 생성")

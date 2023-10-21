@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@ToString
+@ToString(exclude = {"items", "user"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,8 +36,11 @@ public class Storage extends TimeAuditingEntity implements Serializable {
     @Column(nullable = false)
     private String address;
 
-    @Column(columnDefinition = "Geometry(Point, 4326)", nullable = false)
+    @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point location;
+
+    @Column
+    private Boolean isClosed;
 
     @Builder.Default
     @OneToMany(mappedBy = "storage")
