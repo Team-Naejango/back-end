@@ -44,10 +44,6 @@ public class ChatService {
         // 종료된 채널인지 확인
         if(channel.getIsClosed()) throw new CustomException(ErrorCode.CHANNEL_IS_CLOSED);
 
-        // 채널 정원 확인
-        if (channel.getChannelLimit() <= channel.getParticipantsCount())
-            throw new CustomException(ErrorCode.CHANNEL_IS_FULL);
-
         // Chat 조회
         Optional<Chat> groupChatOpt = chatRepository.findChatByChannelIdAndOwnerId(channelId, userId);
 
@@ -55,6 +51,10 @@ public class ChatService {
         if (groupChatOpt.isPresent()) {
             return new JoinGroupChannelDto(false, groupChatOpt.get().getId());
         }
+
+        // 채널 정원 확인
+        if (channel.getChannelLimit() <= channel.getParticipantsCount())
+            throw new CustomException(ErrorCode.CHANNEL_IS_FULL);
 
         // Chat 생성
         Chat newChat = Chat.builder()
