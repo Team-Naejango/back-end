@@ -1,7 +1,10 @@
 package com.example.naejango.domain.chat.application.http;
 
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
-import com.example.naejango.domain.chat.domain.*;
+import com.example.naejango.domain.chat.domain.Channel;
+import com.example.naejango.domain.chat.domain.Chat;
+import com.example.naejango.domain.chat.domain.GroupChannel;
+import com.example.naejango.domain.chat.domain.MessageType;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.JoinGroupChannelDto;
 import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
@@ -118,9 +121,10 @@ public class ChatService {
         Channel channel = channelRepository.findByChatId(chat.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
-        deleteChat(channelId, chat, channel);
+        deleteChat(userId, chat, channel);
     }
 
+    @Transactional
     public void deleteChatByUserId(Long userId){
         chatRepository.findByOwner(em.getReference(User.class, userId))
                 .forEach(chat -> {
@@ -133,25 +137,27 @@ public class ChatService {
         // Chat 에 연관된 ChatMessage 를 삭제합니다.
         chatMessageRepository.deleteChatMessageByChatId(chat.getId());
 
-        // 일대일 채널의 경우
-        if (channel.getChannelType().equals(ChannelType.PRIVATE)) {
-            // 상대방이 Chat 이 없거나 ChatMessage 가 없는지 확인
-            Optional<Chat> otherChat = chatRepository.findOtherChatByPrivateChannelId(channel.getId(), chat.getId());
-            if (otherChat.isEmpty() || !chatMessageRepository.existsByChatId(otherChat.get().getId())) {
-                // Chat 삭제
-                chatRepository.delete(chat);
-                // Channel 의 모든 message 삭제
-                messageRepository.deleteMessagesByChannelId(channel.getId());
-                // Channel 삭제
-                channelRepository.deleteById(channel.getId());
-            }
-        }
-
         // 그룹 채팅의 경우
-        if (channel.getChannelType().equals(ChannelType.GROUP)) {
-
+        if (channel instanceof GroupChannel) {
             // 그룹 채널로 캐스팅 합니다.
             GroupChannel groupChannel = (GroupChannel) channel;
+
+            if (groupChannel.getOwner().getId().equals(userId) && !groupChannel.getIsClosed()) {
+                throw new CustomException(ErrorCode.CHANNEL_IS_OPEN);
+            }
+
+            // Chat 을 삭제합니다. (더이상 메세지를 수신하지 못하도록)
+            chatRepository.deleteById(chat.getId());
+
+            // Channel 의 참여자 수를 줄입니다.
+            groupChannel.decreaseParticipantCount();
+
+            // 만약 채널의 참여자가 0 이 되면 연관된 메세지와 채널을 삭제합니다.
+            if (groupChannel.getParticipantsCount() == 0) {
+                messageRepository.deleteMessagesByChannelId(channel.getId());
+                channelRepository.deleteById(channel.getId());
+                return;
+            }
 
             // 퇴장 메세지 발행
             MessagePublishCommandDto commandDto = MessagePublishCommandDto.builder()
@@ -160,17 +166,8 @@ public class ChatService {
                     .senderId(userId)
                     .content("채널에서 퇴장 하였습니다.").build();
 
+            messageService.publishMessage(commandDto);
             webSocketService.publishMessage(commandDto);
-
-            // Chat 을 삭제합니다. (더이상 메세지를 수신하지 못하도록)
-            chatRepository.delete(chat);
-            // Channel 의 참여자 수를 줄입니다.
-            groupChannel.decreaseParticipantCount();
-            // 만약 채널의 참여자가 0 이 되면 연관된 메세지와 채널을 삭제합니다.
-            if (groupChannel.getParticipantsCount() == 0) {
-                messageRepository.deleteMessagesByChannelId(channel.getId());
-                channelRepository.deleteById(channel.getId());
-            }
         }
     }
 

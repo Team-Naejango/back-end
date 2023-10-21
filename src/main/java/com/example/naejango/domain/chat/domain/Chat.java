@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
+@ToString(exclude = {"channel", "owner", "chatMessages"})
 public class Chat extends TimeAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

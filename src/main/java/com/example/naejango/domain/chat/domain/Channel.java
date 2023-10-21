@@ -50,6 +50,6 @@ public class Channel {
     public void updateLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
     }
-    public void closeChannel() { isClosed = false; }
+    public void closeChannel() { isClosed = true; }
 }
 
