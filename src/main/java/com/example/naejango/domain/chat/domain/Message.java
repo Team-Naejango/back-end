@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+@ToString(exclude = {"chatMessages", "channel"})
 public class Message extends TimeAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
