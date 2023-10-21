@@ -1,4 +1,4 @@
-package com.example.naejango.domain.user.application;
+package com.example.naejango.domain.storage.application;
 
 import com.example.naejango.domain.account.domain.Account;
 import com.example.naejango.domain.account.repository.AccountRepository;
@@ -12,9 +12,9 @@ import com.example.naejango.domain.follow.repository.FollowRepository;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
 import com.example.naejango.domain.item.repository.ItemRepository;
-import com.example.naejango.domain.storage.application.StorageService;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
+import com.example.naejango.domain.user.application.UserService;
 import com.example.naejango.domain.user.domain.Gender;
 import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.domain.user.domain.User;
@@ -25,51 +25,33 @@ import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.util.GeomUtil;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@Rollback
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class UserServiceTest {
+class StorageServiceTest {
     @Autowired UserService userService;
     @Autowired JwtGenerator jwtGenerator;
     @Autowired UserRepository userRepository;
-    @Autowired
-    UserProfileRepository userProfileRepository;
-    @Autowired
-    ItemRepository itemRepository;
-    @Autowired
-    AccountRepository accountRepository;
-    @Autowired
-    StorageRepository storageRepository;
-    @Autowired
-    StorageService storageService;
-    @Autowired
-    ChannelRepository channelRepository;
-    @Autowired
-    ChatRepository chatRepository;
-    @Autowired
-    MessageRepository messageRepository;
-    @Autowired
-    ChatMessageRepository chatMessageRepository;
-    @Autowired
-    FollowRepository followRepository;
+    @Autowired UserProfileRepository userProfileRepository;
+    @Autowired ItemRepository itemRepository;
+    @Autowired AccountRepository accountRepository;
+    @Autowired StorageRepository storageRepository;
+    @Autowired StorageService storageService;
+    @Autowired ChannelRepository channelRepository;
+    @Autowired ChatRepository chatRepository;
+    @Autowired MessageRepository messageRepository;
+    @Autowired ChatMessageRepository chatMessageRepository;
+    @Autowired FollowRepository followRepository;
     @Autowired RefreshTokenRepository refreshTokenRepository;
     @Autowired JwtValidator jwtValidator;
     @Autowired GeomUtil geomUtil;
@@ -138,31 +120,23 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("유저 삭제")
-    void test1(){
+    @DisplayName("창고 삭제")
+    void test() {
+        // given
+        assertTrue(storageRepository.findById(storage.getId()).isPresent());
         // when
-        userService.deleteUser(user.getId(), Optional.ofNullable(refreshToken));
+        storageService.deleteStorage(storage.getId(), user.getId());
 
         // then
-        // 유저 삭제 여부
-        userRepository.findById(user.getId()).ifPresentOrElse(
-                user -> assertEquals(user.getRole(), Role.DELETED),
-                Assertions::fail
-        );
         // 창고 삭제 여부
         assertTrue(storageRepository.findById(storage.getId()).isEmpty());
-
+        // 아이템 삭제 여부
+        assertTrue(itemRepository.findById(item.getId()).isEmpty());
+        // 팔로우 삭제 여부
+        assertTrue(followRepository.findById(follow.getId()).isEmpty());
         // 채널 닫힘 여부
         Optional<Channel> channel = channelRepository.findById(groupChannel.getId());
         assertTrue(channel.isPresent());
         assertTrue(channel.get().getIsClosed());
-
-        // 아이템 삭제 여부
-        assertTrue(itemRepository.findById(item.getId()).isEmpty());
-
-        // 챗 삭제 여부
-        assertTrue(chatRepository.findById(chat1.getId()).isEmpty());
     }
-
 }
-

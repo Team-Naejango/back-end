@@ -188,7 +188,7 @@ class MessageRepositoryTest {
 
             // when
             List<Chat> chatList = chatRepository.findByChannelId(channel2.getId());
-            chatList.forEach(c -> chatMessageRepository.deleteChatMessageByChatId(c.getId()));
+            chatList.forEach(cht -> chatMessageRepository.deleteChatMessageByChat(cht));
             em.flush(); em.clear();
             messageRepository.deleteMessagesByChannelId(channel2.getId());
             em.flush(); em.clear();

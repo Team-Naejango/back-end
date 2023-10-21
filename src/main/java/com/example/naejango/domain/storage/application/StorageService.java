@@ -49,6 +49,7 @@ public class StorageService {
                 .address(address)
                 .description(description)
                 .imgUrl(imgUrl)
+                .isClosed(false)
                 .user(em.getReference(User.class, userId))
                 .build();
         storageRepository.save(storage);
@@ -95,25 +96,23 @@ public class StorageService {
             throw new CustomException(ErrorCode.STORAGE_NOT_FOUND);
         }
 
-        deleteStorage(storageId, userId, storage);
+        deleteStorage(storage, userId);
     }
 
     @Transactional
     public void deleteStorageByUserId(Long userId){
         List<Storage> storageList = storageRepository.findByUserId(userId);
 
-        storageList.forEach(storage -> {
-            // 해당 창고와 연관된 Follow 삭제
-            deleteStorage(storage.getId(), userId, storage);
-        });
+        storageList.forEach(storage -> deleteStorage(storage, userId));
     }
 
-    private void deleteStorage(Long storageId, Long userId, Storage storage) {
+
+    private void deleteStorage(Storage storage, Long userId) {
         // 해당 창고와 연관된 Follow 삭제
-        followRepository.deleteByStorageId(storageId);
+        followRepository.deleteByStorageId(storage.getId());
 
         // 해당 창고와 연관된 Item 삭제
-        deleteRelatedItem(storageId, userId);
+        deleteRelatedItem(storage.getId(), userId);
 
         // Storage 를 삭제합니다.
         storageRepository.delete(storage);
@@ -126,15 +125,13 @@ public class StorageService {
         // 각 아이템에 연관된 Wish 삭제
         wishRepository.deleteByItemIdList(itemIdList);
 
-        // 각 아이템에 연관된 Transaction과의 관계 끊기
+        // 각 아이템에 연관된 Transaction 과의 관계 끊기
         transactionRepository.updateItemToNullByItemIdList(itemIdList);
 
         // 각 아이템의 채널 종료
         for (Long itemId : itemIdList) {
             channelService.closeChannelByItemId(itemId, userId);
+            itemRepository.deleteById(itemId);
         }
-
-        // 창고에 등록된 아이템들 삭제
-        itemRepository.deleteByStorageId(storageId);
     }
 }

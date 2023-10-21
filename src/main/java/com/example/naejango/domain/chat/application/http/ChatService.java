@@ -125,17 +125,17 @@ public class ChatService {
     }
 
     @Transactional
-    public void deleteChatByUserId(Long userId){
-        chatRepository.findByOwner(em.getReference(User.class, userId))
+    public void deleteChatByUser(User user){
+        chatRepository.findByOwner(user)
                 .forEach(chat -> {
                     Optional<Channel> channelOptional = channelRepository.findByChatId(chat.getId());
-                    channelOptional.ifPresent(channel -> deleteChat(userId, chat, channel));
+                    channelOptional.ifPresent(channel -> deleteChat(user.getId(), chat, channel));
                 });
     }
 
     private void deleteChat(Long userId, Chat chat, Channel channel) {
         // Chat 에 연관된 ChatMessage 를 삭제합니다.
-        chatMessageRepository.deleteChatMessageByChatId(chat.getId());
+        chatMessageRepository.deleteChatMessageByChat(chat);
 
         // 그룹 채팅의 경우
         if (channel instanceof GroupChannel) {
@@ -154,6 +154,7 @@ public class ChatService {
 
             // 만약 채널의 참여자가 0 이 되면 연관된 메세지와 채널을 삭제합니다.
             if (groupChannel.getParticipantsCount() == 0) {
+                em.flush();
                 messageRepository.deleteMessagesByChannelId(channel.getId());
                 channelRepository.deleteById(channel.getId());
                 return;

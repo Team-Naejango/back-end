@@ -20,10 +20,6 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     @Query("SELECT i FROM Item i WHERE i.storage.id = :storageId AND i.status = :status")
     Page<Item> findItemWithCategoryByStorageIdAndStatus(@Param("storageId") Long storageId, @Param("status") boolean status, Pageable pageable);
 
-    @Modifying
-    @Query("DELETE FROM Item i WHERE i.storage.id = :storageId")
-    void deleteByStorageId(@Param("storageId") Long storageId);
-
     @EntityGraph(attributePaths = {"category"})
     Optional<Item> findItemWithCategoryById(Long Id);
 
@@ -36,4 +32,5 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     @Modifying
     @Query("UPDATE Item i SET i.status = false WHERE i.id = :itemId")
     void updateItemStatusToFalse(@Param("itemId") Long itemId);
+
 }

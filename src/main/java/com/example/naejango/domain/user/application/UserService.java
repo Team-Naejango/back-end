@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -141,31 +141,30 @@ public class UserService {
      * chat: 모두 삭제 처리 (chatMessage 도 삭제됨)
      */
     @Transactional
-    public void deleteUser(Long userId, HttpServletRequest request) throws CustomException {
+    public void deleteUser(Long userId, Optional<String> refreshToken) throws CustomException {
         // 유저 로드
         User user = userRepository.findUserWithProfileById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 권한 확인 : RefreshToken 확인
-        if (!jwtValidator.validateRefreshToken(request)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST))
-                .equals(userId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST);
-        }
-
-        // 유저 권한 변경 및 유저 프로필 변경
-        user.deleteUser();
-        user.getUserProfile().deleteUserProfile();
-
-        // Storage 삭제
-        storageService.deleteStorageByUserId(userId);
+        if(!jwtValidator.validateRefreshToken(
+                refreshToken.orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST)))
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST)).equals(userId))
+            throw new CustomException(ErrorCode.BAD_REQUEST);
 
         // Follow, Wish 삭제
         followRepository.deleteAllByUserId(userId);
         wishRepository.deleteAllByUserId(userId);
 
+        // Storage 삭제
+        storageService.deleteStorageByUserId(userId);
+
         // Chat 삭제 (채널 퇴장)
-        chatService.deleteChatByUserId(userId);
+        chatService.deleteChatByUser(user);
+
+        // 유저 권한 변경 및 유저 프로필 변경
+        user.deleteUser();
+        user.getUserProfile().deleteUserProfile();
     }
 
 }

@@ -186,7 +186,10 @@ public class ChannelService {
                 participant.getUserProfile().getNickname(), participant.getUserProfile().getImgUrl())).collect(Collectors.toList());
     }
 
-    /** 채널 종료 */
+    /**
+     * 채널 종료
+     * 회원이 탈퇴할 때 채널을 종료 시킵니다.
+     */
     @Transactional
     public void closeChannelById(Long channelId, Long userId) {
         Channel channel = channelRepository.findById(channelId)
@@ -198,15 +201,12 @@ public class ChannelService {
     public void closeChannelByItemId(Long itemId, Long userId) {
         Optional<GroupChannel> optionalGroupChannel= channelRepository.findGroupChannelByItemId(itemId);
 
-        if (optionalGroupChannel.isPresent()) {
-            GroupChannel groupChannel = optionalGroupChannel.get();
-
+        optionalGroupChannel.ifPresent(groupChannel -> {
             // 종료 메세지 전송
             sendCloseMessage(groupChannel.getId(), userId);
-
             // 채널 종료
             groupChannel.closeChannel();
-        }
+        });
     }
 
     private void closeChannel(Channel channel, Long userId) {
@@ -232,6 +232,7 @@ public class ChannelService {
             channel.closeChannel();
             return;
         }
+
         throw new CustomException(ErrorCode.CHANNEL_NOT_FOUND);
     }
 
