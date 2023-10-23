@@ -1,7 +1,6 @@
 package com.example.naejango.domain.follow.repository;
 
 import com.example.naejango.domain.follow.domain.Follow;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,8 +12,11 @@ import java.util.Optional;
 
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Long> {
-    @EntityGraph(attributePaths = {"storage"})
-    List<Follow> findByUserId(Long userId);
+    @Query("select distinct f from Follow f " +
+            "left join fetch f.storage s " +
+            "left join fetch s.items i " +
+            "where f.user.id = :userId")
+    List<Follow> findFollowListByUserId(@Param("userId") Long userId);
 
     Optional<Follow> findByUserIdAndStorageId(Long userId, Long storageId);
 

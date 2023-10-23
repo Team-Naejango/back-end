@@ -26,7 +26,7 @@ public class FollowService {
 
     /** 팔로우 목록 조회 */
     public List<FindFollowResponseDto> findFollow(Long userId){
-        List<Follow> followList = followRepository.findByUserId(userId);
+        List<Follow> followList = followRepository.findFollowListByUserId(userId);
 
         List<FindFollowResponseDto> findFollowResponseDtoList = new ArrayList<>();
         for(Follow follow: followList){
