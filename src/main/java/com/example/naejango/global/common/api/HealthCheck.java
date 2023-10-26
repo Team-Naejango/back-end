@@ -1,5 +1,5 @@
 package com.example.naejango.global.common.api;
-import com.example.naejango.global.aop.NoLogging;
+import com.example.naejango.global.aop.nplusonedetector.NoLogging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.example.naejango.global.aop;
+package com.example.naejango.global.aop.nplusonedetector;
 
 import lombok.RequiredArgsConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -23,6 +23,7 @@ public class PreparedStatementProxyHandler implements MethodInterceptor {
         final Method method = invocation.getMethod();
 
         if (JDBC_QUERY_METHOD.contains(method.getName())) {
+            if(loggingForm.isHibernateProxyAccessFlag()) loggingForm.setProblemOccurFlag(true);
             final long startTime = System.currentTimeMillis();
             final Object result = invocation.proceed();
             final long endTime = System.currentTimeMillis();

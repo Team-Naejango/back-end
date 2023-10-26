@@ -1,4 +1,4 @@
-package com.example.naejango.global.aop;
+package com.example.naejango.global.aop.nplusonedetector;
 
 import lombok.RequiredArgsConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
