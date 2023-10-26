@@ -28,7 +28,7 @@ public class EntityProxyHandler implements MethodInterceptor {
                 String entityName = tmp[0].substring(tmp[0].lastIndexOf(".") + 2);
                 String invocationMethodName = invocation.getMethod().getName();
                 if(invocationMethodName.startsWith("get") && invocationMethodName.endsWith(entityName)){
-                    loggingForm.setHibernateProxyAccessFlag(true);
+                    loggingForm.setRepositoryInvocationFlag(true);
                     loggingForm.addCalledMethod(methodName);
                 }
             }

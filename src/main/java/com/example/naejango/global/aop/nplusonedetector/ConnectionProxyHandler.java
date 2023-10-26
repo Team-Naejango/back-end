@@ -11,7 +11,6 @@ import org.springframework.lang.Nullable;
 public class ConnectionProxyHandler implements MethodInterceptor {
 
     private static final String JDBC_PREPARE_STATEMENT_METHOD_NAME = "prepareStatement";
-
     private final Object connection;
     private final LoggingForm loggingForm;
 

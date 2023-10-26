@@ -4,6 +4,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,30 +33,22 @@ public class NPlus1DetectorAop {
         return new ConnectionProxyHandler(connection, getLoggingForm()).getProxy();
     }
 
-    @Around("execution(* com.example..*Repository.*(..))")
+    @Pointcut("execution(* com.example..*Repository.*(..))")
+    public void condition1(){}
+    @Pointcut("execution(* com.example..*RepositoryImpl.*(..))")
+    public void condition2(){}
+    @Pointcut("execution(* com.example..*RepositoryCustom.*(..))")
+    public void condition3(){}
+    @Pointcut("condition1() || condition2() || condition3()")
+    public void repositoryInvocation(){}
+
+    @Around("repositoryInvocation()")
     public Object entityProxy (final ProceedingJoinPoint joinPoint) throws Throwable {
-        Object target = joinPoint.proceed();
-        if(target == null) return target;
-
         LoggingForm loggingForm = getLoggingForm();
-        if(!loggingForm.isProblemOccurFlag()) loggingForm.setHibernateProxyAccessFlag(false);
-
+        if(!loggingForm.isProblemOccurFlag()) loggingForm.setRepositoryInvocationFlag(true);
         String methodName = joinPoint.getSignature().getName();
-
-        if(target instanceof Optional<?>){
-            Optional<?> targetOpt = (Optional<?>) target;
-            if(targetOpt.isEmpty()) return targetOpt;
-            Object proxy = new EntityProxyHandler(targetOpt.get(), methodName, loggingForm).getProxy();
-            return Optional.ofNullable(proxy);
-        }
-
-        if(target instanceof List<?>){
-            List<?> targetList = (List<?>) target;
-            return targetList.stream()
-                    .map(t -> new EntityProxyHandler(t, methodName, loggingForm).getProxy()).collect(Collectors.toList());
-        }
-
-        return new EntityProxyHandler(target, methodName, loggingForm).getProxy();
+        loggingForm.addCalledMethod(methodName);
+        return joinPoint.proceed();
     }
 
     private LoggingForm getLoggingForm() {
