@@ -25,7 +25,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles({"TestSubscribeRepository", "test"})
+@ActiveProfiles({"TestStub:AspectJ", "test"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class SubscribeServiceTransactionTest {
     @Autowired SubscribeService subscribeService;
@@ -96,6 +96,7 @@ public class SubscribeServiceTransactionTest {
             Optional<Long> channelId = subscribeRepository
                     .findChannelIdBySubscriptionId(errorCommandForSubscribe.getSubscriptionId());
             assertTrue(channelId.isEmpty());
+            // 채널 멤버 정보 롤백 확인
             Set<Long> subscribers = subscribeRepository.findSubscribersByChannelId(errorCommandForSubscribe.getChannelId());
             assertTrue(subscribers.isEmpty());
         }
@@ -113,7 +114,7 @@ public class SubscribeServiceTransactionTest {
             );
 
             // then : 에러가 발생하기 이전의 로직 롤백 확인
-            // 구독 아이디 삭제 롤백
+            // 구독 아이디 삭제 롤백ㅌㅌ
             Optional<Long> channelId = subscribeRepository
                     .findChannelIdBySubscriptionId(errorCommandForSubscribe.getSubscriptionId());
             assertTrue(channelId.isPresent());
