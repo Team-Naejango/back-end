@@ -34,9 +34,12 @@ public class NPlus1DetectorAop {
 
     @Around("execution(* com.example..*Repository.*(..))")
     public Object entityProxy (final ProceedingJoinPoint joinPoint) throws Throwable {
+        Object target = joinPoint.proceed();
+        if(target == null) return target;
+
         LoggingForm loggingForm = getLoggingForm();
         if(!loggingForm.isProblemOccurFlag()) loggingForm.setHibernateProxyAccessFlag(false);
-        Object target = joinPoint.proceed();
+
         String methodName = joinPoint.getSignature().getName();
 
         if(target instanceof Optional<?>){
