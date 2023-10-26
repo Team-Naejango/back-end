@@ -76,7 +76,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers(PERMIT_URL_ARRAY)
                 .permitAll()
-                .antMatchers("/api/auth/**")
+                .antMatchers("/api/auth/**", "/aop/**")
                 .permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/profile")
                 .hasAnyRole(TEMPORAL.toString(), ADMIN.toString())

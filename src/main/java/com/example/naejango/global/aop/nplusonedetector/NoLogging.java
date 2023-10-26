@@ -1,4 +1,4 @@
-package com.example.naejango.global.aop;
+package com.example.naejango.global.aop.nplusonedetector;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
