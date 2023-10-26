@@ -1,11 +1,13 @@
 package com.example.naejango.domain.chat.repository;
 
+import com.example.naejango.global.aop.transactionteststub.TransactionTest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ public class RedisSubscribeRepository implements SubscribeRepository {
     }
 
     @Override
+    @TransactionTest(pos = 1, value = "subscribe")
     public void saveSubscriptionIdBySessionId(String subscriptionId, String sessionId) {
         String key = SESSION_SUBSCRIPTION + sessionId ;
         redisTemplate.opsForSet().add(key, subscriptionId);
@@ -55,7 +58,7 @@ public class RedisSubscribeRepository implements SubscribeRepository {
     @Override
     public Set<String> findSubscriptionIdBySessionId(String sessionId) {
         String key = SESSION_SUBSCRIPTION + sessionId;
-        return redisTemplate.opsForSet().members(key)
+        return Objects.requireNonNull(redisTemplate.opsForSet().members(key))
                 .stream().map(obj -> (String)obj).collect(Collectors.toSet());
     }
     @Override
@@ -71,11 +74,12 @@ public class RedisSubscribeRepository implements SubscribeRepository {
     @Override
     public Set<Long> findSubscribersByChannelId(Long channelId) {
         String key = CHANNEL_USER + channelId;
-        return redisTemplate.opsForSet().members(key)
+        return Objects.requireNonNull(redisTemplate.opsForSet().members(key))
                 .stream().map(obj -> Long.valueOf((Integer)obj)).collect(Collectors.toSet());
     }
 
     @Override
+    @TransactionTest(value = "disconnect")
     public void deleteSessionId(String sessionId) {
         redisTemplate.opsForHash().delete(SESSION_USER, sessionId);
     }
@@ -98,6 +102,7 @@ public class RedisSubscribeRepository implements SubscribeRepository {
     }
 
     @Override
+    @TransactionTest(pos = 1, value = "unsubscribe")
     public void deleteSubscriptionIdBySessionId(String subscriptionId, String sessionId) {
         String key = SESSION_SUBSCRIPTION + sessionId;
         redisTemplate.opsForSet().remove(key, subscriptionId);
