@@ -23,7 +23,6 @@ public class PreparedStatementProxyHandler implements MethodInterceptor {
         final Method method = invocation.getMethod();
 
         if (JDBC_QUERY_METHOD.contains(method.getName())) {
-            loggingForm.addCalledMethod(method.getName());
             if(!loggingForm.isRepositoryInvocationFlag() && method.getName().equals("executeQuery")) {
                 loggingForm.setProblemOccurFlag(true);
             }

@@ -41,6 +41,7 @@ public class NPlus1DetectorAop {
     public Object entityProxy (final ProceedingJoinPoint joinPoint) throws Throwable {
         LoggingForm loggingForm = getLoggingForm();
         loggingForm.setRepositoryInvocationFlag(true);
+        loggingForm.addCalledMethod(joinPoint.getSignature().getName());
         return joinPoint.proceed();
     }
 
@@ -48,14 +49,12 @@ public class NPlus1DetectorAop {
         if (loggingForm.get() == null) {
             loggingForm.set(new LoggingForm());
         }
-
         return loggingForm.get();
     }
 
     @After("within(@org.springframework.web.bind.annotation.RestController *) && !@annotation(com.example.naejango.global.aop.nplusonedetector.NoLogging)")
     public void loggingAfterApiFinish() {
         final LoggingForm loggingForm = getLoggingForm();
-
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         if (isInRequestScope(attributes)) {

@@ -50,7 +50,7 @@ public class LoggingForm {
 
     public String toLog() {
         return "Result: " + (problemOccurFlag?"N+1 OCCURRED -> ":"OK -> ") + " API: [" + apiMethod + "]" + apiUrl +
-                ", RelatedMethods: " + relatedMethods +
+                (problemOccurFlag?(", RelatedMethods: " + relatedMethods):("")) +
                 ", QueryCounts: '" + queryCounts +
                 "', QueryTime: '" + queryTime + "ms'";
     }
