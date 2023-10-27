@@ -8,21 +8,20 @@ import java.util.List;
 @Getter
 public class LoggingForm {
     public LoggingForm() {
-        this.hibernateProxyAccessFlag = false;
+        this.repositoryInvocationFlag = false;
         this.problemOccurFlag = false;
         this.relatedMethods = new ArrayList<>();
     }
-
     private String apiUrl;
     private String apiMethod;
-    private boolean hibernateProxyAccessFlag;
+    private boolean repositoryInvocationFlag;
     private boolean problemOccurFlag;
     private final List<String> relatedMethods;
     private int queryCounts = 0;
     private Long queryTime = 0L;
 
-    public void setHibernateProxyAccessFlag(boolean hibernateProxyAccessFlag) {
-        this.hibernateProxyAccessFlag = hibernateProxyAccessFlag;
+    public void setRepositoryInvocationFlag(boolean repositoryInvocationFlag) {
+        this.repositoryInvocationFlag = repositoryInvocationFlag;
     }
 
     public void setProblemOccurFlag(boolean problemOccurFlag) {

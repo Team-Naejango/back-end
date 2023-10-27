@@ -4,6 +4,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -11,9 +12,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -32,38 +30,18 @@ public class NPlus1DetectorAop {
         return new ConnectionProxyHandler(connection, getLoggingForm()).getProxy();
     }
 
-    @Around("execution(* com.example..*Repository.*(..))")
+    @Pointcut("execution(* com.example..*Repository.*(..))")
+    public void condition1(){}
+    @Pointcut("execution(* com.example..*RepositoryImpl.*(..))")
+    public void condition2(){}
+    @Pointcut("execution(* com.example..*RepositoryCustom.*(..))")
+    public void condition3(){}
+
+    @Around("condition1()||condition2()||condition3()")
     public Object entityProxy (final ProceedingJoinPoint joinPoint) throws Throwable {
-        Object returnValue = joinPoint.proceed();
-        if(isSimpleTypeObject(returnValue)) return returnValue;
-
         LoggingForm loggingForm = getLoggingForm();
-        if(!loggingForm.isProblemOccurFlag()) loggingForm.setHibernateProxyAccessFlag(false);
-
-        String methodName = joinPoint.getSignature().getName();
-        if(returnValue instanceof Optional<?>){
-
-            Optional<?> targetOpt = (Optional<?>) returnValue;
-            if(targetOpt.isEmpty()) return returnValue;
-            if(isSimpleTypeObject(targetOpt.get())) return returnValue;
-            Object proxy = new EntityProxyHandler(targetOpt.get(), methodName, loggingForm).getProxy();
-            return Optional.ofNullable(proxy);
-        }
-
-        if(returnValue instanceof List<?>){
-            List<?> targetList = (List<?>) returnValue;
-            if(targetList.isEmpty()) return returnValue;
-            if(targetList.stream().anyMatch(NPlus1DetectorAop::isSimpleTypeObject)) return returnValue;
-            return targetList.stream()
-                    .map(t -> new EntityProxyHandler(t, methodName, loggingForm).getProxy()).collect(Collectors.toList());
-        }
-
-        return new EntityProxyHandler(returnValue, methodName, loggingForm).getProxy();
-    }
-
-    private static boolean isSimpleTypeObject(Object target) {
-        return target == null || target.getClass().equals(String.class)
-                || target.getClass().equals(Long.class) || target.getClass().equals(Integer.class);
+        loggingForm.setRepositoryInvocationFlag(true);
+        return joinPoint.proceed();
     }
 
     private LoggingForm getLoggingForm() {

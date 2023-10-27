@@ -23,14 +23,18 @@ public class PreparedStatementProxyHandler implements MethodInterceptor {
         final Method method = invocation.getMethod();
 
         if (JDBC_QUERY_METHOD.contains(method.getName())) {
-            if(loggingForm.isHibernateProxyAccessFlag()) loggingForm.setProblemOccurFlag(true);
+            loggingForm.addCalledMethod(method.getName());
+            if(!loggingForm.isRepositoryInvocationFlag() && method.getName().equals("executeQuery")) {
+                loggingForm.setProblemOccurFlag(true);
+            }
+
             final long startTime = System.currentTimeMillis();
             final Object result = invocation.proceed();
             final long endTime = System.currentTimeMillis();
 
             loggingForm.addQueryTime(endTime - startTime);
             loggingForm.queryCountUp();
-
+            loggingForm.setRepositoryInvocationFlag(false);
             return result;
         }
 
