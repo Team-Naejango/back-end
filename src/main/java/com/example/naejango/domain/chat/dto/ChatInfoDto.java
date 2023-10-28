@@ -30,7 +30,7 @@ public class ChatInfoDto {
         this.channelType = chat.getChannel().getChannelType();
         this.participantsCount = channel.getChannelType().equals(ChannelType.GROUP)? ((GroupChannel)channel).getParticipantsCount() : 0;
         this.channelLimit = channel.getChannelType().equals(ChannelType.GROUP)? ((GroupChannel)channel).getChannelLimit() : 0;
-        this.itemId = channel.getChannelType().equals(ChannelType.GROUP)? ((GroupChannel)channel).getItem().getId() : 0L;
+        this.itemId = channel.getChannelType().equals(ChannelType.GROUP)? (((GroupChannel)channel).getItem() != null ? ((GroupChannel)channel).getItem().getId() : 0L) : 0L;
         this.chatId = chat.getId();
         this.title = chat.getTitle();
         this.unreadCount = unreadCount;
