@@ -1,10 +1,10 @@
 package com.example.naejango.domain.item.application;
 
 import com.example.naejango.domain.chat.application.http.ChannelService;
-import com.example.naejango.domain.chat.domain.GroupChannel;
 import com.example.naejango.domain.item.domain.Category;
 import com.example.naejango.domain.item.domain.Item;
 import com.example.naejango.domain.item.domain.ItemType;
+import com.example.naejango.domain.item.dto.MatchItemDto;
 import com.example.naejango.domain.item.dto.SearchItemInfoDto;
 import com.example.naejango.domain.item.dto.SearchItemsDto;
 import com.example.naejango.domain.item.dto.SearchingCommandDto;
@@ -16,7 +16,6 @@ import com.example.naejango.domain.item.dto.response.MatchResponseDto;
 import com.example.naejango.domain.item.dto.response.ModifyItemResponseDto;
 import com.example.naejango.domain.item.repository.CategoryRepository;
 import com.example.naejango.domain.item.repository.ItemRepository;
-import com.example.naejango.domain.item.dto.MatchItemDto;
 import com.example.naejango.domain.storage.domain.Storage;
 import com.example.naejango.domain.storage.repository.StorageRepository;
 import com.example.naejango.domain.transaction.repository.TransactionRepository;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,26 +129,10 @@ public class ItemService {
         transactionRepository.updateItemToNullByItemId(itemId);
 
         // 채널 종료
-        closeChannel(userId, itemId);
+        channelService.closeChannelByItemId(itemId, userId);
 
         // 아이템 삭제
         itemRepository.delete(item);
-    }
-
-    private void closeChannel(Long userId, Long itemId) {
-        // 아이템에 할당 된 채널 조회
-        Optional<GroupChannel> optionalGroupChannel = channelService.findGroupChannelByItemId(itemId);
-
-        // 채널이 존재 하면
-        if (optionalGroupChannel.isPresent()) {
-            GroupChannel groupChannel = optionalGroupChannel.get();
-
-            // 종료 메세지 전송
-            channelService.sendCloseMessage(groupChannel.getId(), userId);
-
-            // 채널 종료
-            groupChannel.closeChannel();
-        }
     }
 
     private Item findItemWithCatById(Long itemId) { // category까지 fetch로 가져오는 메서드
