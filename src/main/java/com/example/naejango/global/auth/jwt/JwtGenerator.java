@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -24,6 +25,14 @@ public class JwtGenerator {
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
     }
 
+    public String generateAccessToken(Long userId, Duration duration){
+        return JWT.create()
+                .withClaim("userId", userId)
+                .withExpiresAt(LocalDateTime.now().plus(duration).toInstant(ZoneOffset.of("+9")))
+                .withIssuer(JwtProperties.ISS)
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
+    }
+
     /**
      * RefreshToken을 생성하는 메서드
      * 해싱 알고리즘(HMAC512)으로 jwt를 생성합니다.
@@ -36,4 +45,13 @@ public class JwtGenerator {
                     .withIssuer(JwtProperties.ISS)
                     .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
     }
+
+    public String generateRefreshToken(Long userId, Duration duration){
+        return JWT.create()
+                .withClaim("userId", userId)
+                .withExpiresAt(LocalDateTime.now().plus(duration).toInstant(ZoneOffset.of("+9")))
+                .withIssuer(JwtProperties.ISS)
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
+    }
+
 }
