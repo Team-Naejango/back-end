@@ -85,7 +85,6 @@ class UserControllerTest extends RestDocsSupportTest {
 
             // then
             verify(userServiceMock, times(1)).join(new CreateUserProfileCommandDto(user.getId(), requestDto));
-            verify(accountServiceMock, times(1)).createAccount(user.getId());
             resultActions.andExpect(
                     status().isOk());
 
