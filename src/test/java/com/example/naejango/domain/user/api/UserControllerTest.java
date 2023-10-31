@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.Mockito.*;
@@ -325,6 +326,7 @@ class UserControllerTest extends RestDocsSupportTest {
         void test1() throws Exception {
             // given
             BDDMockito.given(authenticationHandlerMock.getUserId(any())).willReturn(1L);
+            BDDMockito.given(jwtCookieHandler.getRefreshToken(any())).willReturn(Optional.of("refreshToken"));
 
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders

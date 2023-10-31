@@ -22,6 +22,7 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtPayload;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.util.GeomUtil;
@@ -133,7 +134,7 @@ public class UserServiceTest {
         chatMessageRepository.save(chatMessage1);
         chatMessageRepository.save(chatMessage2);
 
-        refreshToken = jwtGenerator.generateRefreshToken(user.getId());
+        refreshToken = jwtGenerator.generateRefreshToken(new JwtPayload(user.getId(), user.getRole()));
         refreshTokenRepository.saveRefreshToken(user.getId(), refreshToken);
     }
 
@@ -141,7 +142,7 @@ public class UserServiceTest {
     @DisplayName("유저 삭제")
     void test1(){
         // when
-        userService.deleteUser(user.getId(), Optional.ofNullable(refreshToken));
+        userService.deleteUser(user.getId(), refreshToken);
 
         // then
         // 유저 삭제 여부

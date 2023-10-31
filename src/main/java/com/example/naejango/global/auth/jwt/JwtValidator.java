@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -20,43 +21,36 @@ import java.util.Optional;
 public class JwtValidator {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtCookieHandler jwtCookieHandler;
 
-
-    public Optional<Long> isValidToken(HttpServletRequest request) {
-        return validateAccessToken(getAccessToken(request));
-    }
-
-    public Optional<Long> isValidToken(StompHeaderAccessor headerAccessor) {
-        return validateAccessToken(getAccessToken(headerAccessor));
-    }
-
-    public Optional<Long> validateAccessToken(String accessToken) {
+    public Optional<JwtPayload> validateAccessToken(String accessToken) {
         if (accessToken == null) return Optional.empty();
 
         DecodedJWT decodedAccessToken = decodeAccessToken(accessToken);
         if (isExpiredToken(decodedAccessToken)) return Optional.empty();
 
-        return Optional.of(decodedAccessToken.getClaim("userId").asLong());
+        return Optional.ofNullable(getJwtPayload(decodedAccessToken));
     }
 
-    public Optional<Long> validateRefreshToken(HttpServletRequest request) {
-        String refreshToken = jwtCookieHandler.getRefreshToken(request)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
-        return this.validateAccessToken(refreshToken);
-    }
-
-    public Optional<Long> validateRefreshToken(String refreshToken) {
+    public Optional<JwtPayload> validateRefreshToken(String refreshToken) {
         if (refreshToken == null) return Optional.empty();
 
         DecodedJWT decodedRefreshToken = decodeRefreshToken(refreshToken);
         if(isExpiredToken(decodedRefreshToken)) return Optional.empty();
 
-        Long userId = decodedRefreshToken.getClaim("userId").asLong();
-        String storedToken = refreshTokenRepository.getRefreshToken(userId);
+        JwtPayload jwtPayload = getJwtPayload(decodedRefreshToken);
+
+        String storedToken = refreshTokenRepository.getRefreshToken(jwtPayload.getUserId());
         if (!refreshToken.equals(storedToken)) return Optional.empty();
 
-        return Optional.of(userId);
+        return Optional.of(jwtPayload);
+    }
+
+    public Optional<JwtPayload> validateRefreshToken(HttpServletRequest request) {
+        return validateAccessToken(getAccessToken(request));
+    }
+
+    public Optional<JwtPayload> validateRefreshToken(StompHeaderAccessor headerAccessor) {
+        return validateAccessToken(getAccessToken(headerAccessor));
     }
 
     private String getAccessToken(HttpServletRequest request) {
@@ -99,4 +93,9 @@ public class JwtValidator {
         return exp.isBefore(Instant.now());
     }
 
+    private JwtPayload getJwtPayload(DecodedJWT decodedAccessToken) {
+        Long userId = decodedAccessToken.getClaim("userId").asLong();
+        Role role = Role.valueOf(decodedAccessToken.getClaim("role").asString());
+        return JwtPayload.builder().userId(userId).role(role).build();
+    }
 }

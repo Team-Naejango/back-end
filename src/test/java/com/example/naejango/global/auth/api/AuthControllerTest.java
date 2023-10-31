@@ -1,12 +1,11 @@
 package com.example.naejango.global.auth.api;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
+import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtIssuer;
-import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.util.AuthenticationHandler;
@@ -30,7 +29,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends RestDocsSupportTest {
     @MockBean UserService userServiceMock;
-    @MockBean AccountService accountServiceMock;
     @MockBean RefreshTokenRepository refreshTokenRepositoryMock;
     @MockBean AuthenticationHandler authenticationHandlerMock;
     @MockBean JwtCookieHandler jwtCookieHandlerMock;

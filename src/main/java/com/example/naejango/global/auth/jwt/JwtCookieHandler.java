@@ -30,6 +30,11 @@ public class JwtCookieHandler {
         response.setHeader("Set-Cookie", refreshTokenCookieHeader);
     }
 
+    public void deleteAllTokenCookie(HttpServletRequest request, HttpServletResponse response){
+        deleteAccessTokenCookie(request, response);
+        deleteRefreshTokenCookie(request, response);
+    }
+
     public void deleteRefreshTokenCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if(cookies == null) return;

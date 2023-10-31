@@ -23,6 +23,7 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtPayload;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.util.GeomUtil;
 import org.junit.jupiter.api.*;
@@ -119,7 +120,7 @@ class ChannelServiceTest {
         chatMessageRepository.save(chatMessage1);
         chatMessageRepository.save(chatMessage2);
 
-        refreshToken = jwtGenerator.generateRefreshToken(user.getId());
+        refreshToken = jwtGenerator.generateRefreshToken(new JwtPayload(user.getId(), user.getRole()));
         refreshTokenRepository.saveRefreshToken(user.getId(), refreshToken);
     }
 

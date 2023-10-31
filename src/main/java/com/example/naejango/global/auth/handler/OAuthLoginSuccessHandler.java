@@ -1,7 +1,9 @@
 package com.example.naejango.global.auth.handler;
 
+import com.example.naejango.domain.user.domain.Role;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtIssuer;
+import com.example.naejango.global.auth.jwt.JwtPayload;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +43,9 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) throws IOException {
         Long userId = authenticationHandler.getUserId(authentication);
+        Role role = authenticationHandler.getRole(authentication);
 
-        jwtIssuer.issueTokenCookie(userId, response);
+        jwtIssuer.issueTokenCookie(new JwtPayload(userId, role), response);
 
         response.sendRedirect(redirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication).name());
     }
