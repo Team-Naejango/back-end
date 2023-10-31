@@ -106,7 +106,7 @@ public class AuthController {
         return ResponseEntity.ok().body(new CommonResponseDto<>("게스트용 토큰이 발급되었습니다.", accessToken));
     }
 
-    @GetMapping("/commonUser")
+    @GetMapping("/common-user")
     public ResponseEntity<CommonResponseDto<String>> common(HttpServletRequest request,
                                                            HttpServletResponse response,
                                                            Authentication authentication) {

@@ -83,7 +83,7 @@ class AuthControllerIntegrateTest extends RestDocsSupportTest {
             em.flush(); em.clear();
             // when
             ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                    .get("/api/auth/commonUser"));
+                    .get("/api/auth/common-user"));
 
             // then
             resultActions.andExpect(MockMvcResultMatchers
