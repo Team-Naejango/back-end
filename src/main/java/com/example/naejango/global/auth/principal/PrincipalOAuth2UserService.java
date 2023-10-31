@@ -54,6 +54,6 @@ public class PrincipalOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> userOptional = userRepository.findByUserKey(kakaoUserInfo.getUserKey());
 
         return userOptional.map(PrincipalDetails::new)
-                .orElseGet(() -> new PrincipalDetails(userService.join(kakaoUserInfo)));
+                .orElseGet(() -> new PrincipalDetails(userService.createUser(kakaoUserInfo)));
     }
 }

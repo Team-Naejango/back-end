@@ -4,6 +4,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.config.RestDocsSupportTest;
 import com.example.naejango.domain.user.application.UserService;
+import com.example.naejango.global.auth.jwt.JwtGenerator;
 import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.auth.jwt.JwtValidator;
@@ -34,6 +35,7 @@ public class AuthControllerTest extends RestDocsSupportTest {
     @MockBean AuthenticationHandler authenticationHandlerMock;
     @MockBean JwtCookieHandler jwtCookieHandlerMock;
     @MockBean JwtValidator jwtValidatorMock;
+    @MockBean JwtGenerator jwtGeneratorMock;
     @MockBean JwtIssuer jwtIssuerMock;
 
     @Nested

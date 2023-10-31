@@ -1,5 +1,7 @@
 package com.example.naejango.domain.user.application;
 
+import com.example.naejango.domain.account.domain.Account;
+import com.example.naejango.domain.account.repository.AccountRepository;
 import com.example.naejango.domain.chat.application.http.ChatService;
 import com.example.naejango.domain.follow.repository.FollowRepository;
 import com.example.naejango.domain.storage.application.StorageService;
@@ -30,6 +32,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final UserProfileRepository userProfileRepository;
     private final FollowRepository followRepository;
     private final WishRepository wishRepository;
@@ -37,9 +40,9 @@ public class UserService {
     private final StorageService storageService;
     private final ChatService chatService;
 
-    /** 유저 프로필 생성 (회원 가입) */
+    /** 유저 프로필 및 계좌 생성 (회원 가입) */
     @Transactional
-    public void createUserProfile(CreateUserProfileCommandDto commandDto) {
+    public void join(CreateUserProfileCommandDto commandDto) {
         // 유저를 로드합니다.
         User user = userRepository.findById(commandDto.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -48,13 +51,17 @@ public class UserService {
         UserProfile userProfile = commandDto.toEntity();
         userProfileRepository.save(userProfile);
 
+        // 계좌를 생성합니다.
+        Account account = Account.builder().user(user).balance(0).build();
+        accountRepository.save(account);
+
         // 유저에 할당하고 Role 을 User 로 바꿉니다.
         user.setUserProfile(userProfile);
     }
 
     /** 유저 생성 */
     @Transactional
-    public User join(OAuth2UserInfo oauth2UserInfo) {
+    public User createUser(OAuth2UserInfo oauth2UserInfo) {
         User newUser = User.builder()
                 .userKey(oauth2UserInfo.getUserKey())
                 .password("null")
@@ -84,6 +91,9 @@ public class UserService {
 
         userProfileRepository.save(guestProfile);
         guest.setUserProfile(guestProfile);
+
+        Account account = Account.builder().balance(0).user(guest).build();
+        accountRepository.save(account);
 
         return guest.getId();
     }
@@ -167,4 +177,7 @@ public class UserService {
         user.getUserProfile().deleteUserProfile();
     }
 
+    public Optional<Long> getCommonUser() {
+        return userRepository.findByRole(Role.COMMON).map(User::getId);
+    }
 }
