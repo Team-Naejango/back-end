@@ -1,13 +1,10 @@
 package com.example.naejango.global.auth.api;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.example.naejango.domain.account.application.AccountService;
 import com.example.naejango.domain.common.CommonResponseDto;
 import com.example.naejango.domain.user.application.UserService;
-import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
-import com.example.naejango.global.auth.jwt.JwtProperties;
+import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtIssuer;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
@@ -23,8 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Duration;
 
 
 @RestController
@@ -34,11 +30,11 @@ import java.time.ZoneOffset;
 public class AuthController {
 
     private final UserService userService;
-    private final AccountService accountService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtCookieHandler jwtCookieHandler;
     private final JwtValidator jwtValidator;
     private final JwtIssuer jwtIssuer;
+    private final JwtGenerator jwtGenerator;
 
     /**
      * 현재 가지고 있는 RefreshToken 쿠키(및 AccessToken 쿠키)를 만료시키고
@@ -75,6 +71,37 @@ public class AuthController {
     public ResponseEntity<CommonResponseDto<String>> guest(HttpServletRequest request,
                                                            HttpServletResponse response,
                                                            Authentication authentication) {
+        reissueTokenWhenTokenExist(request, response);
+        if (authentication != null) {
+            throw new CustomException(ErrorCode.ALREADY_LOGGED_IN);
+        }
+        Long guestId = userService.createGuest();
+
+        String accessToken = jwtGenerator.generateAccessToken(guestId, Duration.ofDays(365));
+        String refreshToken = jwtGenerator.generateRefreshToken(guestId, Duration.ofDays(365));
+
+        refreshTokenRepository.saveRefreshToken(guestId, refreshToken);
+        jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
+        return ResponseEntity.ok().body(new CommonResponseDto<>("게스트용 토큰이 발급되었습니다.", accessToken));
+    }
+
+    @GetMapping("/commonUser")
+    public ResponseEntity<CommonResponseDto<String>> common(HttpServletRequest request,
+                                                           HttpServletResponse response,
+                                                           Authentication authentication) {
+        reissueTokenWhenTokenExist(request, response);
+
+        if (authentication != null) {
+            throw new CustomException(ErrorCode.ALREADY_LOGGED_IN);
+        }
+
+        Long commonUserId = userService.getCommonUser().orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String accessToken = jwtGenerator.generateAccessToken(commonUserId, Duration.ofDays(1));
+
+        return ResponseEntity.ok().body(new CommonResponseDto<>("공용 유저의 토큰이 발급되었습니다.", accessToken));
+    }
+
+    private void reissueTokenWhenTokenExist(HttpServletRequest request, HttpServletResponse response) {
         if (jwtCookieHandler.hasRefreshTokenCookie(request)){
             jwtCookieHandler.deleteAccessTokenCookie(request, response);
             String reissueAccessToken = jwtIssuer.reissueAccessToken(request)
@@ -82,32 +109,8 @@ public class AuthController {
             jwtCookieHandler.addAccessTokenCookie(reissueAccessToken, response);
             throw new TokenException(ErrorCode.TOKEN_ALREADY_EXIST, reissueAccessToken);
         }
-
-        if (authentication != null) {
-            throw new CustomException(ErrorCode.ALREADY_LOGGED_IN);
-        }
-
-        Long guestId = userService.createGuest();
-
-        // 계좌 생성
-        accountService.createAccount(guestId);
-
-        String accessToken = JWT.create()
-                .withClaim("userId", guestId)
-                .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
-                .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET_A));
-
-        String refreshToken = JWT.create()
-                .withClaim("userId", guestId)
-                .withExpiresAt(LocalDateTime.now().plusYears(1).toInstant(ZoneOffset.of("+9")))
-                .withIssuer(JwtProperties.ISS)
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
-
-        refreshTokenRepository.saveRefreshToken(guestId, refreshToken);
-        jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
-        return ResponseEntity.ok().body(new CommonResponseDto<>("게스트용 토큰이 발급되었습니다.", accessToken));
     }
+
 
     /**
      * 로그인 테스트를 위한 Controller

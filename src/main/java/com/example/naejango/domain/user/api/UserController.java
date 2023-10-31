@@ -47,11 +47,8 @@ public class UserController {
         Long userId = authenticationHandler.getUserId(authentication);
         var commandDto = new CreateUserProfileCommandDto(userId, requestDto);
 
-        // 유저 프로필 생성
-        userService.createUserProfile(commandDto);
-
-        // 계좌 생성
-        accountService.createAccount(userId);
+        // 유저 프로필 & 계좌 생성
+        userService.join(commandDto);
         return ResponseEntity.ok().body(new CommonResponseDto<>("유저 프로필과 계좌가 생성되었습니다. 회원가입 처리가 되었습니다.", null));
     }
 
