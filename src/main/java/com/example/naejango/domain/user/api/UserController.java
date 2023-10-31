@@ -12,6 +12,7 @@ import com.example.naejango.domain.user.dto.request.ModifyUserProfileRequestDto;
 import com.example.naejango.domain.user.dto.response.UserProfileResponseDto;
 import com.example.naejango.global.auth.jwt.JwtCookieHandler;
 import com.example.naejango.global.common.exception.CustomException;
+import com.example.naejango.global.common.exception.ErrorCode;
 import com.example.naejango.global.common.util.AuthenticationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -104,7 +105,9 @@ public class UserController {
     @DeleteMapping("")
     public ResponseEntity<CommonResponseDto<Long>> deleteUser(HttpServletRequest request, Authentication authentication) throws CustomException {
         Long userId = authenticationHandler.getUserId(authentication);
-        userService.deleteUser(userId, jwtCookieHandler.getRefreshToken(request));
+        String refreshToken = jwtCookieHandler.getRefreshToken(request).orElseThrow(() ->
+                new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST));
+        userService.deleteUser(userId, refreshToken);
         return ResponseEntity.ok().body(new CommonResponseDto<>("삭제 완료", userId));
     }
 

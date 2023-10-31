@@ -6,6 +6,7 @@ public enum ErrorCode {
     /** 400 BAD_REQUEST : 잘못된 요청 */
     FORGED_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    LOGIN_DUPLICATION(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     ALREADY_LOGGED_IN(HttpStatus.BAD_REQUEST, "이미 로그인 된 회원입니다."),
     UNIDENTIFIED_DESTINATION(HttpStatus.BAD_REQUEST, "채널 지정이 잘못되었습니다."),
     CANNOT_GENERATE_GROUP_CHANNEL(HttpStatus.BAD_REQUEST, "그룹 채널을 생성할 수 없습니다."),

@@ -9,6 +9,7 @@ import com.example.naejango.domain.user.domain.User;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtPayload;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -83,7 +84,7 @@ public class WebSocketTest {
     public void testWebSocketConnection() throws Exception {
         // given
         User user1 = userRepository.findByUserKey("test1").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        String accessToken = jwtGenerator.generateAccessToken(user1.getId());
+        String accessToken = jwtGenerator.generateAccessToken(new JwtPayload(user1.getId(), user1.getRole()));
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
 
@@ -102,7 +103,7 @@ public class WebSocketTest {
     void chatChannelSubscribeTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
         User user2 = userRepository.findByUserKey("test2").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        String accessToken = jwtGenerator.generateAccessToken(user2.getId());
+        String accessToken = jwtGenerator.generateAccessToken(new JwtPayload(user2.getId(), user2.getRole()));
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);
@@ -136,7 +137,7 @@ public class WebSocketTest {
     void sendMessageTest() throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
         // given
         User user4 = userRepository.findByUserKey("test3").orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        String accessToken = jwtGenerator.generateAccessToken(user4.getId());
+        String accessToken = jwtGenerator.generateAccessToken(new JwtPayload(user4.getId(), user4.getRole()));
         DefaultStompFrameHandler defaultStompFrameHandler = new DefaultStompFrameHandler();
         StompHeaders connectHeaders = new StompHeaders();
         connectHeaders.set(JwtProperties.ACCESS_TOKEN_HEADER, JwtProperties.ACCESS_TOKEN_PREFIX + accessToken);

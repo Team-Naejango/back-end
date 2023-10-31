@@ -23,6 +23,7 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtPayload;
 import com.example.naejango.global.auth.jwt.JwtValidator;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
@@ -134,7 +135,7 @@ class ChatServiceTest {
         chatMessageRepository.save(chatMessage5);chatMessageRepository.save(chatMessage6);
         chatMessageRepository.save(chatMessage7);chatMessageRepository.save(chatMessage8);
 
-        refreshToken = jwtGenerator.generateRefreshToken(user.getId());
+        refreshToken = jwtGenerator.generateRefreshToken(new JwtPayload(user.getId(), user.getRole()));
         refreshTokenRepository.saveRefreshToken(user.getId(), refreshToken);
     }
 

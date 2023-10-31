@@ -30,7 +30,7 @@ public class JwtAuthenticator {
      * @param request Http 요청
      */
     public void authenticateRequest(HttpServletRequest request) {
-        jwtValidator.isValidToken(request).ifPresent(this::authenticate);
+        jwtValidator.validateRefreshToken(request).ifPresent(this::authenticate);
     }
 
     /**
@@ -43,9 +43,9 @@ public class JwtAuthenticator {
      * @return Authentication 객체
      */
     public Authentication authenticateWebSocketRequest(StompHeaderAccessor accessor) {
-        Long userId = jwtValidator.isValidToken(accessor)
+        JwtPayload jwtPayload = jwtValidator.validateRefreshToken(accessor)
                 .orElseThrow(() -> new WebSocketException(ErrorCode.ACCESS_TOKEN_NOT_VALID));
-        return getWebSocketPrincipal(userId);
+        return getWebSocketPrincipal(jwtPayload.getUserId());
     }
 
     /**
@@ -54,8 +54,8 @@ public class JwtAuthenticator {
      * Authentication : UsernamePasswordAuthenticationToken
      * exception : jwtToken을 지니고 있는데 해당 회원이 없는 경우
      */
-    private void authenticate (Long userId){
-        Authentication principal = getPrincipal(userId);
+    private void authenticate (JwtPayload jwtPayload){
+        Authentication principal = getPrincipal(jwtPayload.getUserId());
         SecurityContextHolder.getContext().setAuthentication(principal);
     }
 
@@ -72,7 +72,7 @@ public class JwtAuthenticator {
     private Authentication getWebSocketPrincipal(Long userId) {
         User user = userService.webSocketLogin(userId);
         return new UsernamePasswordAuthenticationToken(
-                user.getId(),
+                new PrincipalDetails(user),
                 null,
                 Collections.singletonList(() -> "ROLE_" + user.getRole().toString())
         );

@@ -11,6 +11,7 @@ import com.example.naejango.domain.user.domain.UserProfile;
 import com.example.naejango.domain.user.repository.UserProfileRepository;
 import com.example.naejango.domain.user.repository.UserRepository;
 import com.example.naejango.global.auth.jwt.JwtGenerator;
+import com.example.naejango.global.auth.jwt.JwtPayload;
 import com.example.naejango.global.auth.jwt.JwtProperties;
 import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.ErrorCode;
@@ -62,7 +63,7 @@ public class JwtAuthTest {
 
     @BeforeEach
     void setup(){
-        testUser = User.builder().role(Role.USER).userKey("test_1").password("").build();
+        testUser = User.builder().role(Role.USER).userKey("test_1").role(Role.USER).password("").build();
         UserProfile userProfile = UserProfile.builder().nickname("김씨").imgUrl("imgUrl").intro("테스트 유저 1 입니다.").
                 birth("19900000").gender(Gender.MALE).phoneNumber("01012345678").build();
         Account account = Account.builder().user(testUser).build();
@@ -71,11 +72,13 @@ public class JwtAuthTest {
         accountRepository.save(account);
         testUser.setUserProfile(userProfile);
 
-        accessTokenNormal = jwtGenerator.generateAccessToken(testUser.getId());
-        refreshTokenNormal = jwtGenerator.generateRefreshToken(testUser.getId());
+        JwtPayload jwtPayload = new JwtPayload(testUser.getId(), testUser.getRole());
+        accessTokenNormal = jwtGenerator.generateAccessToken(jwtPayload);
+        refreshTokenNormal = jwtGenerator.generateRefreshToken(jwtPayload);
         refreshTokenRepository.saveRefreshToken(testUser.getId(), refreshTokenNormal);
         refreshTokenNotRegistered = JWT.create()
                 .withClaim("userId", testUser.getId())
+                .withClaim("role", testUser.getRole().name())
                 .withExpiresAt(LocalDateTime.now().plusDays(JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME + 1).toInstant(ZoneOffset.of("+9")))
                 .withIssuer(JwtProperties.ISS)
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET_B));
@@ -83,8 +86,9 @@ public class JwtAuthTest {
         accessTokenInvalid = "fake";
         refreshTokenInvalid = "fake";
 
-        accessTokenUserNotFound = jwtGenerator.generateAccessToken(90384769835L);
-        accessTokenUserNotFound = jwtGenerator.generateAccessToken(90384769835L);
+        JwtPayload notFound = new JwtPayload(2324234L, Role.USER);
+        accessTokenUserNotFound = jwtGenerator.generateAccessToken(notFound);
+        accessTokenUserNotFound = jwtGenerator.generateAccessToken(notFound);
     }
     @Nested
     @DisplayName("RefreshToken 이 없는 경우")

@@ -19,27 +19,29 @@ public class JwtIssuer {
     private final JwtGenerator jwtGenerator;
     private final JwtCookieHandler jwtCookieHandler;
 
-    public void issueTokenCookie(Long userId, HttpServletResponse response) {
+    public void issueTokenCookie(JwtPayload jwtPayload, HttpServletResponse response) {
         // 토큰 생성
-        String accessToken = jwtGenerator.generateAccessToken(userId);
-        String refreshToken = jwtGenerator.generateRefreshToken(userId);
+        String accessToken = jwtGenerator.generateAccessToken(jwtPayload);
+        String refreshToken = jwtGenerator.generateRefreshToken(jwtPayload);
 
         // 쿠키 발급
         jwtCookieHandler.addAccessTokenCookie(accessToken, response);
         jwtCookieHandler.addRefreshTokenCookie(refreshToken, response);
 
         // 발급한 리프레시 토큰 저장
-        refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+        refreshTokenRepository.saveRefreshToken(jwtPayload.getUserId(), refreshToken);
     }
 
     public Optional<String> reissueAccessToken(HttpServletRequest request) {
         Optional<String> refreshTokenOpt = jwtCookieHandler.getRefreshToken(request);
+
         // 리프레시 토큰이 없는 경우
         if(refreshTokenOpt.isEmpty()) return Optional.empty();
+
         // 리프레시 토큰 검증
-        Long userId = jwtValidator.validateRefreshToken(refreshTokenOpt.get())
+        JwtPayload jwtPayload = jwtValidator.validateRefreshToken(refreshTokenOpt.get())
                 .orElseThrow(() -> new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE));
-        return Optional.ofNullable(jwtGenerator.generateAccessToken(userId));
+        return Optional.ofNullable(jwtGenerator.generateAccessToken(jwtPayload));
     }
 
 }

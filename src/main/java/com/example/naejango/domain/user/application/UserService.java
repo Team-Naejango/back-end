@@ -151,15 +151,14 @@ public class UserService {
      * chat: 모두 삭제 처리 (chatMessage 도 삭제됨)
      */
     @Transactional
-    public void deleteUser(Long userId, Optional<String> refreshToken) throws CustomException {
+    public void deleteUser(Long userId, String refreshToken) throws CustomException {
         // 유저 로드
         User user = userRepository.findUserWithProfileById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 권한 확인 : RefreshToken 확인
-        if(!jwtValidator.validateRefreshToken(
-                refreshToken.orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_DELETE_REQUEST)))
-                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST)).equals(userId))
+        if(!jwtValidator.validateRefreshToken(refreshToken)
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST)).getUserId().equals(userId))
             throw new CustomException(ErrorCode.BAD_REQUEST);
 
         // Follow, Wish 삭제
