@@ -1,7 +1,6 @@
 package com.example.naejango.global.auth.jwt;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.Cookie;
@@ -12,11 +11,9 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class JwtCookieHandler {
     public Optional<String> getRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        log.info("check : 1");
         if (cookies == null) return Optional.empty();
         return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
         .map(Cookie::getValue)

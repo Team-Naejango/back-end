@@ -72,7 +72,7 @@ public class JwtAuthenticator {
     private Authentication getWebSocketPrincipal(Long userId) {
         User user = userService.webSocketLogin(userId);
         return new UsernamePasswordAuthenticationToken(
-                new PrincipalDetails(user),
+                user.getId(),
                 null,
                 Collections.singletonList(() -> "ROLE_" + user.getRole().toString())
         );
