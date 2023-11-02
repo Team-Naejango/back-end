@@ -16,8 +16,8 @@ import java.util.Optional;
 public class JwtCookieHandler {
     public Optional<String> getRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) return Optional.empty();
         log.info("check : 1");
+        if (cookies == null) return Optional.empty();
         return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME))
         .map(Cookie::getValue)
         .findAny();
@@ -75,18 +75,18 @@ public class JwtCookieHandler {
                 .anyMatch(cookie -> cookie.getName().equals(JwtProperties.REFRESH_TOKEN_COOKIE_NAME));
     }
 
-
-
     private String generateAccessTokenCookie(String accessToken) {
         return "AccessToken=" + accessToken + ";   " +
                 "Secure;   " +
-                "Path=/;   ";
+                "Path=/;   " +
+                "SameSite=None";
     }
 
     private String generateRefreshTokenCookie(String refreshToken) {
         return "RefreshToken=" + refreshToken + ";   " +
                 "Secure;   " +
                 "Path=/;   " +
+                "SameSite=None;   " +
                 "HttpOnly   ";
     }
 
