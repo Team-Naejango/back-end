@@ -9,6 +9,7 @@ import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtValidator {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -33,13 +35,14 @@ public class JwtValidator {
 
     public Optional<JwtPayload> validateRefreshToken(String refreshToken) {
         if (refreshToken == null) return Optional.empty();
-
+        log.info("check : 3");
         DecodedJWT decodedRefreshToken = decodeRefreshToken(refreshToken);
         if(isExpiredToken(decodedRefreshToken)) return Optional.empty();
-
+        log.info("check : 4");
         JwtPayload jwtPayload = getJwtPayload(decodedRefreshToken);
-
+        log.info("check : 5");
         String storedToken = refreshTokenRepository.getRefreshToken(jwtPayload.getUserId());
+        log.info("check : 6");
         if (!refreshToken.equals(storedToken)) return Optional.empty();
 
         return Optional.of(jwtPayload);

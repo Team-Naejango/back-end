@@ -4,6 +4,7 @@ import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtIssuer {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -37,10 +39,11 @@ public class JwtIssuer {
 
         // 리프레시 토큰이 없는 경우
         if(refreshTokenOpt.isEmpty()) return Optional.empty();
-
+        log.info("check : 2");
         // 리프레시 토큰 검증
         JwtPayload jwtPayload = jwtValidator.validateRefreshToken(refreshTokenOpt.get())
                 .orElseThrow(() -> new CustomException(ErrorCode.REISSUE_TOKEN_FAILURE));
+        log.info("check : 7");
         return Optional.ofNullable(jwtGenerator.generateAccessToken(jwtPayload));
     }
 
