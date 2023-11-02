@@ -35,7 +35,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         Optional<String> refreshToken = jwtCookieHandler.getRefreshToken(request);
         if (refreshToken.isPresent()){
-            response.sendRedirect(localRedirectUrl + "?loginStatus=already_logged_in");
+            response.sendRedirect(redirectUrl + "?loginStatus=already_logged_in");
             return;
         }
         generateAndSetTokenCookies(authentication, response);
@@ -47,6 +47,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         jwtIssuer.issueTokenCookie(new JwtPayload(userId, role), response);
 
-        response.sendRedirect(localRedirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication).name());
+        response.sendRedirect(redirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication).name());
     }
 }
