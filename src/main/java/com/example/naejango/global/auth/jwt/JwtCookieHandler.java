@@ -77,14 +77,16 @@ public class JwtCookieHandler {
     private String generateAccessTokenCookie(String accessToken) {
         return "AccessToken=" + accessToken + ";   " +
                 "Secure;   " +
-                "Path=/;   ";
+                "Path=/;   " +
+                "SameSite=None";
     }
 
     private String generateRefreshTokenCookie(String refreshToken) {
         return "RefreshToken=" + refreshToken + ";   " +
                 "Secure;   " +
                 "Path=/;   " +
-                "HttpOnly   ";
+                "HttpOnly   " +
+                "SameSite=None";
     }
 
 }
