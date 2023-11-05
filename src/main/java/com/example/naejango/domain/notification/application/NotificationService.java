@@ -26,7 +26,7 @@ public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
     private final EntityManager em;
-    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60; // 1시간
+    private static final Long DEFAULT_TIMEOUT = 60L * 1000; // 1분
 
     /** 알림 구독 요청 */
     @Transactional
