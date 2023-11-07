@@ -36,15 +36,16 @@ public class NotificationService {
         // SSE 연결을 위해서 SseEmitter 객체를 만들어 반환
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
 
+        // Emitter가 타임아웃 되었을 때 Emitter를 완료시키도록 설정
+        // onTimeout : 비동기 요청 시간이 초과될 때 호출할 코드를 등록
+        // 이 메서드는 비동기 요청 시간이 초과되면 컨테이너 스레드에서 호출됨
+        emitter.onTimeout(emitter::complete);
+
         // Emitter가 완료될 때 Emitter 삭제하도록 설정
-        // 비동기 요청이 완료될 때 호출할 코드를 등록
-        // 이 메서드는 시간 초과 및 네트워크 오류를 포함한 어떤 이유로든 비동기 요청이 완료되면 컨테이너 스레드에서 호출됨.
+        // onCompletion : 비동기 요청이 완료될 때 호출할 코드를 등록
+        // 이 메서드는 시간 초과 및 네트워크 오류를 포함한 어떤 이유로든 비동기 요청이 완료되면 컨테이너 스레드에서 호출됨
         // 이 방법은 인스턴스를 더 이상 사용할 수 없음을 감지하는 데 유용
         emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
-        // Emitter가 타임아웃 되었을 때 Emitter 삭제하도록 설정
-        // 비동기 요청 시간이 초과될 때 호출할 코드를 등록
-        // 이 메서드는 비동기 요청 시간이 초과되면 컨테이너 스레드에서 호출됨
-        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
 
         // 503에러 방지를 위해 최초 연결 시 더미 데이터 전송
         sendNotification(emitter, emitterId, "EventStream Created. [userId=" + userId + "]");
