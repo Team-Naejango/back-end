@@ -1,10 +1,7 @@
 package com.example.naejango.domain.chat.application.http;
 
 import com.example.naejango.domain.chat.application.websocket.WebSocketService;
-import com.example.naejango.domain.chat.domain.Channel;
-import com.example.naejango.domain.chat.domain.Chat;
-import com.example.naejango.domain.chat.domain.GroupChannel;
-import com.example.naejango.domain.chat.domain.MessageType;
+import com.example.naejango.domain.chat.domain.*;
 import com.example.naejango.domain.chat.dto.ChatInfoDto;
 import com.example.naejango.domain.chat.dto.JoinGroupChannelDto;
 import com.example.naejango.domain.chat.dto.MessagePublishCommandDto;
@@ -118,7 +115,7 @@ public class ChatService {
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
 
         // Channel 로드
-        Channel channel = channelRepository.findByChatId(chat.getId())
+        Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHANNEL_NOT_FOUND));
 
         deleteChat(userId, chat, channel);
@@ -135,19 +132,21 @@ public class ChatService {
 
     private void deleteChat(Long userId, Chat chat, Channel channel) {
         // Chat 에 연관된 ChatMessage 를 삭제합니다.
-        chatMessageRepository.deleteChatMessageByChat(chat);
+        chatMessageRepository.deleteChatMessageByChat(chat.getId());
+
+        // Chat 을 삭제합니다. (더이상 메세지를 수신하지 못하도록)
+        chatRepository.deleteById(chat.getId());
+
 
         // 그룹 채팅의 경우
-        if (channel instanceof GroupChannel) {
+        if (channel.getChannelType() == ChannelType.GROUP) {
             // 그룹 채널로 캐스팅 합니다.
-            GroupChannel groupChannel = (GroupChannel) channel;
+            GroupChannel groupChannel = em.find(GroupChannel.class, channel.getId());
 
-            if (groupChannel.getOwner().getId().equals(userId) && !groupChannel.getIsClosed()) {
-                throw new CustomException(ErrorCode.CHANNEL_IS_OPEN);
-            }
-
-            // Chat 을 삭제합니다. (더이상 메세지를 수신하지 못하도록)
-            chatRepository.deleteById(chat.getId());
+            // 방장 관련 로직이 추가되기 전까지 주석처리
+//            if (groupChannel.getOwner().getId().equals(userId) && groupChannel.getIsClosed()) {
+//                throw new CustomException(ErrorCode.CHANNEL_IS_OPEN);
+//            }
 
             // Channel 의 참여자 수를 줄입니다.
             groupChannel.decreaseParticipantCount();

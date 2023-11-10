@@ -1,6 +1,5 @@
 package com.example.naejango.domain.chat.repository;
 
-import com.example.naejango.domain.chat.domain.Chat;
 import com.example.naejango.domain.chat.domain.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,7 +13,8 @@ import java.util.List;
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
     @Modifying
-    void deleteChatMessageByChat(Chat chat);
+    @Query("DELETE FROM ChatMessage cm WHERE cm.chat.id = :chatId")
+    void deleteChatMessageByChat(@Param("chatId") Long chatId);
 
     @Modifying
     @Query("UPDATE ChatMessage cm SET cm.isRead = true WHERE cm.chat.id = :chatId")

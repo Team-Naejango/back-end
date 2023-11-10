@@ -38,6 +38,7 @@ public class Channel {
     @Enumerated(EnumType.STRING)
     @Column(name = "channel_type", insertable = false, updatable = false, nullable = false)
     private ChannelType channelType;
+
     private String lastMessage;
 
     @CreatedDate
