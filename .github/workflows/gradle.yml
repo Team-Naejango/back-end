@@ -5,11 +5,11 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: CI/CD
+name: Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop/*"]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:            # 수동으로 CI/CD 수행
@@ -21,16 +21,15 @@ env:
   CODE_DEPLOY_APPLICATION_NAME: my-codedeloy-app
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: my-codedeploy-group
   SECURITY_GROUP_NAME: rds-security
+  EC2_SECURITY_GROUP_NAME: ec2-security
 
 permissions:
   contents: read
 
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
     steps:
-
       # (1) Checkout
       - name: Checkout
         uses: actions/checkout@v3
@@ -51,7 +50,7 @@ jobs:
         with:
           postgresql version: '14'
 
-        # (4) 빌드 (RDS 접근 권한 설정)
+      # (4) 빌드 (RDS 접근 권한 설정)
         # (4-1) AWS 권한 획득 (RDS 서버)
       - name: Configure AWS RDS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -88,6 +87,7 @@ jobs:
       # (5) AWS 권한 획득 (S3, EC2, CodeDeploy Full Access )
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -95,6 +95,7 @@ jobs:
 
       # (6) 빌드 결과물을 S3 버킷에 업로드
       - name: Upload to AWS S3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           aws deploy push \
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
@@ -104,11 +105,45 @@ jobs:
 
       # (7) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
       - name: Deploy to AWS EC2 from S3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           aws deploy create-deployment \
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip        
-        
-  
+            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip       
+
+      # 개발중인 서버 빌드 과정
+      - name: Docker build & push
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/develop')
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/naejango-server .
+          docker push ${{ secrets.DOCKER_USERNAME }}/naejango-server
+
+      # AWS 권한 획득 (EC2 서버)
+      - name: Configure AWS RDS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.EC2_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.EC2_USER_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+        # RDS 보안 그룹에 깃허브 러너 IP 인바운드 규칙 추가
+      - name: Add Github Actions IP to Security group
+        run: |
+          aws ec2 authorize-security-group-ingress --group-name ${{ env.EC2_SECURITY_GROUP_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32 
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/develop')
+        with:
+          host: ${{ secrets.HOST_DNS }} # EC2 퍼블릭 IPv4 DNS
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo sh /home/ec2-user/cicd/blue-green-deploy.sh
+
+      - name: Remove Github Actions IP from security group
+        run: |
+          aws ec2 revoke-security-group-ingress --group-name ${{ env.EC2_SECURITY_GROUP_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32

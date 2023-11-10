@@ -9,6 +9,7 @@ import com.example.naejango.global.auth.repository.RefreshTokenRepository;
 import com.example.naejango.global.common.exception.CustomException;
 import com.example.naejango.global.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtValidator {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -74,6 +76,7 @@ public class JwtValidator {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET_A)).build().verify(accessToken);
         } catch (JWTVerificationException | IllegalArgumentException e) {
             // Token 이 있으나 복호화 실패
+            log.error(e.getMessage());
             throw new CustomException(ErrorCode.TOKEN_DECRYPTION_FAILURE);
         }
     }
@@ -83,6 +86,7 @@ public class JwtValidator {
             return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET_B)).build().verify(refreshToken);
         } catch (JWTVerificationException | IllegalArgumentException e) {
             // Token 이 있으나 복호화 실패
+            log.error(e.getMessage());
             throw new CustomException(ErrorCode.TOKEN_DECRYPTION_FAILURE);
         }
     }

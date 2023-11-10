@@ -114,6 +114,10 @@ test {
 	}
 }
 
+jar {
+	enabled = false
+}
+
 jacocoTestReport {
 	reports {
 		html.enabled true
