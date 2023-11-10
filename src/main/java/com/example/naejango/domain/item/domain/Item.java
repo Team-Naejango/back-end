@@ -25,7 +25,7 @@ public class Item extends TimeAuditingEntity {
     @Column(name = "item_id")
     private Long id;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 30, nullable = false)
     private String name;
 
     @Lob
