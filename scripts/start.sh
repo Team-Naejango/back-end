@@ -5,7 +5,7 @@ JAR_FILE="$PROJECT_ROOT/build/libs/naejango-0.0.1-SNAPSHOT.jar"
 APPLICATION_NAME="naejango-0.0.1-SNAPSHOT.jar"
 DEPLOY_LOG="$PROJECT_ROOT/log/deploy.log"
 APP_LOG="$PROJECT_ROOT/log/application.log"
-ERROR_LOG="$PROJECT_ROOT/error.log"
+ERROR_LOG="$PROJECT_ROOT/log/error.log"
 
 TIME_NOW=$(date +%c)
 

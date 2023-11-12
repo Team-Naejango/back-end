@@ -3,7 +3,7 @@
 PROJECT_ROOT="/home/ec2-user/action"
 JAR_FILE="$PROJECT_ROOT/build/libs/naejango-0.0.1-SNAPSHOT.jar"
 APPLICATION_NAME="naejango-0.0.1-SNAPSHOT.jar"
-DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
+DEPLOY_LOG="$PROJECT_ROOT/log/deploy.log"
 
 TIME_NOW=$(date +%c)
 
