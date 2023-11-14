@@ -23,7 +23,7 @@ env:
   SECURITY_GROUP_NAME: rds-security
   EC2_SECURITY_GROUP_NAME: ec2-security
   BRANCH_NAME: $(echo $GITHUB_REF | awk -F'/' '{print $3}')
-  DEPLOY_STRATEGY: rolling
+  DEPLOY_STRATEGY: blue-green
 
 permissions:
   contents: read
@@ -116,7 +116,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo sh /home/ec2-user/cicd/deploy.sh ${{ env.BRANCH_NAME }} test
+            sudo sh /home/ec2-user/cicd/deploy.sh ${{ env.BRANCH_NAME }} develop
 
       # (5-4) EC2 에 ssh 로 접속하여 배포 스크립트를 실행
       - name: Deploy to EC2
