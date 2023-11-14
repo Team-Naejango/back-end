@@ -113,7 +113,8 @@ jobs:
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
             --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip       
 
-      # 개발중인 서버 빌드 과정
+      # 무중단 배포
+      # 도커 이미지를 빌드하고 푸쉬합니다. (latest 태그)
       - name: Docker build & push
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/develop')
         run: |
@@ -129,11 +130,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.EC2_USER_SECRET_KEY }}
           aws-region: ap-northeast-2
 
-        # RDS 보안 그룹에 깃허브 러너 IP 인바운드 규칙 추가
+      # EC2 보안 그룹에 깃허브 러너 IP 인바운드 규칙 추가
       - name: Add Github Actions IP to Security group
         run: |
           aws ec2 authorize-security-group-ingress --group-name ${{ env.EC2_SECURITY_GROUP_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32 
 
+      # EC2 에 ssh 로 접속하여 배포 스크립트를 실행합니다.
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/develop')
