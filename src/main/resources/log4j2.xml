@@ -2,7 +2,7 @@
 <Configuration status="info">
     <Properties>
         <Property name="LOG_FORMAT">%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=Magenta, TRACE=blue} %style{${sys:PID}}{White} [%15.15t] %style{%-40.40C{1.}}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</Property>
-        <Property name="BASE_DIR">/home/ec2-user/action/log</Property>
+        <Property name="BASE_DIR">/log</Property>
     </Properties>
 
     <Appenders>
