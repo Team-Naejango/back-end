@@ -89,6 +89,7 @@ jobs:
       # (5) 무중단 배포
        # (5-1) docker 이미지 build 및 push
       - name: Docker build & push
+        if: ${{ github.event_name }}" == "push"
         run: |
           branch_name=$(echo "${{ env.BRANCH_NAME }}" | awk -F'/' '{print $3}')
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -97,6 +98,7 @@ jobs:
 
       # (5-2) AWS 권한 획득 (EC2 서버)
       - name: AWS Authentication
+        if: ${{ github.event_name }}" == "push"
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.EC2_USER_ACCESS_KEY }}
@@ -105,11 +107,13 @@ jobs:
 
       # (5-3) EC2 보안 그룹에 깃허브 러너 IP 인바운드 규칙 추가
       - name: Add Github Actions IP to Security group
+        if: ${{ github.event_name }}" == "push"
         run: |
           aws ec2 authorize-security-group-ingress --group-name ${{ env.EC2_SECURITY_GROUP_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32 
 
       # (5-4) EC2 에 ssh 로 접속하여 배포 스크립트를 실행
       - name: Deploy to EC2
+        if: ${{ github.event_name }}" == "push"
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }} # EC2 퍼블릭 IPv4 DNS
@@ -125,5 +129,6 @@ jobs:
 
       # (5-5) EC2 보안 그룹에서 깃허브 러너 IP 규칙 삭제
       - name: Remove Github Actions IP from security group
+        if: ${{ github.event_name }}" == "push"
         run: |
           aws ec2 revoke-security-group-ingress --group-name ${{ env.EC2_SECURITY_GROUP_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
