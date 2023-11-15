@@ -18,6 +18,6 @@ public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        response.sendRedirect(localRedirectUrl + "?failure");
+        response.sendRedirect(redirectUrl + "?failure");
     }
 }
