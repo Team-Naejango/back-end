@@ -49,11 +49,6 @@ public class NPlus1DetectorAop {
         return loggingForm.get();
     }
 
-    @Before("within(@org.springframework.web.bind.annotation.RestController *)")
-    public void enterApi(){
-        getLoggingForm().resetLog();
-    }
-
     @After("within(@org.springframework.web.bind.annotation.RestController *) && !@annotation(com.example.naejango.global.aop.nplusonedetector.NoLogging)")
     public void loggingAfterApiFinish() {
         final LoggingForm loggingForm = getLoggingForm();
