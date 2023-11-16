@@ -51,7 +51,7 @@ public class NPlus1DetectorAop {
 
     @Before("within(@org.springframework.web.bind.annotation.RestController *)")
     public void enterApi(){
-        this.loggingForm.set(new LoggingForm());
+        getLoggingForm().resetLog();
     }
 
     @After("within(@org.springframework.web.bind.annotation.RestController *) && !@annotation(com.example.naejango.global.aop.nplusonedetector.NoLogging)")
@@ -71,9 +71,9 @@ public class NPlus1DetectorAop {
 
     private void printLog(final LoggingForm loggingForm) {
         if(loggingForm.isProblemOccurFlag()) {
-            logger.error(getLoggingForm().toLog());
+            logger.error(loggingForm.toLog());
         } else {
-            logger.info(getLoggingForm().toLog());
+            logger.info(loggingForm.toLog());
         }
     }
 

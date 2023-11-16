@@ -48,6 +48,16 @@ public class LoggingForm {
         this.queryTime += queryTime;
     }
 
+    public void resetLog(){
+         apiUrl = "";
+         apiMethod = "";
+         repositoryInvocationFlag = false;
+         problemOccurFlag = false;
+         relatedMethods.clear();
+         this.queryCounts = 0;
+         this.queryTime = 0L;
+    }
+
     public String toLog() {
         return "Result: " + (problemOccurFlag?"N+1 OCCURRED -> ":"OK -> ") + " API: [" + apiMethod + "]" + apiUrl +
                 (problemOccurFlag?(", RelatedMethods: " + relatedMethods):("")) +
