@@ -1,4 +1,4 @@
-package com.example.naejango.domain.chat.config;
+package com.example.naejango.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -6,9 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.*;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,11 +45,23 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+    /*
+      * OAuth Authorization 요청 시 요청 정보를 세션이 아닌 Redis 에 저장하기 위해
+      * 직렬화 도구로 JdkSerializationRedisSerializer 를 적용하였습니다.
+     */
+    @Bean
+    public RedisTemplate<String, OAuth2AuthorizationRequest> oAuthRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, OAuth2AuthorizationRequest> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
+        return redisTemplate;
+    }
+
     @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        StringRedisTemplate redisTemplate = new StringRedisTemplate(redisConnectionFactory);
-
-        return redisTemplate;
+        return new StringRedisTemplate(redisConnectionFactory);
     }
 
 }

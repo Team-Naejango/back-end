@@ -1,10 +1,7 @@
 package com.example.naejango.global.aop.nplusonedetector;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -61,23 +58,17 @@ public class NPlus1DetectorAop {
             HttpServletRequest request = attributes.getRequest();
             loggingForm.setApiMethod(request.getMethod());
             loggingForm.setApiUrl(request.getRequestURI());
-        }
-
-        // 거래 등록 요청만 요청 쿼리 개수가 많아서 따로 관리, 나머지 API는 요청 쿼리가 많은것 기준으로 조건 설정
-        if (getLoggingForm().getApiMethod().equals("POST") && getLoggingForm().getApiUrl().equals("/api/transaction")){
-            printLog(21);
-        } else {
-            printLog(8);
+            printLog(loggingForm);
         }
 
         this.loggingForm.remove();
     }
 
-    private void printLog(int queryCounts) {
-        if (getLoggingForm().getQueryCounts() > queryCounts) {
-            logger.error(getLoggingForm().toLog());
+    private void printLog(final LoggingForm loggingForm) {
+        if(loggingForm.isProblemOccurFlag()) {
+            logger.error(loggingForm.toLog());
         } else {
-            logger.info(getLoggingForm().toLog());
+            logger.info(loggingForm.toLog());
         }
     }
 

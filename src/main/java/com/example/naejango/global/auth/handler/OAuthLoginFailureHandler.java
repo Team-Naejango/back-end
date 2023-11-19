@@ -14,10 +14,11 @@ import java.io.IOException;
 @Slf4j
 public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
     private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
-    private final String localRedirectUrl = "http://localhost:3000/oauth/kakaoCallback";
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
+        log.error(exception.getMessage());
+        exception.printStackTrace();
         response.sendRedirect(redirectUrl + "?failure");
     }
 }
