@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Optional;
 
 @Component
@@ -33,6 +34,11 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         Optional<String> refreshToken = jwtCookieHandler.getRefreshToken(request);
+        Iterator<String> iterator = request.getHeaderNames().asIterator();
+        while(iterator.hasNext()){
+            String next = iterator.next();
+            System.out.println(next + " : " + request.getHeader(next));
+        }
 
         URL url = new URL(request.getHeader("Referer"));
         String protocol = request.isSecure()?"https":"http";
