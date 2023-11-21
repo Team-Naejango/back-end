@@ -22,7 +22,7 @@ public class WebSocketMessageBrokerConfig implements WebSocketMessageBrokerConfi
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-endpoint")
-                .setAllowedOrigins("http://localhost:5500","https://localhost:3000", "https://naejango.site")
+                .setAllowedOrigins("https://localhost:3000", "https://naejango.site", "https://dev.naejango.site")
                 .withSockJS();
         registry.setErrorHandler(stompErrorHandler);
     }

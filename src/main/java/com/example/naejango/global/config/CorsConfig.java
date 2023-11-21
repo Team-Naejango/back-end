@@ -18,6 +18,7 @@ public class CorsConfig {
         config.addAllowedOrigin("https://localhost:3000");
         config.addAllowedOrigin("http://localhost:5500");
         config.addAllowedOrigin("https://naejango.site");
+        config.addAllowedOrigin("https://dev.naejango.site");
         config.addAllowedOrigin("https://api.naejango.site");
         config.addAllowedHeader("*"); // Access-Control-Request-Headers
         config.addAllowedMethod("*"); // Access-Control-Request-Method
