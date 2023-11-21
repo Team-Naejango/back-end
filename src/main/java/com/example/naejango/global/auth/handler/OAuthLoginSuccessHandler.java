@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Optional;
 
 @Component
@@ -34,27 +34,26 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         Optional<String> refreshToken = jwtCookieHandler.getRefreshToken(request);
-        Iterator<String> iterator = request.getHeaderNames().asIterator();
-        while(iterator.hasNext()){
-            String next = iterator.next();
-            System.out.println(next + " : " + request.getHeader(next));
-        }
-
-        URL url = new URL(request.getHeader("Referer"));
-        String protocol = request.isSecure()?"https":"http";
-        String redirectUrl = protocol + "://" + url.getHost() + "/oauth/KakaoCallback";
+        String redirectUrl = getRedirectUrl(request);
         if (refreshToken.isPresent()){
             response.sendRedirect(redirectUrl + "?loginStatus=already_logged_in");
             return;
         }
-        generateAndSetTokenCookies(authentication, response, redirectUrl);
+        generateAndSetTokenCookies(authentication, response);
+        response.sendRedirect(redirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication).name());
     }
 
-    private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response, String redirectUrl) throws IOException {
+    private String getRedirectUrl(HttpServletRequest request) throws MalformedURLException {
+        URL url = new URL(request.getHeader("Referer"));
+        String referrer = url.getHost();
+        if(referrer.startsWith("dev")) referrer = "dev.naejango.site";
+        else referrer = "naejango.site";
+        return "https://" + referrer + "/oauth/KakaoCallback";
+    }
+
+    private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) {
         Long userId = authenticationHandler.getUserId(authentication);
         Role role = authenticationHandler.getRole(authentication);
-
         jwtIssuer.issueTokenCookie(new JwtPayload(userId, role), response);
-        response.sendRedirect(redirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication).name());
     }
 }

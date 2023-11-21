@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
 
 @Component
 @RequiredArgsConstructor
@@ -21,14 +21,14 @@ public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         log.error(exception.getMessage());
         exception.printStackTrace();
-        Iterator<String> iterator = request.getHeaderNames().asIterator();
-        while(iterator.hasNext()){
-            String next = iterator.next();
-            System.out.println(next + " : " + request.getHeader(next));
-        }
-        URL url = new URL(request.getHeader("Referer"));
-        String protocol = request.isSecure()?"https":"http";
-        String redirectUrl = protocol + "://" + url.getHost() + "/oauth/KakaoCallback";
+        String redirectUrl = getRedirectUrl(request);
         response.sendRedirect(redirectUrl + "?failure");
+    }
+    private String getRedirectUrl(HttpServletRequest request) throws MalformedURLException {
+        URL url = new URL(request.getHeader("Referer"));
+        String referrer = url.getHost();
+        if(referrer.startsWith("dev")) referrer = "dev.naejango.site";
+        else referrer = "naejango.site";
+        return "https://" + referrer + "/oauth/KakaoCallback";
     }
 }
