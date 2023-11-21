@@ -9,16 +9,20 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URL;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuthLoginFailureHandler implements AuthenticationFailureHandler {
-    private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         log.error(exception.getMessage());
         exception.printStackTrace();
+        URL url = new URL(request.getHeader("Referer"));
+        String protocol = request.isSecure()?"https":"http";
+        String redirectUrl = protocol + "://" + url.getHost() + "/oauth/KakaoCallback";
         response.sendRedirect(redirectUrl + "?failure");
     }
 }
