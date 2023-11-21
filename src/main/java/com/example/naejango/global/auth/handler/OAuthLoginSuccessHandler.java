@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 
 @Component
@@ -23,8 +24,6 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final AuthenticationHandler authenticationHandler;
     private final JwtIssuer jwtIssuer;
     private final JwtCookieHandler jwtCookieHandler;
-    private final String redirectUrl = "https://naejango.site/oauth/KakaoCallback";
-    private final String localRedirectUrl = "https://localhost:3000/oauth/kakaoCallback";
 
     /**
      * OAuth 로그인 처리가 성공적으로 수행되어 Authentication 객체가 만들어 진 경우 실행되는 메서드.
@@ -34,19 +33,22 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         Optional<String> refreshToken = jwtCookieHandler.getRefreshToken(request);
+
+        URL url = new URL(request.getHeader("Referer"));
+        String protocol = request.isSecure()?"https":"http";
+        String redirectUrl = protocol + "://" + url.getHost() + "/oauth/KakaoCallback";
         if (refreshToken.isPresent()){
             response.sendRedirect(redirectUrl + "?loginStatus=already_logged_in");
             return;
         }
-        generateAndSetTokenCookies(authentication, response);
+        generateAndSetTokenCookies(authentication, response, redirectUrl);
     }
 
-    private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response) throws IOException {
+    private void generateAndSetTokenCookies(Authentication authentication, HttpServletResponse response, String redirectUrl) throws IOException {
         Long userId = authenticationHandler.getUserId(authentication);
         Role role = authenticationHandler.getRole(authentication);
 
         jwtIssuer.issueTokenCookie(new JwtPayload(userId, role), response);
-
         response.sendRedirect(redirectUrl + "?loginStatus=" + authenticationHandler.getRole(authentication).name());
     }
 }
